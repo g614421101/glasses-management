@@ -22,6 +22,10 @@
             <el-icon><User /></el-icon>
             <span>顾客管理</span>
           </el-menu-item>
+          <el-menu-item index="/stats">
+            <el-icon><TrendCharts /></el-icon>
+            <span>营收统计</span>
+          </el-menu-item>
           <el-menu-item index="/sys-user" v-if="authStore.role === 'admin'">
             <el-icon><Setting /></el-icon>
             <span>账号管理(超管)</span>
@@ -43,7 +47,7 @@
 <script setup>
 import { useAuthStore } from '../store/auth';
 import { useRouter, useRoute } from 'vue-router';
-import { Monitor, User, Setting, View } from '@element-plus/icons-vue';
+import { Monitor, User, Setting, View, TrendCharts } from '@element-plus/icons-vue';
 
 const authStore = useAuthStore();
 const router = useRouter();
@@ -115,6 +119,8 @@ const handleLogout = () => {
   background: rgba(255, 255, 255, 0.6);
   backdrop-filter: blur(10px);
   border-right: 1px solid var(--border-color);
+  z-index: 100;
+  position: relative;
 }
 
 .side-menu {

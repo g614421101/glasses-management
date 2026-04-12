@@ -30,6 +30,11 @@ const routes = [
         path: 'sys-user',
         name: 'SysUser',
         component: () => import('../views/SysUser.vue')
+      },
+      {
+        path: 'stats',
+        name: 'Statistics',
+        component: () => import('../views/Statistics.vue')
       }
     ]
   },

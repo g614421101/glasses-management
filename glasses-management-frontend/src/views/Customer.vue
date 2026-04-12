@@ -22,7 +22,7 @@
         </el-input>
       </div>
       
-      <el-table :data="tableData" v-loading="loading" stripe class="main-table">
+      <el-table :data="tableData" v-loading="loading" stripe row-key="id" class="main-table">
         <el-table-column prop="name" label="姓名" min-width="120" />
         <el-table-column prop="phone" label="手机号" min-width="150" />
         <el-table-column label="性别" width="80">
