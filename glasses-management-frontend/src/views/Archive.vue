@@ -14,6 +14,9 @@
         <el-button type="success" @click="openSalesDialog">
           <el-icon><ShoppingCart /></el-icon>我要开单
         </el-button>
+        <el-button type="warning" @click="exportExcel">
+          <el-icon><Download /></el-icon>导出Excel
+        </el-button>
       </div>
     </div>
 
@@ -50,8 +53,14 @@
             <el-card shadow="hover" class="timeline-detail-card" @click="viewDetail(item)">
               <h4>{{ item.title }}</h4>
               <p class="subtitle">{{ item.subtitle }}</p>
-              <div v-if="item.type === 'SALES'" class="action-bar" @click.stop>
-                <el-button type="primary" link size="small" @click="printRecord(item.data.id)">预览/打印处方</el-button>
+              <div class="action-bar" @click.stop>
+                <el-button v-if="item.type === 'SALES'" type="primary" link size="small" @click="printRecord(item.data.id)">预览/打印处方</el-button>
+                <el-button type="primary" link size="small" @click="openEdit(item)">
+                  <el-icon><Edit /></el-icon>
+                </el-button>
+                <el-button type="danger" link size="small" @click="handleDelete(item)">
+                  <el-icon><Delete /></el-icon>
+                </el-button>
               </div>
             </el-card>
           </el-timeline-item>
@@ -64,7 +73,7 @@
       <div v-if="currentDetail && currentDetail.type === 'OPTOMETRY'" class="detail-box">
         <table class="opto-table">
           <thead>
-            <tr><th>眼别</th><th>SPH (球镜)</th><th>CYL (柱镜)</th><th>AXIS (轴位)</th><th>VA (视力)</th></tr>
+            <tr><th>眼别</th><th>SPH<br/>(球镜)</th><th>CYL<br/>(柱镜)</th><th>AXIS<br/>(轴位)</th><th>VA<br/>(视力)</th></tr>
           </thead>
           <tbody>
             <tr>
@@ -84,7 +93,9 @@
           </tbody>
         </table>
         <div class="extra-opto mt-4">
-          <p>远用瞳距 (PD): {{ currentDetail.data.pdFar || '-' }}</p>
+          <p>右眼瞳距(PD): {{ currentDetail.data.odPd || '-' }}</p>
+          <p>左眼瞳距(PD): {{ currentDetail.data.osPd || '-' }}</p>
+          <p>远用瞳距: {{ currentDetail.data.pdFar || '-' }}</p>
           <p>近用瞳距: {{ currentDetail.data.pdNear || '-' }}</p>
           <p>下加光 (ADD): {{ currentDetail.data.addPower || '-' }}</p>
           <p>验光师: {{ currentDetail.data.optometristName || '-' }}</p>
@@ -102,7 +113,7 @@
     </el-drawer>
 
     <!-- 弹窗：录入验光单 -->
-    <el-dialog title="录入验光单" v-model="optoDialogVisible" width="600px">
+    <el-dialog :title="optoForm.id ? '编辑验光单' : '录入验光单'" v-model="optoDialogVisible" width="600px">
       <el-form :model="optoForm" label-width="100px" label-position="left">
         <h4 style="margin-top:0">右眼 (OD)</h4>
         <el-row :gutter="10">
@@ -120,9 +131,13 @@
         </el-row>
         <el-divider />
         <el-row :gutter="10">
+          <el-col :span="8"><el-form-item label="右眼PD" label-width="60px"><el-input v-model="optoForm.odPd" @input="calcPdTotal"/></el-form-item></el-col>
+          <el-col :span="8"><el-form-item label="左眼PD" label-width="60px"><el-input v-model="optoForm.osPd" @input="calcPdTotal"/></el-form-item></el-col>
           <el-col :span="8"><el-form-item label="远用PD" label-width="60px"><el-input v-model="optoForm.pdFar"/></el-form-item></el-col>
+        </el-row>
+        <el-row :gutter="10">
           <el-col :span="8"><el-form-item label="近用PD" label-width="60px"><el-input v-model="optoForm.pdNear"/></el-form-item></el-col>
-          <el-col :span="8"><el-form-item label="ADD" label-width="40px"><el-input v-model="optoForm.addPower"/></el-form-item></el-col>
+          <el-col :span="8"><el-form-item label="ADD" label-width="50px"><el-input v-model="optoForm.addPower"/></el-form-item></el-col>
         </el-row>
       </el-form>
       <template #footer>
@@ -132,7 +147,7 @@
     </el-dialog>
 
     <!-- 弹窗：录入开单配镜 -->
-    <el-dialog title="新建配镜单" v-model="salesDialogVisible" width="500px">
+    <el-dialog :title="salesForm.id ? '编辑配镜单' : '新建配镜单'" v-model="salesDialogVisible" width="500px">
       <el-form :model="salesForm" label-width="80px">
         <el-form-item label="关联验光">
           <el-select v-model="salesForm.optometryId" placeholder="选择验光记录(可选)" clearable style="width:100%">
@@ -174,7 +189,8 @@ import { ref, reactive, onMounted } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import request from '../utils/request';
 import { ElMessage } from 'element-plus';
-import { Back, DocumentAdd, ShoppingCart, View, Goods } from '@element-plus/icons-vue';
+import { Back, DocumentAdd, ShoppingCart, View, Goods, Download, Edit, Delete } from '@element-plus/icons-vue';
+import { ElMessageBox } from 'element-plus';
 
 const route = useRoute();
 const router = useRouter();
@@ -190,11 +206,28 @@ const currentDetail = ref(null);
 
 // 验光表单
 const optoDialogVisible = ref(false);
-const optoForm = reactive({ customerId });
+const optoForm = reactive({ 
+  id: null,
+  customerId,
+  odSph:'', odCyl:'', odAxis:'', odVa:'',
+  osSph:'', osCyl:'', osAxis:'', osVa:'',
+  odPd:'', osPd:'', pdFar:'', pdNear:'', addPower:''
+});
 
 // 配镜表单
 const salesDialogVisible = ref(false);
-const salesForm = reactive({ customerId, optometryId: null, framePrice: 0, lensPrice: 0, totalAmount: 0 });
+const salesForm = reactive({ 
+  id: null,
+  customerId, 
+  optometryId: null, 
+  frameBrand: '',
+  frameModel: '',
+  framePrice: 0, 
+  lensBrand: '',
+  lensParams: '',
+  lensPrice: 0, 
+  totalAmount: 0 
+});
 
 onMounted(() => {
   loadCustomer();
@@ -223,12 +256,21 @@ const viewDetail = (item) => {
 
 const resetOpto = () => {
   Object.assign(optoForm, {
+    id: null,
     customerId,
     odSph:'', odCyl:'', odAxis:'', odVa:'',
     osSph:'', osCyl:'', osAxis:'', osVa:'',
-    pdFar:'', pdNear:'', addPower:''
+    odPd:'', osPd:'', pdFar:'', pdNear:'', addPower:''
   });
 };
+
+const calcPdTotal = () => {
+  const od = parseFloat(optoForm.odPd) || 0;
+  const os = parseFloat(optoForm.osPd) || 0;
+  if (od > 0 && os > 0) {
+    optoForm.pdFar = (od + os).toFixed(1);
+  }
+}
 
 const openOptometryDialog = () => {
   resetOpto();
@@ -237,8 +279,13 @@ const openOptometryDialog = () => {
 
 const submitOpto = async () => {
   try {
-    await request.post('/optometry/add', optoForm);
-    ElMessage.success('验光单录入成功');
+    if (optoForm.id) {
+      await request.put('/optometry/update', optoForm);
+      ElMessage.success('更新成功');
+    } else {
+      await request.post('/optometry/add', optoForm);
+      ElMessage.success('验光单录入成功');
+    }
     optoDialogVisible.value = false;
     loadTimeline();
   } catch (e) {}
@@ -246,6 +293,7 @@ const submitOpto = async () => {
 
 const resetSales = () => {
   Object.assign(salesForm, {
+    id: null,
     customerId, optometryId: null,
     frameBrand:'', frameModel:'', framePrice:0,
     lensBrand:'', lensParams:'', lensPrice:0,
@@ -264,16 +312,48 @@ const openSalesDialog = () => {
 
 const submitSales = async () => {
   try {
-    await request.post('/sales/add', salesForm);
-    ElMessage.success('配镜开单成功');
+    if (salesForm.id) {
+      await request.put('/sales/update', salesForm);
+      ElMessage.success('更新成功');
+    } else {
+      await request.post('/sales/add', salesForm);
+      ElMessage.success('配镜开单成功');
+    }
     salesDialogVisible.value = false;
     loadTimeline();
   } catch(e){}
 }
 
+const openEdit = (item) => {
+  if (item.type === 'OPTOMETRY') {
+    Object.assign(optoForm, item.data);
+    optoDialogVisible.value = true;
+  } else {
+    Object.assign(salesForm, item.data);
+    salesDialogVisible.value = true;
+  }
+}
+
+const handleDelete = (item) => {
+  ElMessageBox.confirm('确定要删除这条记录吗？', '提示', {
+    type: 'warning'
+  }).then(async () => {
+    const url = item.type === 'OPTOMETRY' ? '/optometry/' : '/sales/';
+    await request.delete(url + item.data.id);
+    ElMessage.success('删除成功');
+    loadTimeline();
+  })
+}
+
 const printRecord = (id) => {
-  // 直接利用浏览器新窗口打开后端的PDF流
+  // 打印接口已在后端白名单中放行，直接打开即可
   const url = `http://localhost:8080/api/print/prescription/${id}`;
+  window.open(url, '_blank');
+}
+
+const exportExcel = () => {
+  // 导出Excel也已在后端白名单中，直接下载
+  const url = `http://localhost:8080/api/print/export/customer/${customerId}`;
   window.open(url, '_blank');
 }
 

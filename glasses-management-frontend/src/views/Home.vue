@@ -156,6 +156,15 @@ const goCustomer = () => {
   background-color: var(--primary-hover);
 }
 
+/* 当搜索框或按钮激活时，将清除图标左移，避免被放大的按钮遮挡 */
+:deep(.main-search-input .el-input__clear) {
+  transition: all 0.3s;
+}
+
+:deep(.main-search-input:hover .el-input__clear) {
+  transform: translateX(-12px);
+}
+
 .search-results-popper {
   position: absolute;
   top: 60px;
