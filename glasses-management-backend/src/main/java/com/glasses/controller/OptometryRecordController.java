@@ -33,6 +33,11 @@ public class OptometryRecordController {
         return Result.success(optometryRecordService.listByCustomerId(customerId));
     }
 
+    @PutMapping("/update")
+    public Result<Boolean> updateRecord(@RequestBody OptometryRecord record) {
+        return Result.success(optometryRecordService.updateById(record));
+    }
+
     @DeleteMapping("/{id}")
     public Result<Boolean> deleteRecord(@PathVariable Long id) {
         return Result.success(optometryRecordService.removeById(id));

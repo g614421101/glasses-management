@@ -58,8 +58,10 @@ CREATE TABLE `optometry_record` (
   `os_cyl` decimal(5,2) DEFAULT NULL COMMENT '左眼柱镜(CYL)',
   `os_axis` int DEFAULT NULL COMMENT '左眼轴位(AXIS)',
   `os_va` varchar(20) DEFAULT NULL COMMENT '左眼矫正视力',
-  -- 其他
-  `pd_far` decimal(5,1) DEFAULT NULL COMMENT '远用瞳距',
+  -- 瞳距
+  `od_pd` decimal(5,1) DEFAULT NULL COMMENT '右眼瞳距',
+  `os_pd` decimal(5,1) DEFAULT NULL COMMENT '左眼瞳距',
+  `pd_far` decimal(5,1) DEFAULT NULL COMMENT '瞳距(远用)',
   `pd_near` decimal(5,1) DEFAULT NULL COMMENT '近用瞳距',
   `add_power` decimal(5,2) DEFAULT NULL COMMENT '下加光(ADD)',
   `optometrist_name` varchar(50) DEFAULT NULL COMMENT '验光师',

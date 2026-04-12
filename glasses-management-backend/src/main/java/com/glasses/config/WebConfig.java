@@ -20,6 +20,7 @@ public class WebConfig implements WebMvcConfigurer {
             SaRouter.match("/api/**")
                     .notMatch("/api/auth/login")
                     .notMatch("/api/auth/register")
+                    .notMatch("/api/print/**")
                     .check(r -> StpUtil.checkLogin());
         })).addPathPatterns("/**");
     }

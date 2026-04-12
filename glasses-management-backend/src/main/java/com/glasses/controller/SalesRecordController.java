@@ -20,7 +20,7 @@ public class SalesRecordController {
     @PostMapping("/add")
     public Result<Boolean> addRecord(@RequestBody SalesRecord record) {
         if (record.getRecordNo() == null || record.getRecordNo().isEmpty()) {
-            record.setRecordNo("SR" + System.currentTimeMillis());
+            record.setRecordNo("SR" + DateUtil.format(DateUtil.date(), "yyyyMMddHHmmss"));
         }
         if (record.getOperatorId() == null) {
             record.setOperatorId(StpUtil.getLoginIdAsLong());
@@ -34,6 +34,11 @@ public class SalesRecordController {
     @GetMapping("/customer/{customerId}")
     public Result<List<SalesRecord>> getByCustomer(@PathVariable Long customerId) {
         return Result.success(salesRecordService.listByCustomerId(customerId));
+    }
+
+    @PutMapping("/update")
+    public Result<Boolean> updateRecord(@RequestBody SalesRecord record) {
+        return Result.success(salesRecordService.updateById(record));
     }
 
     @DeleteMapping("/{id}")

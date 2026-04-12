@@ -28,10 +28,12 @@ public class OptometryRecord {
     private Integer osAxis;
     private String osVa;
     
-    // 其他
-    private BigDecimal pdFar;
-    private BigDecimal pdNear;
-    private BigDecimal addPower;
+    // 瞳距
+    private BigDecimal odPd;      // 右眼瞳距
+    private BigDecimal osPd;      // 左眼瞳距
+    private BigDecimal pdFar;     // 总瞳距(远用)
+    private BigDecimal pdNear;    // 近用瞳距
+    private BigDecimal addPower;  // 下加光
     
     private String optometristName;
     
