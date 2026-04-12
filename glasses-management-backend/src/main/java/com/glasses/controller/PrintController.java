@@ -25,6 +25,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import java.io.IOException;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
@@ -242,6 +243,71 @@ public class PrintController {
 
         EasyExcel.write(response.getOutputStream(), SalesRecordExcelDTO.class)
                 .sheet("配镜记录")
+                .doWrite(dataList);
+    }
+
+    /**
+     * 导出营业额流水为 Excel
+     */
+    @GetMapping("/export/revenue")
+    public void exportRevenue(
+            @RequestParam(required = false) String startDate,
+            @RequestParam(required = false) String endDate,
+            @RequestParam(defaultValue = "false") Boolean showAll,
+            HttpServletResponse response) throws IOException {
+        
+        QueryWrapper<SalesRecord> wrapper = new QueryWrapper<>();
+        if (!showAll && startDate != null && endDate != null) {
+            wrapper.ge("sales_date", startDate + " 00:00:00")
+                   .le("sales_date", endDate + " 23:59:59");
+        }
+        wrapper.orderByDesc("sales_date");
+        
+        List<SalesRecord> records = salesRecordService.list(wrapper);
+        List<SalesRecordExcelDTO> dataList = new ArrayList<>();
+        
+        for (SalesRecord sr : records) {
+            Customer customer = customerService.getById(sr.getCustomerId());
+            SalesRecordExcelDTO dto = new SalesRecordExcelDTO();
+            dto.setCustomerName(customer != null ? customer.getName() : "-");
+            dto.setPhone(customer != null ? customer.getPhone() : "-");
+            dto.setRecordNo(sr.getRecordNo());
+            dto.setSalesDate(sr.getSalesDate() != null ? DateUtil.formatDateTime(sr.getSalesDate()) : "-");
+            dto.setFrameBrand(nvl(sr.getFrameBrand()));
+            dto.setFrameModel(nvl(sr.getFrameModel()));
+            dto.setFramePrice(sr.getFramePrice() != null ? sr.getFramePrice().toString() : "0");
+            dto.setLensBrand(nvl(sr.getLensBrand()));
+            dto.setLensParams(nvl(sr.getLensParams()));
+            dto.setLensPrice(sr.getLensPrice() != null ? sr.getLensPrice().toString() : "0");
+            dto.setTotalAmount(sr.getTotalAmount() != null ? sr.getTotalAmount().toString() : "0");
+
+            if (sr.getOptometryId() != null) {
+                OptometryRecord opto = optometryRecordService.getById(sr.getOptometryId());
+                if (opto != null) {
+                    dto.setOdSph(fmtDiopter(opto.getOdSph()));
+                    dto.setOdCyl(fmtDiopter(opto.getOdCyl()));
+                    dto.setOdAxis(opto.getOdAxis() != null ? opto.getOdAxis().toString() : "");
+                    dto.setOdPd(opto.getOdPd() != null ? opto.getOdPd().toString() : "");
+                    dto.setOsSph(fmtDiopter(opto.getOsSph()));
+                    dto.setOsCyl(fmtDiopter(opto.getOsCyl()));
+                    dto.setOsAxis(opto.getOsAxis() != null ? opto.getOsAxis().toString() : "");
+                    dto.setOsPd(opto.getOsPd() != null ? opto.getOsPd().toString() : "");
+                    dto.setPdFar(opto.getPdFar() != null ? opto.getPdFar().toString() : "");
+                    dto.setPdNear(opto.getPdNear() != null ? opto.getPdNear().toString() : "");
+                    dto.setAddPower(opto.getAddPower() != null ? opto.getAddPower().toString() : "");
+                }
+            }
+            dataList.add(dto);
+        }
+
+        String fileName = "营业额流水_" + startDate + "_至_" + endDate + ".xlsx";
+        response.setContentType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
+        response.setCharacterEncoding("utf-8");
+        response.setHeader("Content-Disposition", "attachment; filename=" +
+                URLEncoder.encode(fileName, StandardCharsets.UTF_8));
+
+        EasyExcel.write(response.getOutputStream(), SalesRecordExcelDTO.class)
+                .sheet("营业额流水")
                 .doWrite(dataList);
     }
 

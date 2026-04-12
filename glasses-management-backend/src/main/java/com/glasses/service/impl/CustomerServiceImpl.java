@@ -21,7 +21,8 @@ public class CustomerServiceImpl extends ServiceImpl<CustomerMapper, Customer> i
                     .or()
                     .like(Customer::getName, keyword));
         }
-        wrapper.orderByDesc(Customer::getCreateTime);
+        wrapper.orderByDesc(Customer::getCreateTime)
+               .orderByDesc(Customer::getId);
         return baseMapper.selectPage(page, wrapper);
     }
 }
