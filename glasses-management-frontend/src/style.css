@@ -1,0 +1,48 @@
+:root {
+  --primary-color: #4f46e5; /* Indigo */
+  --primary-hover: #4338ca;
+  --bg-color: #f3f4f6;
+  --surface-color: #ffffff;
+  --text-primary: #111827;
+  --text-secondary: #4b5563;
+  --border-color: #e5e7eb;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  background-color: var(--bg-color);
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  color: var(--text-primary);
+  -webkit-font-smoothing: antialiased;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+/* 玻璃拟态风格卡片通用类 */
+.glass-card {
+  background: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
+}
+
+/* 高颜值微动画平滑过渡 */
+.el-button, .el-input__inner, .glass-card {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* 覆盖ElementPlus的主色 */
+:root {
+  --el-color-primary: var(--primary-color) !important;
+  --el-color-primary-light-3: #818cf8 !important;
+  --el-color-primary-light-5: #a5b4fc !important;
+  --el-color-primary-light-7: #c7d2fe !important;
+  --el-color-primary-light-8: #e0e7ff !important;
+  --el-color-primary-light-9: #eef2ff !important;
+  --el-color-primary-dark-2: var(--primary-hover) !important;
+}
