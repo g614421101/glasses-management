@@ -45,3 +45,5 @@ application-secret.yml
 application-secret.properties
 *.pem
 *.key
+
+dist
