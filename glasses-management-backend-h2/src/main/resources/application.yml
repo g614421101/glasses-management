@@ -19,7 +19,7 @@ spring:
     password: ""
   sql:
     init:
-      mode: always
+      mode: embedded
       schema-locations: classpath:sql/schema.sql
   h2:
     console:
