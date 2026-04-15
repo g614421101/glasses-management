@@ -24,5 +24,19 @@ export const useAuthStore = defineStore('auth', () => {
     localStorage.removeItem('role');
   }
 
-  return { token, username, role, login, logout };
+  async function verifyToken() {
+    if (!token.value) return;
+    try {
+      const data = await import('../utils/request').then(m => m.default.get('/auth/info'));
+      username.value = data.username;
+      role.value = data.role;
+      localStorage.setItem('username', data.username);
+      localStorage.setItem('role', data.role);
+    } catch (e) {
+      logout();
+      throw e;
+    }
+  }
+
+  return { token, username, role, login, logout, verifyToken };
 });
