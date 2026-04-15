@@ -1,3 +1,0 @@
-2026-04-14 21:00:48.593774+08:00 jdbc[3]: exception
-org.h2.jdbc.JdbcSQLSyntaxErrorException: Table "sys_user" not found (this database is empty); SQL statement:
-SELECT  id,username,password,real_name,role,create_time  FROM sys_user      WHERE  (username = ?) [42104-224]
