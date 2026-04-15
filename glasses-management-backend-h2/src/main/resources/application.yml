@@ -4,15 +4,23 @@ server:
 app:
   invite-code: REMOVED_INVITE_CODE
 
+glasses:
+  admin:
+    username: admin
+    password: "REMOVED_ADMIN_PASSWORD"
+    real-name: "系统管理员"
+    enabled: true
+
 spring:
   datasource:
     driver-class-name: org.h2.Driver
-    url: jdbc:h2:file:./data/glasses_management;MODE=MySQL;DATABASE_TO_UPPER=FALSE;CASE_INSENSITIVE_IDENTIFIERS=TRUE
+    url: jdbc:h2:file:./data/glasses_management;MODE=MySQL;DATABASE_TO_UPPER=FALSE;CASE_INSENSITIVE_IDENTIFIERS=TRUE;AUTO_SERVER=TRUE
     username: sa
     password: ""
   sql:
     init:
       mode: always
+      schema-locations: classpath:sql/schema.sql
   h2:
     console:
       enabled: true
