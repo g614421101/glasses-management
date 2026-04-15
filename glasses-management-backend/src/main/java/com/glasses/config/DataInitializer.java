@@ -42,9 +42,18 @@ public class DataInitializer implements ApplicationRunner {
             sysUserMapper.insert(newAdmin);
             log.info("[DataInitializer] 超管账号 {} 创建成功", adminProperties.getUsername());
         } else {
-            admin.setPassword(BCrypt.hashpw(adminProperties.getPassword()));
-            sysUserMapper.updateById(admin);
-            log.info("[DataInitializer] 超管账号 {} 密码已刷新", adminProperties.getUsername());
+            // 调试点：同步幂等逻辑，仅在配置发生变化时才执行数据库更新
+            boolean passwordMatch = BCrypt.checkpw(adminProperties.getPassword(), admin.getPassword());
+            boolean realNameMatch = adminProperties.getRealName().equals(admin.getRealName());
+
+            if (!passwordMatch || !realNameMatch) {
+                admin.setPassword(BCrypt.hashpw(adminProperties.getPassword()));
+                admin.setRealName(adminProperties.getRealName());
+                sysUserMapper.updateById(admin);
+                log.info("[DataInitializer] 超管账号 {} 配置已更新（映射到 MySQL）", adminProperties.getUsername());
+            } else {
+                log.info("[DataInitializer] 超管账号 {} 配置已同步（MySQL 数据已是最新）", adminProperties.getUsername());
+            }
         }
     }
 }
