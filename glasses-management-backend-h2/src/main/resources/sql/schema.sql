@@ -5,8 +5,7 @@
 -- ----------------------------
 -- Table structure for sys_user
 -- ----------------------------
-DROP TABLE IF EXISTS `sys_user`;
-CREATE TABLE `sys_user` (
+CREATE TABLE IF NOT EXISTS `sys_user` (
   `id` bigint NOT NULL AUTO_INCREMENT,
   `username` varchar(50) NOT NULL,
   `password` varchar(100) NOT NULL,
@@ -20,8 +19,7 @@ CREATE TABLE `sys_user` (
 -- ----------------------------
 -- Table structure for customer
 -- ----------------------------
-DROP TABLE IF EXISTS `customer`;
-CREATE TABLE `customer` (
+CREATE TABLE IF NOT EXISTS `customer` (
   `id` bigint NOT NULL AUTO_INCREMENT,
   `name` varchar(50) NOT NULL,
   `phone` varchar(20) NOT NULL,
@@ -37,8 +35,7 @@ CREATE TABLE `customer` (
 -- ----------------------------
 -- Table structure for optometry_record
 -- ----------------------------
-DROP TABLE IF EXISTS `optometry_record`;
-CREATE TABLE `optometry_record` (
+CREATE TABLE IF NOT EXISTS `optometry_record` (
   `id` bigint NOT NULL AUTO_INCREMENT,
   `customer_id` bigint NOT NULL,
   `od_sph` decimal(5,2) DEFAULT NULL,
@@ -59,13 +56,12 @@ CREATE TABLE `optometry_record` (
   `create_time` datetime DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`)
 );
-CREATE INDEX `idx_customer_id_opto` ON `optometry_record` (`customer_id`);
+CREATE INDEX IF NOT EXISTS `idx_customer_id_opto` ON `optometry_record` (`customer_id`);
 
 -- ----------------------------
 -- Table structure for sales_record
 -- ----------------------------
-DROP TABLE IF EXISTS `sales_record`;
-CREATE TABLE `sales_record` (
+CREATE TABLE IF NOT EXISTS `sales_record` (
   `id` bigint NOT NULL AUTO_INCREMENT,
   `record_no` varchar(50) NOT NULL,
   `customer_id` bigint NOT NULL,
@@ -84,4 +80,4 @@ CREATE TABLE `sales_record` (
   PRIMARY KEY (`id`),
   UNIQUE KEY `uk_record_no` (`record_no`)
 );
-CREATE INDEX `idx_customer_id_sales` ON `sales_record` (`customer_id`);
+CREATE INDEX IF NOT EXISTS `idx_customer_id_sales` ON `sales_record` (`customer_id`);
