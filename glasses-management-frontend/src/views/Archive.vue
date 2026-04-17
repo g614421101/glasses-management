@@ -138,6 +138,7 @@
         <el-row :gutter="10">
           <el-col :span="8"><el-form-item label="近用PD" label-width="60px"><el-input v-model="optoForm.pdNear"/></el-form-item></el-col>
           <el-col :span="8"><el-form-item label="ADD" label-width="50px"><el-input v-model="optoForm.addPower"/></el-form-item></el-col>
+          <el-col :span="8"><el-form-item label="验光师" label-width="60px"><el-input v-model="optoForm.optometristName" placeholder="默认操作人"/></el-form-item></el-col>
         </el-row>
       </el-form>
       <template #footer>
@@ -211,7 +212,8 @@ const optoForm = reactive({
   customerId,
   odSph:'', odCyl:'', odAxis:'', odVa:'',
   osSph:'', osCyl:'', osAxis:'', osVa:'',
-  odPd:'', osPd:'', pdFar:'', pdNear:'', addPower:''
+  odPd:'', osPd:'', pdFar:'', pdNear:'', addPower:'',
+  optometristName: ''
 });
 
 // 配镜表单
@@ -260,7 +262,8 @@ const resetOpto = () => {
     customerId,
     odSph:'', odCyl:'', odAxis:'', odVa:'',
     osSph:'', osCyl:'', osAxis:'', osVa:'',
-    odPd:'', osPd:'', pdFar:'', pdNear:'', addPower:''
+    odPd:'', osPd:'', pdFar:'', pdNear:'', addPower:'',
+    optometristName: ''
   });
 };
 
