@@ -19,8 +19,12 @@ public class OptometryRecordController {
 
     @PostMapping("/add")
     public Result<Boolean> addRecord(@RequestBody OptometryRecord record) {
-        if (record.getOptometristName() == null) {
-            record.setOptometristName(StpUtil.getSession().getString("username")); // 默认当前登录人
+        if (record.getOptometristName() == null || record.getOptometristName().trim().isEmpty()) {
+            String realName = StpUtil.getSession().getString("realName");
+            if (realName == null || realName.trim().isEmpty()) {
+                realName = StpUtil.getSession().getString("username");
+            }
+            record.setOptometristName(realName); // 默认当前登录人
         }
         if (record.getExamDate() == null) {
             record.setExamDate(DateUtil.date()); // 使用 Hutool DateTime
