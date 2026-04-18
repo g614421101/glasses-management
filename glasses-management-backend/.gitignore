@@ -46,7 +46,9 @@ application-secret.properties
 *.pem
 *.key
 
-dist 
+dist/
 /src/main/resources/static/
-/package-temp/
-/dist-installer/
+
+# Installer Configs
+jpackage-temp/
+dist-install/

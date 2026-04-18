@@ -1,0 +1,11 @@
+# 生产环境配置 (打包成 EXE 时自动激活)
+# 关闭 MyBatis SQL 日志输出，避免终端日志过于冗杂
+mybatis-plus:
+  configuration:
+    log-impl: org.apache.ibatis.logging.nologging.NoLoggingImpl
+
+logging:
+  file:
+    path: ${user.home}/.glasses_management_mysql/logs
+  level:
+    root: INFO
