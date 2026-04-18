@@ -59,15 +59,13 @@ router.beforeEach(async (to, from, next) => {
     if (!token) {
       next({ name: 'Login' });
     } else {
-      // 核心修复逻辑：如果有 Token 但 Pinia 里没有用户信息，说明是首屏加载
-      // 必须主动向后端验证一次 Token 的有效性
-      if (!authStore.username) {
+      // 使用内存标记 verified（而非 localStorage 中的 username）
+      // 确保每次应用重新启动（后端重启/Token 过期）都会重新向后端验证一次
+      if (!authStore.verified) {
         try {
           await authStore.verifyToken();
           next();
         } catch (error) {
-          // verifyToken 内部如果 401 会被拦截器处理，
-          // 但这里为了路由逻辑严密，捕获后跳回登录
           next({ name: 'Login' });
         }
       } else {

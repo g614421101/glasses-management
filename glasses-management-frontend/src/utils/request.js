@@ -33,7 +33,7 @@ request.interceptors.response.use(
     if (error.response && error.response.status === 401) {
       ElMessage.error('请先登录');
       localStorage.removeItem('token');
-      window.location.href = '/login';
+      window.location.href = '/#/login';
     } else {
       ElMessage.error(error.message || '网络错误');
     }
