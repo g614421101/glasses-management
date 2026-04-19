@@ -1,4 +1,4 @@
-import axios from 'axios';
+import axios, { InternalAxiosRequestConfig, AxiosResponse } from 'axios';
 import { ElMessage } from 'element-plus';
 
 const request = axios.create({
@@ -7,20 +7,20 @@ const request = axios.create({
 });
 
 request.interceptors.request.use(
-  config => {
+  (config: InternalAxiosRequestConfig) => {
     const token = localStorage.getItem('token');
     if (token) {
       config.headers['Authorization'] = token;
     }
     return config;
   },
-  error => {
+  (error: any) => {
     return Promise.reject(error);
   }
 );
 
 request.interceptors.response.use(
-  response => {
+  (response: AxiosResponse) => {
     const res = response.data;
     if (res.code === 200) {
       return res.data;
@@ -29,7 +29,7 @@ request.interceptors.response.use(
       return Promise.reject(new Error(res.msg || 'Error'));
     }
   },
-  error => {
+  (error: any) => {
     if (error.response && error.response.status === 401) {
       ElMessage.error('请先登录');
       localStorage.removeItem('token');

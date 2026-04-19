@@ -52,7 +52,7 @@
   </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { ref, onMounted } from 'vue';
 import { Refresh } from '@element-plus/icons-vue';
 import request from '../utils/request';
@@ -64,8 +64,8 @@ const loading = ref(false);
 const fetchUsers = async () => {
   loading.value = true;
   try {
-    const res = await request.get('/sys-user/list');
-    users.value = res || [];
+    const res: any = await request.get('/sys-user/list');
+    users.value = (res as any[]) || [];
   } catch (error) {
     console.error(error);
   } finally {

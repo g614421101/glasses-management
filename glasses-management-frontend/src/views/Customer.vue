@@ -93,7 +93,7 @@
   </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { ref, reactive, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
 import request from '../utils/request';
@@ -139,7 +139,7 @@ const handleQuery = () => {
 const loadData = async () => {
   loading.value = true;
   try {
-    const res = await request.get('/customer/page', {
+    const res: any = await request.get('/customer/page', {
       params: { keyword: keyword.value, ...pageParams }
     });
     tableData.value = res.records;

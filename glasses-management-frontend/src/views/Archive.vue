@@ -68,49 +68,90 @@
       </div>
     </div>
 
-    <!-- 侧边抽屉：展示详细信息 -->
-    <el-drawer v-model="drawerVisible" :title="drawerTitle" size="400px">
-      <div v-if="currentDetail && currentDetail.type === 'OPTOMETRY'" class="detail-box">
-        <table class="opto-table">
-          <thead>
-            <tr><th>眼别</th><th>SPH<br/>(球镜)</th><th>CYL<br/>(柱镜)</th><th>AXIS<br/>(轴位)</th><th>VA<br/>(视力)</th></tr>
-          </thead>
-          <tbody>
-            <tr>
-              <td><strong>右眼(OD)</strong></td>
-              <td>{{ fmt(currentDetail.data.odSph) }}</td>
-              <td>{{ fmt(currentDetail.data.odCyl) }}</td>
-              <td>{{ currentDetail.data.odAxis || '-' }}</td>
-              <td>{{ currentDetail.data.odVa || '-' }}</td>
-            </tr>
-            <tr>
-              <td><strong>左眼(OS)</strong></td>
-              <td>{{ fmt(currentDetail.data.osSph) }}</td>
-              <td>{{ fmt(currentDetail.data.osCyl) }}</td>
-              <td>{{ currentDetail.data.osAxis || '-' }}</td>
-              <td>{{ currentDetail.data.osVa || '-' }}</td>
-            </tr>
-          </tbody>
-        </table>
-        <div class="extra-opto mt-4">
-          <p>右眼瞳距(PD): {{ currentDetail.data.odPd || '-' }}</p>
-          <p>左眼瞳距(PD): {{ currentDetail.data.osPd || '-' }}</p>
-          <p>远用瞳距: {{ currentDetail.data.pdFar || '-' }}</p>
-          <p>近用瞳距: {{ currentDetail.data.pdNear || '-' }}</p>
-          <p>下加光 (ADD): {{ currentDetail.data.addPower || '-' }}</p>
-          <p>验光师: {{ currentDetail.data.optometristName || '-' }}</p>
+    <!-- 居中弹窗：展示历史记录详细信息 -->
+    <el-dialog 
+      v-model="detailVisible" 
+      width="560px" 
+      class="elegant-dialog" 
+      align-center 
+      destroy-on-close
+      :show-close="false"
+    >
+      <template #header="{ close }">
+        <div class="dialog-custom-header">
+          <span class="dialog-title">{{ drawerTitle }}</span>
+          <el-button class="close-btn" circle link @click="close"><el-icon><Close /></el-icon></el-button>
+        </div>
+      </template>
+
+      <div v-if="currentDetail && currentDetail.type === 'OPTOMETRY'" class="detail-box animate-fade-up">
+        <div class="receipt-badge primary">验光记录</div>
+        <div class="table-container">
+          <table class="opto-table elegant-table">
+            <thead>
+              <tr><th>眼别</th><th>SPH (球镜)</th><th>CYL (柱镜)</th><th>AXIS (轴位)</th><th>VA (视力)</th></tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><span class="eye-label">右眼 OD</span></td>
+                <td class="numbold">{{ fmt(currentDetail.data.odSph) }}</td>
+                <td class="numbold">{{ fmt(currentDetail.data.odCyl) }}</td>
+                <td class="numbold">{{ currentDetail.data.odAxis || '-' }}</td>
+                <td class="numbold">{{ currentDetail.data.odVa || '-' }}</td>
+              </tr>
+              <tr>
+                <td><span class="eye-label">左眼 OS</span></td>
+                <td class="numbold">{{ fmt(currentDetail.data.osSph) }}</td>
+                <td class="numbold">{{ fmt(currentDetail.data.osCyl) }}</td>
+                <td class="numbold">{{ currentDetail.data.osAxis || '-' }}</td>
+                <td class="numbold">{{ currentDetail.data.osVa || '-' }}</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        
+        <div class="extra-grid mt-4">
+          <div class="info-tag"><span>右眼PD</span><strong>{{ currentDetail.data.odPd || '-' }}</strong></div>
+          <div class="info-tag"><span>左眼PD</span><strong>{{ currentDetail.data.osPd || '-' }}</strong></div>
+          <div class="info-tag"><span>远用PD</span><strong>{{ currentDetail.data.pdFar || '-' }}</strong></div>
+          <div class="info-tag"><span>近用PD</span><strong>{{ currentDetail.data.pdNear || '-' }}</strong></div>
+          <div class="info-tag"><span>ADD</span><strong>{{ currentDetail.data.addPower || '-' }}</strong></div>
+          <div class="info-tag"><span>验光师</span><strong>{{ currentDetail.data.optometristName || '-' }}</strong></div>
         </div>
       </div>
       
-      <div v-else-if="currentDetail && currentDetail.type === 'SALES'" class="detail-box">
-        <p><strong>单号:</strong> {{ currentDetail.data.recordNo }}</p>
-        <el-divider />
-        <p><strong>镜架:</strong> {{ currentDetail.data.frameBrand || '-' }} {{ currentDetail.data.frameModel || '-' }} (￥{{ currentDetail.data.framePrice }})</p>
-        <p><strong>镜片:</strong> {{ currentDetail.data.lensBrand || '-' }} {{ currentDetail.data.lensParams || '-' }} (￥{{ currentDetail.data.lensPrice }})</p>
-        <el-divider />
-        <p class="total-price"><strong>总实收:</strong> <span class="price-txt">￥{{ currentDetail.data.totalAmount }}</span></p>
+      <div v-else-if="currentDetail && currentDetail.type === 'SALES'" class="detail-box animate-fade-up">
+        <div class="receipt-badge success">销售票据</div>
+        <div class="receipt-body">
+          <div class="receipt-row">
+            <span class="r-label">订单号</span>
+            <span class="r-value code">{{ currentDetail.data.recordNo }}</span>
+          </div>
+          <div class="receipt-divider"></div>
+          <div class="receipt-row">
+            <span class="r-label">所配镜架</span>
+            <span class="r-value highlight">{{ currentDetail.data.frameBrand || '-' }} {{ currentDetail.data.frameModel || '-' }}</span>
+          </div>
+          <div class="receipt-row">
+            <span class="r-label">镜架金额</span>
+            <span class="r-value">￥{{ currentDetail.data.framePrice }}</span>
+          </div>
+          <div class="receipt-divider"></div>
+          <div class="receipt-row">
+            <span class="r-label">所配镜片</span>
+            <span class="r-value highlight">{{ currentDetail.data.lensBrand || '-' }} {{ currentDetail.data.lensParams || '-' }}</span>
+          </div>
+          <div class="receipt-row">
+            <span class="r-label">镜片金额</span>
+            <span class="r-value">￥{{ currentDetail.data.lensPrice }}</span>
+          </div>
+        </div>
+        <div class="receipt-footer">
+          <span class="total-label">总计收讫</span>
+          <span class="total-amount">￥{{ currentDetail.data.totalAmount }}</span>
+        </div>
       </div>
-    </el-drawer>
+    </el-dialog>
 
     <!-- 弹窗：录入验光单 -->
     <el-dialog :title="optoForm.id ? '编辑验光单' : '录入验光单'" v-model="optoDialogVisible" width="600px">
@@ -185,29 +226,29 @@
   </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { ref, reactive, onMounted } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import request from '../utils/request';
 import { ElMessage } from 'element-plus';
-import { Back, DocumentAdd, ShoppingCart, View, Goods, Download, Edit, Delete } from '@element-plus/icons-vue';
+import { Back, DocumentAdd, ShoppingCart, View, Goods, Download, Edit, Delete, Close } from '@element-plus/icons-vue';
 import { ElMessageBox } from 'element-plus';
 
 const route = useRoute();
 const router = useRouter();
 const customerId = route.params.id;
 
-const customerInfo = ref({});
-const timelineData = ref([]);
+const customerInfo = reactive<any>({});
+const timelineData = ref<any>([]);
 
-// 抽屉
-const drawerVisible = ref(false);
+// 详细记录弹窗
+const detailVisible = ref(false);
 const drawerTitle = ref('');
-const currentDetail = ref(null);
+const currentDetail = ref<any>(null);
 
 // 验光表单
 const optoDialogVisible = ref(false);
-const optoForm = reactive({ 
+const optoForm = reactive<any>({ 
   id: null,
   customerId,
   odSph:'', odCyl:'', odAxis:'', odVa:'',
@@ -218,7 +259,7 @@ const optoForm = reactive({
 
 // 配镜表单
 const salesDialogVisible = ref(false);
-const salesForm = reactive({ 
+const salesForm = reactive<any>({ 
   id: null,
   customerId, 
   optometryId: null, 
@@ -238,22 +279,21 @@ onMounted(() => {
 
 const loadCustomer = async () => {
   try {
-    const res = await request.get('/customer/' + customerId);
-    customerInfo.value = res || {};
+    const res = await request.get('/customer/' + customerId) as any;
+    Object.assign(customerInfo, res || {});
   } catch(e) {}
 }
 
 const loadTimeline = async () => {
   try {
-    const res = await request.get('/archive/' + customerId);
-    timelineData.value = res || [];
+    timelineData.value = await request.get('/archive/' + customerId) as any;
   } catch (e) {}
 }
 
-const viewDetail = (item) => {
+const viewDetail = (item: any) => {
   currentDetail.value = item;
   drawerTitle.value = item.title;
-  drawerVisible.value = true;
+  detailVisible.value = true;
 }
 
 const resetOpto = () => {
@@ -465,36 +505,142 @@ const fmt = (val) => {
 }
 
 .detail-box {
-  padding: 0 10px;
+  padding: 10px 20px 20px;
+  position: relative;
 }
 
-.opto-table {
+.animate-fade-up {
+  animation: fadeUp 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes fadeUp {
+  0% { opacity: 0; transform: translateY(10px); }
+  100% { opacity: 1; transform: translateY(0); }
+}
+
+.receipt-badge {
+  display: inline-block;
+  padding: 4px 12px;
+  border-radius: 999px;
+  font-size: 13px;
+  font-weight: 600;
+  margin-bottom: 20px;
+}
+.receipt-badge.primary { background: #e0e7ff; color: #4338ca; }
+.receipt-badge.success { background: #dcfce7; color: #166534; }
+
+.table-container {
+  overflow: hidden;
+  border-radius: 12px;
+  border: 1px solid var(--border-color);
+}
+
+.elegant-table {
   width: 100%;
   border-collapse: collapse;
   text-align: center;
+  background: #fafafa;
 }
 
-.opto-table th, .opto-table td {
-  border: 1px solid #e5e7eb;
-  padding: 8px 4px;
+.elegant-table th {
+  background-color: var(--primary-color);
+  color: white;
+  font-weight: 500;
+  padding: 12px 6px;
+  font-size: 13px;
 }
 
-.opto-table th {
-  background-color: #f9fafb;
+.elegant-table td {
+  padding: 14px 6px;
+  border-top: 1px solid var(--border-color);
+  background: white;
 }
 
-.extra-opto p {
-  margin: 6px 0;
-  color: #374151;
+.eye-label { font-weight: 600; color: #4b5563; font-size: 13px; }
+.numbold { font-weight: 700; color: var(--primary-color); font-size: 15px; }
+
+.extra-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
 }
 
-.total-price {
-  font-size: 16px;
+.info-tag {
+  background: #f8f9fa;
+  border-radius: 8px;
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.info-tag span { color: #6b7280; font-size: 12px; }
+.info-tag strong { color: #1f2937; font-size: 14px; }
+
+/* 小票式的流线设计 */
+.receipt-body {
+  background: #f9fafb;
+  border-radius: 12px;
+  padding: 24px;
 }
 
-.price-txt {
-  color: #ef4444;
-  font-weight: bold;
+.receipt-row {
+  display: flex;
+  justify-content: space-between;
+  line-height: 2;
+  font-size: 15px;
+}
+
+.receipt-divider {
+  border-top: 2px dashed #d1d5db;
+  margin: 16px 0;
+}
+
+.r-label { color: #6b7280; }
+.r-value { color: #111827; font-weight: 500; }
+.r-value.code { font-family: monospace; letter-spacing: 1px; color: var(--primary-color); }
+.r-value.highlight { font-weight: 600; }
+
+.receipt-footer {
+  margin-top: 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 24px;
+}
+.total-label { font-size: 16px; font-weight: 600; color: #374151; }
+.total-amount { font-size: 28px; font-weight: 800; color: #ff6b6b; padding-right: 12px; }
+
+:deep(.elegant-dialog) {
+  border-radius: 20px !important;
+  overflow: hidden;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25) !important;
+}
+
+:deep(.elegant-dialog .el-dialog__header) {
+  display: none !important; /* hide default header to use custom slot */
+}
+
+.dialog-custom-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 24px 24px 0;
+}
+
+.dialog-title {
   font-size: 20px;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.close-btn {
+  font-size: 22px;
+  color: #9ca3af;
+  transition: transform 0.3s;
+}
+
+.close-btn:hover {
+  transform: rotate(90deg);
+  color: #ef4444;
 }
 </style>

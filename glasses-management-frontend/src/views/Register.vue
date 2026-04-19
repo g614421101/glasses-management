@@ -52,7 +52,7 @@
   </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { reactive, ref } from 'vue';
 import { Iphone, Lock, Key, View } from '@element-plus/icons-vue';
 import { useRouter } from 'vue-router';
@@ -92,32 +92,20 @@ const handleRegister = async () => {
   display: flex;
   justify-content: center;
   align-items: center;
-  background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%);
   position: relative;
   overflow: hidden;
-}
-
-.login-container::before {
-  content: '';
-  position: absolute;
-  top: -20%;
-  left: -10%;
-  width: 50vw;
-  height: 50vw;
-  background: radial-gradient(circle, rgba(255,255,255,0.3) 0%, rgba(255,255,255,0) 70%);
-  border-radius: 50%;
+  background: transparent;
 }
 
 .login-box {
-  width: 400px;
-  padding: 40px;
+  width: 420px;
+  padding: 48px;
   text-align: center;
   z-index: 10;
-  box-shadow: 0 20px 40px rgba(0,0,0,0.1);
-  border: 1px solid rgba(255,255,255,0.5);
-  background: rgba(255, 255, 255, 0.7);
-  backdrop-filter: blur(10px);
+  background: #ffffff;
   border-radius: 12px;
+  box-shadow: 0 4px 24px rgba(255, 107, 107, 0.08);
+  border: 1px solid var(--border-color);
 }
 
 .sys-title {
@@ -125,29 +113,23 @@ const handleRegister = async () => {
   justify-content: center;
   align-items: center;
   gap: 12px;
-  font-size: 24px;
-  font-weight: bold;
-  color: #1f2937;
-  margin-bottom: 10px;
+  font-size: 28px;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin-bottom: 12px;
 }
 
 .sys-subtitle {
-  font-size: 14px;
-  color: #6b7280;
-  margin-bottom: 30px;
+  font-size: 15px;
+  color: var(--text-secondary);
+  margin-bottom: 36px;
 }
 
 .login-btn {
   width: 100%;
   letter-spacing: 2px;
+  font-size: 16px;
   font-weight: 600;
-  background: linear-gradient(90deg, #10b981 0%, #059669 100%);
-  border: none;
-}
-
-.login-btn:hover {
-  filter: brightness(1.1);
-  transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.4);
+  border-radius: 8px;
 }
 </style>

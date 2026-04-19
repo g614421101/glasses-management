@@ -44,7 +44,7 @@
   </el-container>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { useAuthStore } from '../store/auth';
 import { useRouter, useRoute } from 'vue-router';
 import { Monitor, User, Setting, View, TrendCharts } from '@element-plus/icons-vue';
@@ -71,16 +71,14 @@ const handleLogout = () => {
 }
 
 .glass-header {
-  height: 60px;
-  background: rgba(255, 255, 255, 0.8);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
+  height: 64px;
+  background: #ffffff;
   border-bottom: 1px solid var(--border-color);
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 0 24px;
-  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  padding: 0 32px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.02);
   z-index: 10;
 }
 
@@ -89,6 +87,11 @@ const handleLogout = () => {
   align-items: center;
   gap: 12px;
   cursor: pointer;
+  transition: transform 0.3s;
+}
+
+.logo-box:hover {
+  transform: scale(1.02);
 }
 
 .logo-text {
@@ -112,15 +115,15 @@ const handleLogout = () => {
 .main-body {
   flex: 1;
   overflow: hidden;
-  background: linear-gradient(135deg, #fdfbfb 0%, #ebedee 100%);
+  background: transparent;
 }
 
 .glass-aside {
-  background: rgba(255, 255, 255, 0.6);
-  backdrop-filter: blur(10px);
+  background: #ffffff;
   border-right: 1px solid var(--border-color);
   z-index: 100;
   position: relative;
+  box-shadow: 2px 0 8px rgba(0,0,0,0.01);
 }
 
 .side-menu {
@@ -128,14 +131,19 @@ const handleLogout = () => {
   border-right: none;
 }
 
+.el-menu-item {
+  margin: 6px 12px;
+  border-radius: 8px;
+}
+
 .el-menu-item.is-active {
-  background: linear-gradient(90deg, rgba(79, 70, 229, 0.1) 0%, transparent 100%);
-  border-left: 4px solid var(--primary-color);
+  background: var(--bg-color);
+  color: var(--primary-color);
   font-weight: 600;
 }
 
 .main-content {
-  padding: 24px;
+  padding: 32px;
   overflow-y: auto;
 }
 

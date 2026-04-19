@@ -9,7 +9,7 @@ export const useAuthStore = defineStore('auth', () => {
   // 不保存到 localStorage，每次应用重启时从 false 开始，强制重新验证
   const verified = ref(false);
 
-  function login(newToken, newUsername, newRole) {
+  function login(newToken: string, newUsername: string, newRole: string) {
     token.value = newToken;
     username.value = newUsername;
     role.value = newRole;
@@ -32,7 +32,7 @@ export const useAuthStore = defineStore('auth', () => {
   async function verifyToken() {
     if (!token.value) return;
     try {
-      const data = await import('../utils/request').then(m => m.default.get('/auth/info'));
+      const data: any = await import('../utils/request').then(m => m.default.get('/auth/info'));
       username.value = data.username;
       role.value = data.role;
       verified.value = true;

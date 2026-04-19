@@ -52,8 +52,8 @@
   </div>
 </template>
 
-<script setup>
-import { ref } from 'vue';
+<script setup lang="ts">
+import { ref, reactive } from 'vue';
 import { useRouter } from 'vue-router';
 import request from '../utils/request';
 import { ElMessage } from 'element-plus';
@@ -61,7 +61,7 @@ import { Search, ArrowRight, UserFilled, Grid } from '@element-plus/icons-vue';
 
 const router = useRouter();
 const searchQuery = ref('');
-const searchResults = ref([]);
+const searchResults = ref<any>([]);
 
 const handleSearch = async () => {
   if (!searchQuery.value) {
@@ -69,7 +69,7 @@ const handleSearch = async () => {
     return;
   }
   try {
-    const res = await request.get('/customer/page', { params: { keyword: searchQuery.value, current: 1, size: 5 } });
+    const res: any = await request.get('/customer/page', { params: { keyword: searchQuery.value, current: 1, size: 5 } });
     if (res.records && res.records.length > 0) {
       if (res.records.length === 1 && res.records[0].phone === searchQuery.value) {
         // 精确匹配手机号直接跳转
@@ -86,9 +86,9 @@ const handleSearch = async () => {
   }
 }
 
-const goToArchive = (id) => {
+const goToArchive = (id: any) => {
   router.push('/archive/' + id);
-}
+};
 
 const goCustomer = () => {
   router.push('/customer');
@@ -128,32 +128,42 @@ const goCustomer = () => {
   margin-bottom: 60px;
 }
 
-/* 覆盖Element Plus的输入框样式以实现更大更好的体验 */
+/* 覆盖Element Plus的输入框样式以实现现代胶囊极简设计 */
 :deep(.main-search-input .el-input__wrapper) {
   padding: 8px 16px;
   font-size: 16px;
-  border-radius: 12px 0 0 12px;
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05) !important;
+  border-radius: 999px 0 0 999px;
+  box-shadow: 0 4px 15px -2px rgba(0, 0, 0, 0.05) !important;
 }
 
 :deep(.main-search-input .el-input-group__append) {
-  border-radius: 0 12px 12px 0;
-  padding: 0;
-  background-color: var(--primary-color);
+  border-radius: 0 999px 999px 0;
+  padding: 4px 6px 4px 0; /* 内边距给胶囊按钮留出空间 */
+  background-color: #ffffff;
   border: none;
+  box-shadow: 0 4px 15px -2px rgba(0, 0, 0, 0.05) !important;
 }
 
+/* 内部的悬浮收缩检索胶囊按钮 */
 :deep(.main-search-input .el-input-group__append button) {
   height: 100%;
+  margin: 0;
   padding: 0 24px;
-  color: white;
-  border-radius: 0 12px 12px 0;
+  background-color: var(--primary-color) !important;
+  color: #ffffff !important;
+  border-radius: 999px !important;
   font-weight: 600;
-  transition: all 0.3s;
+  box-shadow: 0 4px 10px rgba(255, 107, 107, 0.25) !important;
+  transform: scale(0.9) !important; /* 不悬停时默认缩小在内部 */
+  transition: all 0.35s cubic-bezier(0.175, 0.885, 0.32, 1.275) !important; /* 弹簧动画 */
 }
 
+/* 悬停时弹出来充满整个右侧胶囊边界 */
 :deep(.main-search-input .el-input-group__append button:hover) {
-  background-color: var(--primary-hover);
+  transform: scale(1) !important;
+  background-color: var(--primary-hover) !important;
+  box-shadow: 0 6px 14px rgba(255, 107, 107, 0.4) !important;
+  opacity: 1;
 }
 
 /* 当搜索框或按钮激活时，将清除图标左移，避免被放大的按钮遮挡 */

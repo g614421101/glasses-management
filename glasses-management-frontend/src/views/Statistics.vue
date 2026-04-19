@@ -103,7 +103,7 @@
   </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { ref, computed, onMounted, reactive } from 'vue';
 import { useRouter } from 'vue-router';
 import request from '../utils/request';
@@ -150,10 +150,11 @@ const handleShowAllChange = () => {
   fetchStats();
 };
 
+
 const fetchStats = async () => {
   loading.value = true;
   try {
-    const params = {
+    const params: any = {
       ...pageParams,
       showAll: showAll.value
     };
@@ -163,7 +164,7 @@ const fetchStats = async () => {
       params.endDate = dateRange.value[1];
     }
 
-    const res = await request.get('/sales/stats', { params });
+    const res: any = await request.get('/sales/stats', { params });
     
     if (res) {
       statsData.value.totalRevenue = res.totalRevenue;
@@ -178,7 +179,7 @@ const fetchStats = async () => {
   }
 };
 
-const goToArchive = (customerId) => {
+const goToArchive = (customerId: any) => {
   router.push('/archive/' + customerId);
 };
 
