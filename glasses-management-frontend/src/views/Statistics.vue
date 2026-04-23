@@ -1,12 +1,19 @@
 <template>
-  <div class="stats-container">
-    <div class="page-header">
-      <h2 class="title">营收统计</h2>
-      <div class="header-actions">
+  <div class="page-shell stats-page">
+    <section class="page-hero glass-card stats-hero">
+      <div class="hero-copy">
+        <span class="hero-kicker">Revenue Overview</span>
+        <h1 class="page-heading">营收统计</h1>
+        <p class="page-subheading">
+          把区间筛选、导出和分页放进同一套蓝白工作流里，让统计页在大屏和小屏上都更清晰、更顺手。
+        </p>
+      </div>
+
+      <div class="filter-toolbar">
         <el-switch
           v-model="showAll"
           active-text="展示所有记录"
-          class="mr-4"
+          class="stats-switch"
           @change="handleShowAllChange"
         />
         <el-date-picker
@@ -21,16 +28,15 @@
           :disabled="showAll"
           @change="handleDateChange"
         />
-        <el-button type="warning" class="ml-4" @click="exportExcel">
+        <el-button type="primary" @click="exportExcel">
           <el-icon><Download /></el-icon>导出流水
         </el-button>
       </div>
-    </div>
+    </section>
 
-    <!-- 汇总卡片 -->
-    <div class="summary-grid">
-      <div class="summary-card glass-card">
-        <div class="card-icon revenue">
+    <section class="summary-grid">
+      <div class="summary-card glass-card summary-revenue">
+        <div class="card-icon">
           <el-icon><Money /></el-icon>
         </div>
         <div class="card-content">
@@ -39,8 +45,8 @@
         </div>
       </div>
 
-      <div class="summary-card glass-card">
-        <div class="card-icon orders">
+      <div class="summary-card glass-card summary-orders">
+        <div class="card-icon">
           <el-icon><Ticket /></el-icon>
         </div>
         <div class="card-content">
@@ -49,8 +55,8 @@
         </div>
       </div>
 
-      <div class="summary-card glass-card">
-        <div class="card-icon avg">
+      <div class="summary-card glass-card summary-average">
+        <div class="card-icon">
           <el-icon><DataLine /></el-icon>
         </div>
         <div class="card-content">
@@ -58,48 +64,54 @@
           <h3 class="value">￥{{ avgOrderValue }}</h3>
         </div>
       </div>
-    </div>
+    </section>
 
-    <!-- 流水详情列表 -->
-    <div class="details-section mt-6">
-      <div class="section-card glass-card">
-        <h3 class="section-title">收支流水明细</h3>
-        <el-table :data="statsData.records" style="width: 100%" v-loading="loading">
-          <el-table-column prop="salesDate" label="日期" width="180" />
-          <el-table-column prop="recordNo" label="单号" width="200" />
-          <el-table-column label="商品项目">
-            <template #default="scope">
-              <span class="item-tag">{{ scope.row.frameBrand }} {{ scope.row.frameModel }}</span>
-              <el-divider direction="vertical" />
-              <span class="item-tag">{{ scope.row.lensBrand }}</span>
-            </template>
-          </el-table-column>
-          <el-table-column prop="totalAmount" label="金额" width="120">
-            <template #default="scope">
-              <span class="price-text">￥{{ scope.row.totalAmount }}</span>
-            </template>
-          </el-table-column>
-          <el-table-column label="操作" width="100">
-            <template #default="scope">
-              <el-button link type="primary" @click="goToArchive(scope.row.customerId)">查看详情</el-button>
-            </template>
-          </el-table-column>
-        </el-table>
-
-        <!-- 分页控制 -->
-        <div class="pagination-section">
-          <el-pagination
-            v-model:current-page="pageParams.current"
-            v-model:page-size="pageParams.size"
-            :total="total"
-            :page-sizes="[10, 20, 50, 100]"
-            layout="total, sizes, prev, pager, next"
-            @size-change="fetchStats"
-            @current-change="fetchStats"
-          />
+    <section class="surface-panel table-card">
+      <div class="table-toolbar">
+        <div class="toolbar-copy">
+          <h3>收支流水明细</h3>
         </div>
       </div>
-    </div>
+
+      <el-table :data="statsData.records" style="width: 100%" v-loading="loading" class="stats-table">
+        <el-table-column prop="salesDate" label="日期" min-width="180" />
+        <el-table-column prop="recordNo" label="单号" min-width="200" />
+        <el-table-column label="商品项目" min-width="220">
+          <template #default="scope">
+            <div class="item-tags">
+              <span class="item-tag">{{ scope.row.frameBrand }} {{ scope.row.frameModel }}</span>
+              <span class="item-tag item-tag--soft">{{ scope.row.lensBrand }}</span>
+            </div>
+          </template>
+        </el-table-column>
+        <el-table-column prop="totalAmount" label="金额" min-width="120">
+          <template #default="scope">
+            <span class="price-text">￥{{ scope.row.totalAmount }}</span>
+          </template>
+        </el-table-column>
+        <el-table-column label="操作" min-width="130">
+          <template #default="scope">
+            <el-button class="action-pill" @click="goToArchive(scope.row.customerId)">
+              查看详情
+            </el-button>
+          </template>
+        </el-table-column>
+      </el-table>
+
+      <div class="pagination-shell">
+        <el-pagination
+          v-model:current-page="pageParams.current"
+          v-model:page-size="pageParams.size"
+          :total="total"
+          :page-sizes="[10, 20, 50, 100]"
+          layout="total, sizes, prev, pager, next"
+          prev-text="上一页"
+          next-text="下一页"
+          @size-change="fetchStats"
+          @current-change="fetchStats"
+        />
+      </div>
+    </section>
   </div>
 </template>
 
@@ -150,7 +162,6 @@ const handleShowAllChange = () => {
   fetchStats();
 };
 
-
 const fetchStats = async () => {
   loading.value = true;
   try {
@@ -169,7 +180,7 @@ const fetchStats = async () => {
     if (res) {
       statsData.value.totalRevenue = res.totalRevenue;
       statsData.value.orderCount = res.orderCount;
-      statsData.value.records = res.records.records; // MyBatis Plus Page records
+      statsData.value.records = res.records.records;
       total.value = res.records.total;
     }
   } catch (e) {
@@ -195,33 +206,48 @@ const exportExcel = () => {
 </script>
 
 <style scoped>
-.stats-container {
-  max-width: 1200px;
-  margin: 0 auto;
+.stats-page {
+  padding-top: 6px;
 }
 
-.page-header {
-  display: flex;
-  justify-content: space-between;
+.stats-hero {
+  display: grid;
+  grid-template-columns: minmax(0, 1.2fr) minmax(320px, 0.9fr);
+  gap: 24px;
   align-items: center;
-  margin-bottom: 24px;
 }
 
-.title {
+.hero-kicker {
+  display: inline-flex;
+  align-items: center;
+  padding: 8px 14px;
+  margin-bottom: 16px;
+  border-radius: 999px;
+  background: rgba(219, 234, 254, 0.9);
+  color: var(--primary-color);
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.filter-toolbar {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  position: relative;
+  z-index: 1;
+}
+
+.toolbar-copy h3 {
   margin: 0;
-  font-size: 24px;
-  font-weight: 600;
-  color: var(--text-primary);
-}
-
-.header-actions {
-  display: flex;
-  align-items: center;
 }
 
 .summary-grid {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 20px;
 }
 
@@ -229,65 +255,88 @@ const exportExcel = () => {
   padding: 24px;
   display: flex;
   align-items: center;
-  gap: 20px;
+  gap: 18px;
 }
 
 .card-icon {
-  width: 56px;
-  height: 56px;
-  border-radius: 12px;
+  width: 60px;
+  height: 60px;
+  border-radius: 20px;
   display: flex;
   align-items: center;
   justify-content: center;
   font-size: 28px;
-  color: white;
+  color: #ffffff;
+  box-shadow: 0 18px 36px rgba(37, 99, 235, 0.18);
 }
 
-.card-icon.revenue { background: linear-gradient(135deg, #10b981 0%, #34d399 100%); }
-.card-icon.orders { background: linear-gradient(135deg, #3b82f6 0%, #60a5fa 100%); }
-.card-icon.avg { background: linear-gradient(135deg, #f59e0b 0%, #fbbf24 100%); }
+.summary-revenue .card-icon {
+  background: linear-gradient(135deg, #1d4ed8 0%, #2563eb 100%);
+}
+
+.summary-orders .card-icon {
+  background: linear-gradient(135deg, #2563eb 0%, #38bdf8 100%);
+}
+
+.summary-average .card-icon {
+  background: linear-gradient(135deg, #0f172a 0%, #2563eb 100%);
+}
 
 .label {
-  margin: 0 0 4px;
+  margin: 0 0 6px;
   font-size: 14px;
   color: var(--text-secondary);
 }
 
 .value {
   margin: 0;
-  font-size: 24px;
-  font-weight: 700;
+  font-size: 28px;
+  font-weight: 800;
+  line-height: 1.1;
   color: var(--text-primary);
 }
 
-.section-card {
-  padding: 24px;
-}
-
-.section-title {
-  margin: 0 0 20px;
-  font-size: 18px;
-  font-weight: 600;
-  color: var(--text-primary);
+.item-tags {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
 }
 
 .item-tag {
+  display: inline-flex;
+  align-items: center;
+  padding: 6px 10px;
+  border-radius: 999px;
+  background: rgba(219, 234, 254, 0.82);
+  color: var(--primary-color);
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.item-tag--soft {
+  background: rgba(239, 246, 255, 0.92);
   color: var(--text-secondary);
-  font-size: 13px;
 }
 
 .price-text {
-  color: #ef4444;
-  font-weight: 600;
+  color: var(--primary-color);
+  font-weight: 800;
 }
 
-.mt-6 { margin-top: 24px; }
-.ml-4 { margin-left: 16px; }
-.mr-4 { margin-right: 16px; }
+@media (max-width: 1024px) {
+  .stats-hero,
+  .summary-grid {
+    grid-template-columns: 1fr;
+  }
+}
 
-.pagination-section {
-  margin-top: 20px;
-  display: flex;
-  justify-content: flex-end;
+@media (max-width: 640px) {
+  .filter-toolbar {
+    justify-content: stretch;
+  }
+
+  .filter-toolbar > * {
+    width: 100%;
+  }
 }
 </style>

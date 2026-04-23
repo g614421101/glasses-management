@@ -107,6 +107,8 @@ onMounted(() => {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
   margin-bottom: 24px;
 }
 
@@ -124,9 +126,19 @@ onMounted(() => {
 }
 
 .table-card {
-  border-radius: 12px;
-  padding: 8px;
-  background: white;
+  border-radius: 24px;
+  padding: 12px;
+  background: rgba(255, 255, 255, 0.92);
+}
+
+@media (max-width: 640px) {
+  .page-header {
+    align-items: stretch;
+  }
+
+  .page-header > :last-child {
+    width: 100%;
+  }
 }
 
 @keyframes fadeIn {

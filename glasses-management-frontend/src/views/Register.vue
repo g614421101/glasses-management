@@ -87,8 +87,9 @@ const handleRegister = async () => {
 
 <style scoped>
 .login-container {
-  height: 100vh;
-  width: 100vw;
+  min-height: 100vh;
+  width: 100%;
+  padding: 24px;
   display: flex;
   justify-content: center;
   align-items: center;
@@ -98,14 +99,14 @@ const handleRegister = async () => {
 }
 
 .login-box {
-  width: 420px;
+  width: min(100%, 460px);
   padding: 48px;
   text-align: center;
   z-index: 10;
-  background: #ffffff;
-  border-radius: 12px;
-  box-shadow: 0 4px 24px rgba(255, 107, 107, 0.08);
-  border: 1px solid var(--border-color);
+  background: rgba(255, 255, 255, 0.9);
+  border-radius: 28px;
+  box-shadow: 0 28px 60px rgba(37, 99, 235, 0.14);
+  border: 1px solid rgba(148, 163, 184, 0.16);
 }
 
 .sys-title {
@@ -130,6 +131,20 @@ const handleRegister = async () => {
   letter-spacing: 2px;
   font-size: 16px;
   font-weight: 600;
-  border-radius: 8px;
+  border-radius: 18px;
+}
+
+@media (max-width: 640px) {
+  .login-container {
+    padding: 14px;
+  }
+
+  .login-box {
+    padding: 30px 22px;
+  }
+
+  .sys-title {
+    font-size: 22px;
+  }
 }
 </style>
