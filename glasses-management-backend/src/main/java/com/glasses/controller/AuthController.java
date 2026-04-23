@@ -1,5 +1,6 @@
 package com.glasses.controller;
 
+import cn.dev33.satoken.annotation.SaCheckLogin;
 import cn.dev33.satoken.stp.StpUtil;
 import cn.hutool.crypto.digest.BCrypt;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
@@ -76,5 +77,21 @@ public class AuthController {
         
         sysUserMapper.insert(newUser);
         return Result.success("注册成功！");
+    }
+
+    @SaCheckLogin
+    @GetMapping("/info")
+    public Result<Map<String, Object>> getInfo() {
+        long userId = StpUtil.getLoginIdAsLong();
+        SysUser user = sysUserMapper.selectById(userId);
+        if (user == null) {
+            return Result.error("用户不存在");
+        }
+
+        Map<String, Object> data = new HashMap<>();
+        data.put("username", user.getUsername());
+        data.put("realName", user.getRealName());
+        data.put("role", user.getRole());
+        return Result.success(data);
     }
 }
