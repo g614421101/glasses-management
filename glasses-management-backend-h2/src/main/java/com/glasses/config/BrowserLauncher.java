@@ -11,6 +11,13 @@ public class BrowserLauncher implements ApplicationListener<ApplicationReadyEven
 
     @Override
     public void onApplicationEvent(ApplicationReadyEvent event) {
+        // 从环境变量或配置中获取是否自动打开浏览器的开关，默认为 true
+        Boolean autoLaunch = event.getApplicationContext().getEnvironment().getProperty("app.browser.auto-launch", Boolean.class, true);
+        if (Boolean.FALSE.equals(autoLaunch)) {
+            log.info("已跳过自动打开浏览器（根据配置已禁用）");
+            return;
+        }
+
         String url = "http://localhost:8080";
         try {
             // 获取当前操作系统名称
