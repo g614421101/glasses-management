@@ -1,0 +1,9 @@
+/.idea/
+/.vscode/
+
+/glasses-management-backend/
+/glasses-management-backend-h2/
+/glasses-management-frontend/
+/glasses-management-electron/
+
+*.log
