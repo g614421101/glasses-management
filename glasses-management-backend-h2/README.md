@@ -38,6 +38,20 @@
 - 数据库路径默认落到 `~/.glasses_management/data`
 - 日志默认落到 `~/.glasses_management/logs`
 
+## 安装后数据位置
+
+H2 原生安装包启动时会按 [application-prod.yml](./src/main/resources/application-prod.yml) 使用生产配置，因此安装后数据默认写到当前 Windows 用户目录下：
+
+- 数据库目录：`C:\Users\<用户名>\.glasses_management\data`
+- 日志目录：`C:\Users\<用户名>\.glasses_management\logs`
+
+常见的 H2 数据文件包括：
+
+- `glasses_management.mv.db`
+- `glasses_management.trace.db`（如果运行过程中生成）
+
+如果需要迁移或备份单机数据，优先备份上述 `data` 目录即可，安装目录本身通常不保存业务数据。
+
 ## 本地启动
 
 直接在当前目录运行：
