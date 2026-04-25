@@ -50,7 +50,7 @@
           </div>
         </div>
 
-        <div class="base-info mt-4">
+        <div class="base-info">
           <el-descriptions :column="1" border size="small" class="customer-meta">
             <el-descriptions-item label="性别">{{ customerInfo.gender === 1 ? '男' : (customerInfo.gender === 2 ? '女' : '未知') }}</el-descriptions-item>
             <el-descriptions-item label="生日">{{ customerInfo.birthday || '-' }}</el-descriptions-item>
@@ -611,6 +611,7 @@ const fmt = (val) => {
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 12px;
   margin-top: 22px;
+  margin-bottom: 26px;
 }
 
 .summary-chip {
@@ -630,6 +631,12 @@ const fmt = (val) => {
 .summary-chip strong {
   color: var(--text-primary);
   font-size: 20px;
+}
+
+.base-info {
+  margin-top: 0;
+  padding-top: 20px;
+  border-top: 1px solid rgba(148, 163, 184, 0.14);
 }
 
 .timeline-card {

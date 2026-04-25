@@ -80,6 +80,7 @@ const handleLogout = () => {
 }
 
 .glass-header {
+  height: auto !important;
   min-height: 74px;
   background: rgba(255, 255, 255, 0.86);
   border-bottom: 1px solid rgba(148, 163, 184, 0.16);
@@ -146,6 +147,7 @@ const handleLogout = () => {
   gap: 12px;
   flex-wrap: wrap;
   justify-content: flex-end;
+  min-width: 0;
 }
 
 .user-chip {
@@ -157,6 +159,7 @@ const handleLogout = () => {
   background: rgba(239, 246, 255, 0.85);
   border: 1px solid rgba(148, 163, 184, 0.16);
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.8);
+  min-width: 0;
 }
 
 .user-label {
@@ -296,11 +299,11 @@ const handleLogout = () => {
   .glass-header {
     flex-direction: column;
     align-items: stretch;
+    padding: 14px 12px 16px;
   }
 
-  .logo-box,
-  .user-info {
-    justify-content: space-between;
+  .logo-box {
+    justify-content: flex-start;
   }
 
   .brand-copy {
@@ -311,9 +314,24 @@ const handleLogout = () => {
     letter-spacing: 0.12em;
   }
 
-  .user-chip,
-  .logout-btn {
+  .user-info {
     width: 100%;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .user-chip {
+    width: auto;
+    min-height: 44px;
+    justify-content: center;
+  }
+
+  .logout-btn {
+    width: auto;
+    min-width: 112px;
+    height: 44px !important;
     justify-content: center;
   }
 
@@ -321,6 +339,17 @@ const handleLogout = () => {
   .main-content {
     margin-left: 12px;
     margin-right: 12px;
+  }
+}
+
+@media (max-width: 480px) {
+  .user-info {
+    grid-template-columns: 1fr;
+  }
+
+  .user-chip,
+  .logout-btn {
+    width: 100%;
   }
 }
 </style>

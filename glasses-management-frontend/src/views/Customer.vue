@@ -60,7 +60,7 @@
         </el-table-column>
         <el-table-column prop="birthday" label="生日" min-width="130" />
         <el-table-column prop="createTime" label="注册时间" min-width="190" />
-        <el-table-column label="操作" min-width="320">
+        <el-table-column label="操作" min-width="320" class-name="actions-column">
           <template #default="scope">
             <div class="table-actions">
               <el-button class="action-pill" @click="goArchive(scope.row.id)">
@@ -355,10 +355,28 @@ const handleDelete = async (id) => {
   flex-wrap: nowrap;
   white-space: nowrap;
   min-width: max-content;
+  align-items: center;
+  padding: 4px 0;
 }
 
 .table-actions > * {
   flex: 0 0 auto;
+  position: relative;
+}
+
+.table-actions :deep(.action-pill:hover) {
+  position: relative;
+  z-index: 2;
+}
+
+.main-table :deep(.actions-column) {
+  overflow: visible;
+}
+
+.main-table :deep(.actions-column .cell) {
+  overflow: visible;
+  padding-top: 8px;
+  padding-bottom: 8px;
 }
 
 .customer-form {

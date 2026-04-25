@@ -89,11 +89,13 @@
             <span class="price-text">￥{{ scope.row.totalAmount }}</span>
           </template>
         </el-table-column>
-        <el-table-column label="操作" min-width="130">
+        <el-table-column label="操作" min-width="150" class-name="actions-column">
           <template #default="scope">
-            <el-button class="action-pill" @click="goToArchive(scope.row.customerId)">
-              查看详情
-            </el-button>
+            <div class="table-actions">
+              <el-button class="action-pill" @click="goToArchive(scope.row.customerId)">
+                查看详情
+              </el-button>
+            </div>
           </template>
         </el-table-column>
       </el-table>
@@ -321,6 +323,34 @@ const exportExcel = () => {
 .price-text {
   color: var(--primary-color);
   font-weight: 800;
+}
+
+.table-actions {
+  display: flex;
+  align-items: center;
+  white-space: nowrap;
+  min-width: max-content;
+  padding: 4px 0;
+}
+
+.table-actions > * {
+  flex: 0 0 auto;
+  position: relative;
+}
+
+.table-actions :deep(.action-pill:hover) {
+  position: relative;
+  z-index: 2;
+}
+
+.stats-table :deep(.actions-column) {
+  overflow: visible;
+}
+
+.stats-table :deep(.actions-column .cell) {
+  overflow: visible;
+  padding-top: 8px;
+  padding-bottom: 8px;
 }
 
 @media (max-width: 1024px) {
