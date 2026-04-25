@@ -120,9 +120,9 @@
                     <span>镜片</span>
                     <strong>{{ item.data.lensBrand || '-' }}</strong>
                   </div>
-                  <div class="glance-item">
+                  <div class="glance-item glance-item--record-no">
                     <span>单号</span>
-                    <strong>{{ item.data.recordNo || '-' }}</strong>
+                    <strong class="record-no-text" :title="item.data.recordNo || '-'">{{ item.data.recordNo || '-' }}</strong>
                   </div>
                 </template>
               </div>
@@ -764,6 +764,7 @@ const fmt = (val) => {
   border-radius: 18px;
   background: rgba(248, 250, 252, 0.96);
   border: 1px solid rgba(148, 163, 184, 0.12);
+  min-width: 0;
 }
 
 .glance-item span {
@@ -774,8 +775,22 @@ const fmt = (val) => {
 }
 
 .glance-item strong {
+  display: block;
   color: var(--text-primary);
   font-size: 14px;
+  min-width: 0;
+}
+
+.glance-item--record-no {
+  align-self: stretch;
+}
+
+.record-no-text {
+  font-size: 13px !important;
+  line-height: 1.4;
+  white-space: normal;
+  overflow-wrap: anywhere;
+  word-break: break-word;
 }
 
 .action-bar {
@@ -815,6 +830,8 @@ const fmt = (val) => {
   margin: 10px 0 6px;
   font-size: 26px;
   line-height: 1.15;
+  overflow-wrap: anywhere;
+  word-break: break-word;
 }
 
 .sheet-subtitle {
