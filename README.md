@@ -94,6 +94,16 @@
 
 - `glasses-management-electron/dist`
 
+## 安装后数据目录
+
+如果你把系统安装给客户本地单机使用，业务数据默认不写在安装目录，而是写在当前 Windows 用户目录下：
+
+- `Electron` 版：`C:\Users\<用户名>\AppData\Roaming\视光管理系统\data`
+- `H2 原生版`：`C:\Users\<用户名>\.glasses_management\data`
+- `H2 原生版` 日志：`C:\Users\<用户名>\.glasses_management\logs`
+
+建议做数据备份时优先备份这些目录中的 H2 数据文件，例如 `glasses_management.mv.db`。
+
 ## 核心功能
 
 - 极速检索：按手机号或姓名快速定位顾客
