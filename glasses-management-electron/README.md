@@ -20,6 +20,16 @@
 
 因此交付给客户时，目标机器不需要额外安装 Java。
 
+## 安装后数据位置
+
+Electron 版会把 H2 后端的工作目录设置到 Electron 的用户数据目录，因此安装后数据默认写在当前 Windows 用户的 `AppData\Roaming` 下。
+
+- 数据库目录：`C:\Users\<用户名>\AppData\Roaming\视光管理系统\data`
+- 常见数据文件：`glasses_management.mv.db`
+- 可能生成的跟踪文件：`glasses_management.trace.db`
+
+如果需要备份或迁移 Electron 单机版数据，直接备份上述 `data` 目录即可，不需要备份安装目录里的程序文件。
+
 ## 目录说明
 
 - `main.js`：Electron 主进程入口
