@@ -1,0 +1,47 @@
+{
+  "name": "glasses-management-electron",
+  "version": "1.1.1",
+  "description": "Desktop wrapper for Glasses Management System",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron .",
+    "build": "electron-builder --win"
+  },
+  "devDependencies": {
+    "electron": "^30.0.1",
+    "electron-builder": "^24.13.3"
+  },
+  "build": {
+    "appId": "com.glasses.management",
+    "productName": "视光管理系统",
+    "directories": {
+      "output": "dist"
+    },
+    "extraResources": [
+      {
+        "from": "../glasses-management-backend-h2/target",
+        "to": "backend",
+        "filter": [
+          "glasses-management-backend-h2-*.jar"
+        ]
+      },
+      {
+        "from": "runtime/jre",
+        "to": "runtime/jre",
+        "filter": [
+          "**/*"
+        ]
+      }
+    ],
+    "win": {
+      "target": "nsis",
+      "artifactName": "${productName}_${version}.${ext}"
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true
+    }
+  }
+}
