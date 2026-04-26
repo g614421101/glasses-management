@@ -1,0 +1,89 @@
+package com.glasses.controller;
+
+import cn.dev33.satoken.stp.StpUtil;
+import cn.hutool.core.date.DateUtil;
+import com.glasses.entity.SalesRecord;
+import com.glasses.service.SalesRecordService;
+import com.glasses.util.Result;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.*;
+
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import java.math.BigDecimal;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+@RestController
+@RequestMapping("/api/sales")
+public class SalesRecordController {
+
+    @Autowired
+    private SalesRecordService salesRecordService;
+
+    @PostMapping("/add")
+    public Result<Boolean> addRecord(@RequestBody SalesRecord record) {
+        if (record.getRecordNo() == null || record.getRecordNo().isEmpty()) {
+            record.setRecordNo("SR" + DateUtil.format(DateUtil.date(), "yyyyMMddHHmmss"));
+        }
+        if (record.getOperatorId() == null) {
+            record.setOperatorId(StpUtil.getLoginIdAsLong());
+        }
+        if (record.getSalesDate() == null) {
+            record.setSalesDate(DateUtil.date());
+        }
+        return Result.success(salesRecordService.save(record));
+    }
+
+    @GetMapping("/customer/{customerId}")
+    public Result<List<SalesRecord>> getByCustomer(@PathVariable Long customerId) {
+        return Result.success(salesRecordService.listByCustomerId(customerId));
+    }
+
+    @PutMapping("/update")
+    public Result<Boolean> updateRecord(@RequestBody SalesRecord record) {
+        return Result.success(salesRecordService.updateById(record));
+    }
+
+    @DeleteMapping("/{id}")
+    public Result<Boolean> deleteRecord(@PathVariable Long id) {
+        return Result.success(salesRecordService.removeById(id));
+    }
+
+    @GetMapping("/stats")
+    public Result<Map<String, Object>> getStats(
+            @RequestParam(required = false) String startDate,
+            @RequestParam(required = false) String endDate,
+            @RequestParam(defaultValue = "1") Integer current,
+            @RequestParam(defaultValue = "10") Integer size,
+            @RequestParam(defaultValue = "false") Boolean showAll) {
+        
+        QueryWrapper<SalesRecord> wrapper = new QueryWrapper<>();
+        if (!showAll && startDate != null && endDate != null) {
+            wrapper.ge("sales_date", startDate + " 00:00:00")
+                   .le("sales_date", endDate + " 23:59:59");
+        }
+        
+        // 1. 计算总汇总数据 (不分页)
+        QueryWrapper<SalesRecord> summaryWrapper = wrapper.clone();
+        summaryWrapper.select("IFNULL(SUM(total_amount), 0) as totalRevenue", "COUNT(*) as orderCount");
+        Map<String, Object> summary = salesRecordService.getMap(summaryWrapper);
+        
+        BigDecimal totalRevenue = new BigDecimal(summary.get("totalRevenue").toString());
+        Long orderCount = (Long) summary.get("orderCount");
+
+        // 2. 获取分页明细数据
+        wrapper.orderByDesc("sales_date").orderByDesc("id");
+        com.baomidou.mybatisplus.extension.plugins.pagination.Page<SalesRecord> page = 
+                new com.baomidou.mybatisplus.extension.plugins.pagination.Page<>(current, size);
+        com.baomidou.mybatisplus.extension.plugins.pagination.Page<SalesRecord> recordsPage = 
+                salesRecordService.page(page, wrapper);
+        
+        Map<String, Object> result = new HashMap<>();
+        result.put("totalRevenue", totalRevenue);
+        result.put("orderCount", orderCount);
+        result.put("records", recordsPage);
+        
+        return Result.success(result);
+    }
+}
