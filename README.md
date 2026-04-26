@@ -4,11 +4,29 @@
 
 ## 项目结构
 
+当前仓库采用 monorepo 方式统一管理，四个子项目已经合并到同一个 Git 仓库中，后续开发、分支、提交和发版都在根目录统一进行。
+
 - `glasses-management-backend`：MySQL 版后端，适合连接外部 MySQL 数据库部署
 - `glasses-management-backend-h2`：H2 单机版后端，适合本地单机运行和桌面打包
 - `glasses-management-frontend`：Vue 3 前端
 - `glasses-management-electron`：Electron 桌面打包项目
 - `build-desktop.ps1`：一键打包桌面版脚本（默认打 H2 版）
+
+## Git 管理方式
+
+本项目现在使用一个根仓库统一管理所有模块，不再把四个子项目作为独立 Git 仓库维护。
+
+- 根目录是唯一 Git 工作区。
+- 子项目目录中不再保留各自的 `.git` 目录。
+- 原子提交建议按业务改动组织，可以一次提交同时包含前端、后端和打包脚本的配套修改。
+- `target`、`dist`、`runtime`、`node_modules`、H2 数据文件和后端静态构建产物都由根 `.gitignore` 排除。
+
+历史导入时保留了各子项目原来的提交记录，提交图中可以看到对应模块的历史分支。因为文件被移动到了各自子目录下，查看旧历史时可以结合新旧路径查询，例如：
+
+```bash
+git log --oneline -- glasses-management-frontend/src/views/Archive.vue
+git log --oneline --all -- src/views/Archive.vue
+```
 
 ## 技术栈
 

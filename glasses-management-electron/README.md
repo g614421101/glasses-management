@@ -78,5 +78,5 @@ npm run build
 
 ## 说明
 
-- 当前项目已经单独纳入 git 管理。
-- `dist`、`runtime`、`node_modules` 等生成物已在 `.gitignore` 中排除。
+- 当前项目已合并到根目录 monorepo 中统一管理。
+- `dist`、`runtime`、`node_modules` 等生成物已由 `.gitignore` 排除。

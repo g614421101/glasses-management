@@ -1,9 +1,39 @@
 /.idea/
 /.vscode/
 
-/glasses-management-backend/
-/glasses-management-backend-h2/
-/glasses-management-frontend/
-/glasses-management-electron/
-
 *.log
+
+# OS / editor noise
+.DS_Store
+Thumbs.db
+*.swp
+
+# Java / Maven build output
+**/target/
+**/.mvn/wrapper/maven-wrapper.jar
+
+# Node / frontend / Electron build output
+**/node_modules/
+**/dist/
+**/runtime/
+*.tsbuildinfo
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Generated frontend assets copied into Spring Boot static directories
+/glasses-management-backend/src/main/resources/static/
+/glasses-management-backend-h2/src/main/resources/static/
+
+# Local H2 data and exported runtime data
+/data/
+/glasses-management-backend/data/
+/glasses-management-backend-h2/data/
+*.mv.db
+*.trace.db
+
+# Local environment files
+.env
+.env.*
+!.env.example
