@@ -112,6 +112,22 @@ git log --oneline --all -- src/views/Archive.vue
 
 - `glasses-management-electron/dist`
 
+## 后端原生安装包
+
+如果不需要 Electron 桌面壳，也可以分别在两个后端目录里生成 Windows 原生安装包：
+
+```powershell
+cd glasses-management-backend
+.\build-package.ps1
+```
+
+```powershell
+cd glasses-management-backend-h2
+.\build-package.ps1
+```
+
+产物分别输出到对应后端目录下的 `dist-install`。
+
 ## 安装后数据目录
 
 如果你把系统安装给客户本地单机使用，业务数据默认不写在安装目录，而是写在当前 Windows 用户目录下：
@@ -134,4 +150,4 @@ git log --oneline --all -- src/views/Archive.vue
 
 - 当前前端默认依赖 `/api/auth/info` 做登录态校验，两套后端现已保持一致。
 - 账号权限目前主要用于登录与管理后台账号，业务数据默认未做商户级隔离。
-- 如需打包 MySQL 版原生安装包，可参考 `glasses-management-backend/jpackage.cfg`。
+- 如需打包后端原生安装包，可优先使用对应后端目录下的 `build-package.ps1`。

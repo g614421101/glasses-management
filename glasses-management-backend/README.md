@@ -51,13 +51,30 @@ mvn spring-boot:run
 
 ## 打包
 
-先构建 JAR：
+推荐直接运行当前目录下的打包脚本：
+
+```powershell
+.\build-package.ps1
+```
+
+脚本会自动完成：
+
+1. 构建前端
+2. 同步前端到 MySQL 后端静态目录
+3. 打包 MySQL 后端 JAR
+4. 按 [jpackage.cfg](./jpackage.cfg) 生成 Windows 原生安装包
+
+安装包输出目录：
+
+- `dist-install`
+
+如果只需要构建 JAR，也可以运行：
 
 ```bash
 mvn clean package -DskipTests
 ```
 
-如果需要打 Windows 原生安装包，可使用当前目录下的 [jpackage.cfg](./jpackage.cfg)。
+MySQL 原生安装包依赖外部 MySQL 服务，不会把数据库一起打进安装包。
 
 ## 说明
 

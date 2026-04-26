@@ -71,15 +71,28 @@ mvn spring-boot:run
 
 ## 打包
 
-先构建 JAR：
+推荐直接运行当前目录下的打包脚本：
+
+```powershell
+.\build-package.ps1
+```
+
+脚本会自动完成：
+
+1. 构建前端
+2. 同步前端到 H2 后端静态目录
+3. 打包 H2 后端 JAR
+4. 按 [jpackage.cfg](./jpackage.cfg) 生成 Windows 原生安装包
+
+安装包输出目录：
+
+- `dist-install`
+
+如果只需要构建 JAR，也可以运行：
 
 ```bash
 mvn clean package -DskipTests
 ```
-
-### 打 H2 原生 EXE
-
-使用当前目录下的 [jpackage.cfg](./jpackage.cfg) 调用 `jpackage` 即可。
 
 ### 打 Electron 桌面版
 

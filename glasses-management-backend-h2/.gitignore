@@ -55,4 +55,3 @@ data/
 # Installer Packages
 dist-install/
 jpackage-temp/
-jpackage.cfg

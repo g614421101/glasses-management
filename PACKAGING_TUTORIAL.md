@@ -17,7 +17,7 @@
 
 如果你需要直接生成 Spring Boot 原生安装包，而不是 Electron 桌面壳，则使用下面这条：
 
-- 备选路线：手动用 `jpackage` 打 MySQL 版或 H2 版
+- 备选路线：运行对应后端目录下的 `build-package.ps1`
 
 ## 路线一：一键打包 H2 桌面版
 
@@ -74,12 +74,12 @@ glasses-management-electron/package.json
 当前字段是：
 
 ```json
-"version": "1.0.1"
+"version": "1.1.1"
 ```
 
 如果你希望生成新版本安装包，先改这里，再执行 `.\build-desktop.ps1`。
 
-## 路线二：手动打包 Spring Boot 原生 EXE
+## 路线二：打包 Spring Boot 原生 EXE
 
 如果你不想走 Electron，而是想把后端本身直接打成 Windows 原生安装包，可以使用 `jpackage`。
 
@@ -90,7 +90,27 @@ glasses-management-electron/package.json
 - Maven
 - WiX Toolset
 
-### 通用步骤
+### 推荐方式
+
+H2 原生安装包：
+
+```powershell
+cd glasses-management-backend-h2
+.\build-package.ps1
+cd ..
+```
+
+MySQL 原生安装包：
+
+```powershell
+cd glasses-management-backend
+.\build-package.ps1
+cd ..
+```
+
+两个脚本都会自动构建前端、同步静态资源、打包后端 JAR，并按当前目录下的 `jpackage.cfg` 输出安装包。
+
+### 手动步骤
 
 无论是 MySQL 版还是 H2 版，都建议先做完这三步：
 
@@ -164,7 +184,7 @@ glasses-management-electron/package.json
 3. 执行打包：
 
    ```powershell
-   jpackage --type exe --name "视光管理系统" --app-version "1.0.5" --input jpackage-temp/ --main-jar glasses-management-backend-h2-0.0.1-SNAPSHOT.jar --dest dist-install --win-shortcut --win-menu --win-dir-chooser --win-console --java-options "-Dspring.profiles.active=prod"
+   jpackage --type exe --name "视光管理系统" --app-version "1.1.1" --input jpackage-temp/ --main-jar glasses-management-backend-h2-0.0.1-SNAPSHOT.jar --dest dist-install --win-shortcut --win-menu --win-dir-chooser --win-console --java-options "-Dspring.profiles.active=prod"
    ```
 
 4. 清理临时目录：
@@ -183,7 +203,7 @@ glasses-management-backend-h2\dist-install
 ### 需要注意
 
 - H2 版生产环境数据库路径在 `application-prod.yml` 中，默认落到用户目录下的 `.glasses_management\data`
-- 当前 `jpackage` 参数也保存在 `glasses-management-backend-h2/jpackage.cfg`，如果你改版本号，最好同步这里
+- 当前 `jpackage` 参数保存在 `glasses-management-backend-h2/jpackage.cfg`，如果你改版本号，优先同步这里
 
 ## 手动打 MySQL 原生 EXE
 
@@ -230,7 +250,7 @@ glasses-management-backend\dist-install
 
 - MySQL 版不会把数据库一起打进去，它依赖外部 MySQL 服务
 - 打包前请确认 `glasses-management-backend/src/main/resources/application.yml` 中的数据库地址、账号、密码已经是你要交付的配置
-- 当前 `jpackage` 参数也保存在 `glasses-management-backend/jpackage.cfg`
+- 当前 `jpackage` 参数保存在 `glasses-management-backend/jpackage.cfg`，如果你改版本号，优先同步这里
 
 ## 常见问题
 
@@ -250,7 +270,7 @@ glasses-management-backend\dist-install
 
 - `frontend + backend-h2 + electron`
 
-如果你要打 MySQL 交付包，请走上面的手动 `jpackage` 路线。
+如果你要打 MySQL 交付包，请走 `glasses-management-backend\build-package.ps1`。
 
 ### 3. 版本号改哪里
 
