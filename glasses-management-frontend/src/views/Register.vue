@@ -1,49 +1,49 @@
 <template>
   <div class="login-container">
-    <div class="login-box glass-card">
+    <div class="register-box glass-card">
       <div class="sys-title">
         <el-icon :size="28" color="var(--primary-color)"><View /></el-icon>
-        <span>商户注册平台</span>
+        <span>商户注册</span>
       </div>
       <p class="sys-subtitle">Create Your Account</p>
-      
-      <el-form :model="regForm" @keyup.enter="handleRegister">
-        <el-form-item>
-          <el-input 
-            v-model="regForm.phone" 
-            placeholder="请输入您的手机号" 
-            :prefix-icon="Iphone"
-            size="large"
-          />
-        </el-form-item>
-        <el-form-item>
-          <el-input 
-            v-model="regForm.password" 
-            type="password" 
-            placeholder="请设置您的登录密码" 
+
+      <el-form :model="regForm" @keyup.enter="handleRegister" label-position="top">
+        <div class="form-grid">
+          <el-form-item label="用户名">
+            <el-input v-model="regForm.username" placeholder="3-30 位登录用户名" :prefix-icon="User" size="large" />
+          </el-form-item>
+          <el-form-item label="手机号">
+            <el-input v-model="regForm.phone" placeholder="请输入手机号" :prefix-icon="Iphone" size="large" />
+          </el-form-item>
+        </div>
+        <el-form-item label="密码">
+          <el-input
+            v-model="regForm.password"
+            type="password"
+            placeholder="至少 6 位密码"
             :prefix-icon="Lock"
             show-password
             size="large"
           />
         </el-form-item>
-        <el-form-item>
-          <el-input 
-            v-model="regForm.inviteCode" 
-            placeholder="请输入系统邀请码" 
-            :prefix-icon="Key"
+        <el-form-item label="确认密码">
+          <el-input
+            v-model="regForm.confirmPassword"
+            type="password"
+            placeholder="请再次输入密码"
+            :prefix-icon="Lock"
+            show-password
             size="large"
           />
         </el-form-item>
-        <div style="text-align: right; margin-top: -10px; margin-bottom: 20px;">
+        <el-form-item label="邀请码">
+          <el-input v-model="regForm.inviteCode" placeholder="请输入系统邀请码" :prefix-icon="Key" size="large" />
+        </el-form-item>
+        <div class="form-link">
           <el-link type="primary" :underline="false" @click="$router.push('/login')">返回登录</el-link>
         </div>
         <el-form-item>
-          <el-button 
-            type="primary" 
-            size="large" 
-            class="login-btn" 
-            @click="handleRegister" 
-            :loading="loading">
+          <el-button type="primary" size="large" class="login-btn" @click="handleRegister" :loading="loading">
             立即注册
           </el-button>
         </el-form-item>
@@ -54,7 +54,7 @@
 
 <script setup lang="ts">
 import { reactive, ref } from 'vue';
-import { Iphone, Lock, Key, View } from '@element-plus/icons-vue';
+import { Iphone, Lock, Key, View, User } from '@element-plus/icons-vue';
 import { useRouter } from 'vue-router';
 import request from '../utils/request';
 import { ElMessage } from 'element-plus';
@@ -63,26 +63,50 @@ const router = useRouter();
 const loading = ref(false);
 
 const regForm = reactive({
+  username: '',
   phone: '',
   password: '',
+  confirmPassword: '',
   inviteCode: ''
 });
 
-const handleRegister = async () => {
-  if (!regForm.phone || !regForm.password || !regForm.inviteCode) {
-    return ElMessage.warning('请完整填写注册信息');
+const validate = () => {
+  if (!regForm.username || !regForm.phone || !regForm.password || !regForm.confirmPassword || !regForm.inviteCode) {
+    ElMessage.warning('请完整填写注册信息');
+    return false;
   }
+  if (regForm.username.length < 3 || regForm.username.length > 30) {
+    ElMessage.warning('用户名长度需为 3-30 位');
+    return false;
+  }
+  if (!/^1[3-9]\d{9}$/.test(regForm.phone)) {
+    ElMessage.warning('手机号格式不正确');
+    return false;
+  }
+  if (regForm.password.length < 6) {
+    ElMessage.warning('密码至少 6 位');
+    return false;
+  }
+  if (regForm.password !== regForm.confirmPassword) {
+    ElMessage.warning('两次输入的密码不一致');
+    return false;
+  }
+  return true;
+};
+
+const handleRegister = async () => {
+  if (!validate()) return;
   loading.value = true;
   try {
     await request.post('/auth/register', regForm);
-    ElMessage.success('注册成功，请使用新账号登录！');
+    ElMessage.success('注册成功，请使用用户名或手机号登录');
     router.push('/login');
   } catch (error) {
     console.error(error);
   } finally {
     loading.value = false;
   }
-}
+};
 </script>
 
 <style scoped>
@@ -98,13 +122,12 @@ const handleRegister = async () => {
   background: transparent;
 }
 
-.login-box {
-  width: min(100%, 460px);
-  padding: 48px;
-  text-align: center;
+.register-box {
+  width: min(100%, 620px);
+  padding: 44px;
   z-index: 10;
   background: var(--surface-overlay);
-  border-radius: 28px;
+  border-radius: 30px;
   box-shadow: var(--shadow-card);
   border: 1px solid var(--border-color);
 }
@@ -115,22 +138,34 @@ const handleRegister = async () => {
   align-items: center;
   gap: 12px;
   font-size: 28px;
-  font-weight: 700;
+  font-weight: 800;
   color: var(--text-primary);
-  margin-bottom: 12px;
+  margin-bottom: 10px;
 }
 
 .sys-subtitle {
+  text-align: center;
   font-size: 15px;
   color: var(--text-secondary);
-  margin-bottom: 36px;
+  margin: 0 0 30px;
+}
+
+.form-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.form-link {
+  text-align: right;
+  margin: -4px 0 18px;
 }
 
 .login-btn {
   width: 100%;
   letter-spacing: 2px;
   font-size: 16px;
-  font-weight: 600;
+  font-weight: 700;
   border-radius: 18px;
 }
 
@@ -139,8 +174,13 @@ const handleRegister = async () => {
     padding: 14px;
   }
 
-  .login-box {
-    padding: 30px 22px;
+  .register-box {
+    padding: 28px 20px;
+  }
+
+  .form-grid {
+    grid-template-columns: 1fr;
+    gap: 0;
   }
 
   .sys-title {

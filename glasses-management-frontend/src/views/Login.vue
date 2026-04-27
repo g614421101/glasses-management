@@ -72,9 +72,9 @@ const handleLogin = async () => {
       ElMessage.error('登录返回数据异常，请重试');
       return;
     }
-    authStore.login(res.token, res.username, res.role);
+    authStore.login(res.token, res.username, res.role, res);
     ElMessage.success('登录成功');
-    await router.replace('/');
+    await router.replace(res.mustChangePassword ? '/profile' : '/');
   } catch (error) {
     console.error('登录失败:', error);
   } finally {

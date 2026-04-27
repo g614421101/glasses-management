@@ -11,7 +11,7 @@
         </div>
       </div>
       <div class="user-info">
-        <div class="user-chip">
+        <div class="user-chip user-chip--link" @click="router.push('/profile')">
           <span class="user-label">当前账号</span>
           <strong class="welcome-text">{{ authStore.username }}</strong>
         </div>
@@ -48,6 +48,14 @@
             <el-icon><TrendCharts /></el-icon>
             <span>营收统计</span>
           </el-menu-item>
+          <el-menu-item index="/profile">
+            <el-icon><User /></el-icon>
+            <span>个人主页</span>
+          </el-menu-item>
+          <el-menu-item index="/recycle-bin" v-if="authStore.role === 'admin'">
+            <el-icon><Delete /></el-icon>
+            <span>回收站</span>
+          </el-menu-item>
           <el-menu-item index="/sys-user" v-if="authStore.role === 'admin'">
             <el-icon><Setting /></el-icon>
             <span>账号管理(超管)</span>
@@ -69,7 +77,7 @@
 <script setup lang="ts">
 import { useAuthStore } from '../store/auth';
 import { useRouter, useRoute } from 'vue-router';
-import { Monitor, User, Setting, View, TrendCharts, Moon, Sunny } from '@element-plus/icons-vue';
+import { Monitor, User, Setting, View, TrendCharts, Moon, Sunny, Delete } from '@element-plus/icons-vue';
 import { useTheme } from '../utils/theme';
 
 const authStore = useAuthStore();
@@ -175,6 +183,16 @@ const handleLogout = () => {
   border: 1px solid var(--border-color);
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.18);
   min-width: 0;
+}
+
+.user-chip--link {
+  cursor: pointer;
+  transition: transform 0.24s ease, border-color 0.24s ease;
+}
+
+.user-chip--link:hover {
+  transform: translateY(-1px);
+  border-color: var(--border-strong);
 }
 
 .user-label {

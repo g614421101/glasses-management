@@ -2,48 +2,43 @@
   <div class="sys-user-page">
     <div class="page-header">
       <div class="header-content">
-        <h2>权限账号管理中心</h2>
+        <h2>账号管理中心</h2>
+        <p>管理商户账号状态，支持封禁、恢复、逻辑删除和彻底删除。</p>
       </div>
-      <el-button type="primary" @click="fetchUsers" :icon="Refresh">刷新列表</el-button>
+      <div class="header-actions">
+        <el-switch v-model="includeDeleted" active-text="显示已删除" @change="fetchUsers" />
+        <el-button type="primary" @click="fetchUsers" :icon="Refresh">刷新列表</el-button>
+      </div>
     </div>
 
     <el-card class="glass-card table-card" shadow="never">
-      <el-table :data="users" style="width: 100%" v-loading="loading">
-        <el-table-column prop="id" label="账号ID" width="100" />
-        <el-table-column prop="username" label="注册手机号 / 账号名" width="200" />
-        <el-table-column prop="realName" label="系统内定名称" />
-        <el-table-column prop="createTime" label="加入系统时间" width="220" />
-        <el-table-column prop="role" label="权限组" width="120">
+      <el-table :data="users" style="width: 100%" v-loading="loading" class="sys-user-table">
+        <el-table-column prop="id" label="账号ID" width="90" />
+        <el-table-column prop="username" label="用户名" min-width="140" />
+        <el-table-column prop="phone" label="手机号" min-width="140" />
+        <el-table-column prop="createTime" label="注册时间" min-width="180" />
+        <el-table-column label="状态" width="160">
           <template #default="{ row }">
-            <el-tag :type="row.role === 'admin' ? 'danger' : 'success'">
-              {{ row.role === 'admin' ? '超管' : '商户' }}
-            </el-tag>
+            <el-tag v-if="row.deleted" type="info">已删除</el-tag>
+            <el-tag v-else-if="row.disabled" type="warning">已封禁</el-tag>
+            <el-tag v-else type="success">正常</el-tag>
           </template>
         </el-table-column>
-        <el-table-column label="高级操作" width="240" align="center">
+        <el-table-column label="操作" min-width="420" align="center" class-name="actions-column">
           <template #default="{ row }">
-            <el-button 
-              size="small" 
-              type="primary" 
-              plain 
-              @click="resetPwd(row)"
-              :disabled="row.role === 'admin'">
-              重置密码
-            </el-button>
-            <el-popconfirm
-              title="确定要彻底注销并且删除该用户的系统所有登录权吗？"
-              confirm-button-type="danger"
-              @confirm="deleteUser(row)"
-            >
-              <template #reference>
-                <el-button 
-                  size="small" 
-                  type="danger" 
-                  plain
-                  :disabled="row.role === 'admin'"
-                >注销删除</el-button>
+            <div class="table-actions">
+              <template v-if="row.deleted">
+                <el-button class="action-pill" size="small" @click="restoreUser(row)">恢复</el-button>
+                <el-button class="action-pill action-pill--danger" size="small" @click="purgeUser(row)">彻底删除</el-button>
               </template>
-            </el-popconfirm>
+              <template v-else>
+                <el-button class="action-pill" size="small" @click="resetPwd(row)">重置密码</el-button>
+                <el-button class="action-pill" size="small" @click="toggleDisabled(row)">
+                  {{ row.disabled ? '解除封禁' : '封禁' }}
+                </el-button>
+                <el-button class="action-pill action-pill--danger" size="small" @click="deleteUser(row)">删除</el-button>
+              </template>
+            </div>
           </template>
         </el-table-column>
       </el-table>
@@ -57,44 +52,60 @@ import { Refresh } from '@element-plus/icons-vue';
 import request from '../utils/request';
 import { ElMessage, ElMessageBox } from 'element-plus';
 
-const users = ref([]);
+const users = ref<any[]>([]);
 const loading = ref(false);
+const includeDeleted = ref(false);
 
 const fetchUsers = async () => {
   loading.value = true;
   try {
-    const res: any = await request.get('/sys-user/list');
+    const res: any = await request.get('/sys-user/list', { params: { includeDeleted: includeDeleted.value } });
     users.value = (res as any[]) || [];
-  } catch (error) {
-    console.error(error);
   } finally {
     loading.value = false;
   }
 };
 
-const resetPwd = async (row) => {
-  try {
-    await ElMessageBox.confirm(`确定要将商户号 ${row.username} 的密码重置为初创密码 REMOVED_RESET_PASSWORD 吗？`, '强制重置', {
-      type: 'warning'
-    });
-    await request.post(`/sys-user/reset-password/${row.id}`);
-    ElMessage.success(`操作成功！密码已重设为 REMOVED_RESET_PASSWORD`);
-  } catch (cancel) {}
-};
-
-const deleteUser = async (row) => {
-  try {
-    await request.delete(`/sys-user/${row.id}`);
-    ElMessage.success('成功强制删除了该权限登录账号。');
-    fetchUsers();
-  } catch (error) {
-    console.error(error);
-  }
-};
-
-onMounted(() => {
+const resetPwd = async (row: any) => {
+  await ElMessageBox.confirm(`确定将 ${row.username} 的密码重置为 REMOVED_RESET_PASSWORD 吗？`, '重置密码', { type: 'warning' });
+  await request.post(`/sys-user/reset-password/${row.id}`);
+  ElMessage.success('密码已重置为 REMOVED_RESET_PASSWORD');
   fetchUsers();
-});
+};
+
+const toggleDisabled = async (row: any) => {
+  const action = row.disabled ? '解除封禁' : '封禁';
+  await ElMessageBox.confirm(`确定${action}账号 ${row.username} 吗？`, action, { type: 'warning' });
+  await request.post(`/sys-user/${row.disabled ? 'enable' : 'disable'}/${row.id}`);
+  ElMessage.success(`${action}成功`);
+  fetchUsers();
+};
+
+const deleteUser = async (row: any) => {
+  await ElMessageBox.confirm(`删除后账号 ${row.username} 将进入回收状态，可恢复。确认删除吗？`, '删除账号', { type: 'warning' });
+  await request.delete(`/sys-user/${row.id}`);
+  ElMessage.success('账号已删除');
+  fetchUsers();
+};
+
+const restoreUser = async (row: any) => {
+  await request.post(`/sys-user/restore/${row.id}`);
+  ElMessage.success('账号已恢复');
+  fetchUsers();
+};
+
+const purgeUser = async (row: any) => {
+  await ElMessageBox.confirm(`彻底删除账号 ${row.username} 后无法恢复，确认继续吗？`, '危险操作', {
+    type: 'warning',
+    confirmButtonText: '彻底删除',
+    cancelButtonText: '取消'
+  });
+  await request.delete(`/sys-user/purge/${row.id}`);
+  ElMessage.success('账号已彻底删除');
+  fetchUsers();
+};
+
+onMounted(fetchUsers);
 </script>
 
 <style scoped>
@@ -118,18 +129,61 @@ onMounted(() => {
   letter-spacing: 0.5px;
 }
 
+.page-header p {
+  margin: 0;
+  color: var(--text-secondary);
+}
+
+.header-actions {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
 .table-card {
   border-radius: 24px;
   padding: 12px;
   background: var(--surface-overlay);
 }
 
+.table-actions {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  flex-wrap: nowrap;
+  padding: 4px 0;
+  white-space: nowrap;
+}
+
+.table-actions > * {
+  flex: 0 0 auto;
+  position: relative;
+}
+
+.table-actions :deep(.action-pill:hover) {
+  position: relative;
+  z-index: 2;
+}
+
+.sys-user-table :deep(.actions-column) {
+  overflow: visible;
+}
+
+.sys-user-table :deep(.actions-column .cell) {
+  overflow: visible;
+  padding-top: 8px;
+  padding-bottom: 8px;
+}
+
 @media (max-width: 640px) {
-  .page-header {
+  .page-header,
+  .header-actions {
     align-items: stretch;
   }
 
-  .page-header > :last-child {
+  .page-header > :last-child,
+  .header-actions > * {
     width: 100%;
   }
 }
