@@ -47,7 +47,14 @@ public class SalesRecordController {
 
     @DeleteMapping("/{id}")
     public Result<Boolean> deleteRecord(@PathVariable Long id) {
-        return Result.success(salesRecordService.removeById(id));
+        SalesRecord record = salesRecordService.getById(id);
+        if (record == null) {
+            return Result.error("配镜记录不存在");
+        }
+        record.setDeleted(true);
+        record.setDeletedTime(DateUtil.date());
+        record.setDeletedBy(StpUtil.getLoginIdAsLong());
+        return Result.success(salesRecordService.updateById(record));
     }
 
     @GetMapping("/stats")
@@ -59,6 +66,7 @@ public class SalesRecordController {
             @RequestParam(defaultValue = "false") Boolean showAll) {
         
         QueryWrapper<SalesRecord> wrapper = new QueryWrapper<>();
+        wrapper.eq("deleted", false);
         if (!showAll && startDate != null && endDate != null) {
             wrapper.ge("sales_date", startDate + " 00:00:00")
                    .le("sales_date", endDate + " 23:59:59");

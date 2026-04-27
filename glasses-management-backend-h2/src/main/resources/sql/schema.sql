@@ -1,24 +1,21 @@
--- H2 Compatible Schema for Glasses Management System
--- Database setup
--- H2 creates the database based on the connection string URL
-
--- ----------------------------
--- Table structure for sys_user
--- ----------------------------
 CREATE TABLE IF NOT EXISTS `sys_user` (
   `id` bigint NOT NULL AUTO_INCREMENT,
   `username` varchar(50) NOT NULL,
+  `phone` varchar(20) DEFAULT NULL,
   `password` varchar(100) NOT NULL,
   `real_name` varchar(50) DEFAULT NULL,
   `role` varchar(20) NOT NULL DEFAULT 'merchant',
+  `must_change_password` boolean NOT NULL DEFAULT false,
+  `disabled` boolean NOT NULL DEFAULT false,
+  `disabled_time` datetime DEFAULT NULL,
+  `deleted` boolean NOT NULL DEFAULT false,
+  `deleted_time` datetime DEFAULT NULL,
   `create_time` datetime DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
-  UNIQUE KEY `uk_username` (`username`)
+  UNIQUE KEY `uk_username` (`username`),
+  UNIQUE KEY `uk_phone` (`phone`)
 );
 
--- ----------------------------
--- Table structure for customer
--- ----------------------------
 CREATE TABLE IF NOT EXISTS `customer` (
   `id` bigint NOT NULL AUTO_INCREMENT,
   `name` varchar(50) NOT NULL,
@@ -26,15 +23,15 @@ CREATE TABLE IF NOT EXISTS `customer` (
   `gender` tinyint DEFAULT 0,
   `birthday` date DEFAULT NULL,
   `remark` varchar(500) DEFAULT NULL,
+  `deleted` boolean NOT NULL DEFAULT false,
+  `deleted_time` datetime DEFAULT NULL,
+  `deleted_by` bigint DEFAULT NULL,
   `create_time` datetime DEFAULT CURRENT_TIMESTAMP,
   `update_time` datetime DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
   UNIQUE KEY `uk_phone` (`phone`)
 );
 
--- ----------------------------
--- Table structure for optometry_record
--- ----------------------------
 CREATE TABLE IF NOT EXISTS `optometry_record` (
   `id` bigint NOT NULL AUTO_INCREMENT,
   `customer_id` bigint NOT NULL,
@@ -54,13 +51,12 @@ CREATE TABLE IF NOT EXISTS `optometry_record` (
   `optometrist_name` varchar(50) DEFAULT NULL,
   `exam_date` datetime DEFAULT CURRENT_TIMESTAMP,
   `create_time` datetime DEFAULT CURRENT_TIMESTAMP,
+  `deleted` boolean NOT NULL DEFAULT false,
+  `deleted_time` datetime DEFAULT NULL,
+  `deleted_by` bigint DEFAULT NULL,
   PRIMARY KEY (`id`)
 );
-CREATE INDEX IF NOT EXISTS `idx_customer_id_opto` ON `optometry_record` (`customer_id`);
 
--- ----------------------------
--- Table structure for sales_record
--- ----------------------------
 CREATE TABLE IF NOT EXISTS `sales_record` (
   `id` bigint NOT NULL AUTO_INCREMENT,
   `record_no` varchar(50) NOT NULL,
@@ -77,7 +73,9 @@ CREATE TABLE IF NOT EXISTS `sales_record` (
   `operator_id` bigint DEFAULT NULL,
   `create_time` datetime DEFAULT CURRENT_TIMESTAMP,
   `update_time` datetime DEFAULT CURRENT_TIMESTAMP,
+  `deleted` boolean NOT NULL DEFAULT false,
+  `deleted_time` datetime DEFAULT NULL,
+  `deleted_by` bigint DEFAULT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `uk_record_no` (`record_no`)
 );
-CREATE INDEX IF NOT EXISTS `idx_customer_id_sales` ON `sales_record` (`customer_id`);

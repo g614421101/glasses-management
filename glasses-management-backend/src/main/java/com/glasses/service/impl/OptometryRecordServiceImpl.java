@@ -16,6 +16,7 @@ public class OptometryRecordServiceImpl extends ServiceImpl<OptometryRecordMappe
     public List<OptometryRecord> listByCustomerId(Long customerId) {
         return baseMapper.selectList(new LambdaQueryWrapper<OptometryRecord>()
                 .eq(OptometryRecord::getCustomerId, customerId)
+                .eq(OptometryRecord::getDeleted, false)
                 .orderByDesc(OptometryRecord::getExamDate));
     }
 }

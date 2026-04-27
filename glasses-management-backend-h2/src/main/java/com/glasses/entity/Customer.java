@@ -15,15 +15,20 @@ public class Customer {
     private Long id;
     private String name;
     private String phone;
-    private Integer gender; // 1男 2女 0未知
-    
+    private Integer gender; // 1 male, 2 female, 0 unknown
+
     @JsonFormat(pattern = "yyyy-MM-dd", timezone = "Asia/Shanghai")
     private Date birthday;
     private String remark;
-    
+    private Boolean deleted;
+
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "Asia/Shanghai")
+    private Date deletedTime;
+    private Long deletedBy;
+
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "Asia/Shanghai")
     private Date createTime;
-    
+
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "Asia/Shanghai")
     private Date updateTime;
 }

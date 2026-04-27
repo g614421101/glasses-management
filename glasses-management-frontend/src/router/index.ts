@@ -33,6 +33,16 @@ const routes: Array<RouteRecordRaw> = [
         component: () => import('../views/SysUser.vue')
       },
       {
+        path: 'profile',
+        name: 'Profile',
+        component: () => import('../views/Profile.vue')
+      },
+      {
+        path: 'recycle-bin',
+        name: 'RecycleBin',
+        component: () => import('../views/RecycleBin.vue')
+      },
+      {
         path: 'stats',
         name: 'Statistics',
         component: () => import('../views/Statistics.vue')
@@ -64,11 +74,19 @@ router.beforeEach(async (to, _from, next) => {
       if (!authStore.verified) {
         try {
           await authStore.verifyToken();
+          if ((to.name === 'SysUser' || to.name === 'RecycleBin') && authStore.role !== 'admin') {
+            next({ name: 'Home' });
+            return;
+          }
           next();
         } catch {
           next({ name: 'Login' });
         }
       } else {
+        if ((to.name === 'SysUser' || to.name === 'RecycleBin') && authStore.role !== 'admin') {
+          next({ name: 'Home' });
+          return;
+        }
         next();
       }
     }

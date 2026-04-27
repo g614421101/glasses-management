@@ -16,6 +16,7 @@ public class CustomerServiceImpl extends ServiceImpl<CustomerMapper, Customer> i
     public Page<Customer> searchCustomer(String keyword, Integer current, Integer size) {
         Page<Customer> page = new Page<>(current, size);
         LambdaQueryWrapper<Customer> wrapper = new LambdaQueryWrapper<>();
+        wrapper.eq(Customer::getDeleted, false);
         if (StrUtil.isNotBlank(keyword)) {
             wrapper.and(w -> w.like(Customer::getPhone, keyword)
                     .or()

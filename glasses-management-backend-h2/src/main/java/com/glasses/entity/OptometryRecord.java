@@ -15,31 +15,37 @@ public class OptometryRecord {
     @TableId(type = IdType.AUTO)
     private Long id;
     private Long customerId;
-    
-    // 右眼参数
+
+    // Right eye values
     private BigDecimal odSph;
     private BigDecimal odCyl;
     private Integer odAxis;
     private String odVa;
-    
-    // 左眼参数
+
+    // Left eye values
     private BigDecimal osSph;
     private BigDecimal osCyl;
     private Integer osAxis;
     private String osVa;
-    
-    // 瞳距
-    private BigDecimal odPd;      // 右眼瞳距
-    private BigDecimal osPd;      // 左眼瞳距
-    private BigDecimal pdFar;     // 总瞳距(远用)
-    private BigDecimal pdNear;    // 近用瞳距
-    private BigDecimal addPower;  // 下加光
-    
+
+    // Pupillary distance values
+    private BigDecimal odPd;      // Right eye PD
+    private BigDecimal osPd;      // Left eye PD
+    private BigDecimal pdFar;     // Far PD
+    private BigDecimal pdNear;    // Near PD
+    private BigDecimal addPower;  // Addition power
+
     private String optometristName;
-    
+
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "Asia/Shanghai")
     private Date examDate;
-    
+
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "Asia/Shanghai")
     private Date createTime;
+
+    private Boolean deleted;
+
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "Asia/Shanghai")
+    private Date deletedTime;
+    private Long deletedBy;
 }

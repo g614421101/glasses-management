@@ -51,16 +51,23 @@ public class PrintController {
     @GetMapping("/prescription/{recordId}")
     public void printPrescription(@PathVariable Long recordId, HttpServletResponse response) throws IOException {
         SalesRecord salesRecord = salesRecordService.getById(recordId);
-        if (salesRecord == null) {
+        if (salesRecord == null || Boolean.TRUE.equals(salesRecord.getDeleted())) {
             response.setStatus(404);
             return;
         }
 
         Customer customer = customerService.getById(salesRecord.getCustomerId());
+        if (customer == null || Boolean.TRUE.equals(customer.getDeleted())) {
+            response.setStatus(404);
+            return;
+        }
 
         OptometryRecord opto = null;
         if (salesRecord.getOptometryId() != null) {
             opto = optometryRecordService.getById(salesRecord.getOptometryId());
+            if (opto != null && Boolean.TRUE.equals(opto.getDeleted())) {
+                opto = null;
+            }
         }
 
         response.setContentType("application/pdf");
@@ -198,6 +205,10 @@ public class PrintController {
     @GetMapping("/export/customer/{customerId}")
     public void exportCustomerRecords(@PathVariable Long customerId, HttpServletResponse response) throws IOException {
         Customer customer = customerService.getById(customerId);
+        if (customer == null || Boolean.TRUE.equals(customer.getDeleted())) {
+            response.setStatus(404);
+            return;
+        }
         List<SalesRecord> salesRecords = salesRecordService.listByCustomerId(customerId);
 
         List<SalesRecordExcelDTO> dataList = new ArrayList<>();
@@ -218,7 +229,7 @@ public class PrintController {
             // 如果关联了验光单则填充验光数据
             if (sr.getOptometryId() != null) {
                 OptometryRecord opto = optometryRecordService.getById(sr.getOptometryId());
-                if (opto != null) {
+                if (opto != null && !Boolean.TRUE.equals(opto.getDeleted())) {
                     dto.setOdSph(fmtDiopter(opto.getOdSph()));
                     dto.setOdCyl(fmtDiopter(opto.getOdCyl()));
                     dto.setOdAxis(opto.getOdAxis() != null ? opto.getOdAxis().toString() : "");
@@ -257,6 +268,7 @@ public class PrintController {
             HttpServletResponse response) throws IOException {
         
         QueryWrapper<SalesRecord> wrapper = new QueryWrapper<>();
+        wrapper.eq("deleted", false);
         if (!showAll && startDate != null && endDate != null) {
             wrapper.ge("sales_date", startDate + " 00:00:00")
                    .le("sales_date", endDate + " 23:59:59");
@@ -268,6 +280,9 @@ public class PrintController {
         
         for (SalesRecord sr : records) {
             Customer customer = customerService.getById(sr.getCustomerId());
+            if (customer != null && Boolean.TRUE.equals(customer.getDeleted())) {
+                customer = null;
+            }
             SalesRecordExcelDTO dto = new SalesRecordExcelDTO();
             dto.setCustomerName(customer != null ? customer.getName() : "-");
             dto.setPhone(customer != null ? customer.getPhone() : "-");
@@ -283,7 +298,7 @@ public class PrintController {
 
             if (sr.getOptometryId() != null) {
                 OptometryRecord opto = optometryRecordService.getById(sr.getOptometryId());
-                if (opto != null) {
+                if (opto != null && !Boolean.TRUE.equals(opto.getDeleted())) {
                     dto.setOdSph(fmtDiopter(opto.getOdSph()));
                     dto.setOdCyl(fmtDiopter(opto.getOdCyl()));
                     dto.setOdAxis(opto.getOdAxis() != null ? opto.getOdAxis().toString() : "");

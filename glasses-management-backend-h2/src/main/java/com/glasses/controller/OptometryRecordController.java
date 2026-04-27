@@ -44,6 +44,13 @@ public class OptometryRecordController {
 
     @DeleteMapping("/{id}")
     public Result<Boolean> deleteRecord(@PathVariable Long id) {
-        return Result.success(optometryRecordService.removeById(id));
+        OptometryRecord record = optometryRecordService.getById(id);
+        if (record == null) {
+            return Result.error("验光记录不存在");
+        }
+        record.setDeleted(true);
+        record.setDeletedTime(DateUtil.date());
+        record.setDeletedBy(StpUtil.getLoginIdAsLong());
+        return Result.success(optometryRecordService.updateById(record));
     }
 }

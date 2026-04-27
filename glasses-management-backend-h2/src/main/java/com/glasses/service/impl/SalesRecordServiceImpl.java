@@ -16,6 +16,7 @@ public class SalesRecordServiceImpl extends ServiceImpl<SalesRecordMapper, Sales
     public List<SalesRecord> listByCustomerId(Long customerId) {
         return baseMapper.selectList(new LambdaQueryWrapper<SalesRecord>()
                 .eq(SalesRecord::getCustomerId, customerId)
+                .eq(SalesRecord::getDeleted, false)
                 .orderByDesc(SalesRecord::getSalesDate));
     }
 }

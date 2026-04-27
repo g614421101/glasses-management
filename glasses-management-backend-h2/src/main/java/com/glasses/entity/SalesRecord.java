@@ -14,30 +14,36 @@ import java.util.Date;
 public class SalesRecord {
     @TableId(type = IdType.AUTO)
     private Long id;
-    
+
     private String recordNo;
     private Long customerId;
     private Long optometryId;
-    
+
     // 镜架信息
     private String frameBrand;
     private String frameModel;
     private BigDecimal framePrice;
-    
+
     // 镜片信息
     private String lensBrand;
     private String lensParams;
     private BigDecimal lensPrice;
-    
+
     private BigDecimal totalAmount;
-    
+
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "Asia/Shanghai")
     private Date salesDate;
     private Long operatorId;
-    
+
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "Asia/Shanghai")
     private Date createTime;
-    
+
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "Asia/Shanghai")
     private Date updateTime;
+
+    private Boolean deleted;
+
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "Asia/Shanghai")
+    private Date deletedTime;
+    private Long deletedBy;
 }
