@@ -153,12 +153,14 @@ a {
   letter-spacing: -0.03em;
 }
 
-.page-subheading {
-  margin: 12px 0 0;
-  max-width: 720px;
-  color: var(--text-secondary);
-  font-size: 15px;
-  line-height: 1.75;
+.page-title-en {
+  margin: 10px 0 0;
+  color: var(--text-muted);
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 0.18em;
+  line-height: 1.4;
+  text-transform: uppercase;
 }
 
 .page-toolbar {
@@ -455,8 +457,9 @@ a {
     border-radius: 22px;
   }
 
-  .page-subheading {
-    font-size: 14px;
+  .page-title-en {
+    font-size: 11px;
+    letter-spacing: 0.14em;
   }
 
   .table-toolbar,

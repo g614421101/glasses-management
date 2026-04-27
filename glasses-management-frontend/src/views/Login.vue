@@ -5,7 +5,7 @@
         <el-icon :size="28" color="var(--primary-color)"><View /></el-icon>
         <span>视光档案管理系统</span>
       </div>
-      <p class="sys-subtitle">专业、高效的验光配镜管理工作台</p>
+      <p class="sys-subtitle">Optical Record Management System</p>
       
       <el-form :model="loginForm" @keyup.enter="handleLogin">
         <el-form-item>

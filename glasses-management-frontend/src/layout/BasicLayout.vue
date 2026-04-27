@@ -7,7 +7,7 @@
         </div>
         <div class="brand-copy">
           <span class="logo-text">视光档案管理系统</span>
-          <span class="logo-subtext">Blue clinical workspace</span>
+          <span class="logo-subtext">Optical Record Management System</span>
         </div>
       </div>
       <div class="user-info">

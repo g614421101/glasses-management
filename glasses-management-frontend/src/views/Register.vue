@@ -5,7 +5,7 @@
         <el-icon :size="28" color="var(--primary-color)"><View /></el-icon>
         <span>商户注册平台</span>
       </div>
-      <p class="sys-subtitle">输入专属邀请码，完成极速注册开通</p>
+      <p class="sys-subtitle">Create Your Account</p>
       
       <el-form :model="regForm" @keyup.enter="handleRegister">
         <el-form-item>
@@ -74,7 +74,7 @@ const handleRegister = async () => {
   }
   loading.value = true;
   try {
-    const res = await request.post('/auth/register', regForm);
+    await request.post('/auth/register', regForm);
     ElMessage.success('注册成功，请使用新账号登录！');
     router.push('/login');
   } catch (error) {

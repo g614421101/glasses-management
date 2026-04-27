@@ -2,11 +2,8 @@
   <div class="page-shell stats-page">
     <section class="page-hero glass-card stats-hero">
       <div class="hero-copy">
-        <span class="hero-kicker">Revenue Overview</span>
         <h1 class="page-heading">营收统计</h1>
-        <p class="page-subheading">
-          把区间筛选、导出和分页放进同一套蓝白工作流里，让统计页在大屏和小屏上都更清晰、更顺手。
-        </p>
+        <p class="page-title-en">Revenue Statistics</p>
       </div>
 
       <div class="filter-toolbar">
@@ -217,20 +214,6 @@ const exportExcel = () => {
   grid-template-columns: minmax(0, 1.2fr) minmax(320px, 0.9fr);
   gap: 24px;
   align-items: center;
-}
-
-.hero-kicker {
-  display: inline-flex;
-  align-items: center;
-  padding: 8px 14px;
-  margin-bottom: 16px;
-  border-radius: 999px;
-  background: rgba(219, 234, 254, 0.9);
-  color: var(--primary-color);
-  font-size: 12px;
-  font-weight: 800;
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
 }
 
 .filter-toolbar {

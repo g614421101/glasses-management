@@ -2,11 +2,8 @@
   <div class="page-shell customer-page">
     <section class="page-hero glass-card customer-hero">
       <div class="hero-copy">
-        <span class="hero-kicker">Customer Center</span>
         <h1 class="page-heading">顾客管理</h1>
-        <p class="page-subheading">
-          从这里集中维护顾客基础资料，快速搜索、创建与进入档案。按钮和分页都做了更清晰的操作反馈，日常录入会更顺手。
-        </p>
+        <p class="page-title-en">Customer Management</p>
       </div>
 
       <div class="hero-meta">
@@ -265,20 +262,6 @@ const handleDelete = async (id) => {
 .hero-copy {
   position: relative;
   z-index: 1;
-}
-
-.hero-kicker {
-  display: inline-flex;
-  align-items: center;
-  padding: 8px 14px;
-  margin-bottom: 16px;
-  border-radius: 999px;
-  background: rgba(219, 234, 254, 0.9);
-  color: var(--primary-color);
-  font-size: 12px;
-  font-weight: 800;
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
 }
 
 .hero-meta {

@@ -3,7 +3,6 @@
     <div class="page-header">
       <div class="header-content">
         <h2>权限账号管理中心</h2>
-        <p class="subtitle">仅超级管理员 (Admin) 授权可见，可在此管理全站商户账号并重置其密码。</p>
       </div>
       <el-button type="primary" @click="fetchUsers" :icon="Refresh">刷新列表</el-button>
     </div>
@@ -117,12 +116,6 @@ onMounted(() => {
   color: var(--text-primary);
   font-size: 24px;
   letter-spacing: 0.5px;
-}
-
-.subtitle {
-  color: var(--text-secondary);
-  font-size: 14px;
-  margin: 0;
 }
 
 .table-card {

@@ -51,7 +51,7 @@ const router = createRouter({
   routes
 });
 
-router.beforeEach(async (to, from, next) => {
+router.beforeEach(async (to, _from, next) => {
   const authStore = useAuthStore();
   const token = localStorage.getItem('token');
   
@@ -65,7 +65,7 @@ router.beforeEach(async (to, from, next) => {
         try {
           await authStore.verifyToken();
           next();
-        } catch (error) {
+        } catch {
           next({ name: 'Login' });
         }
       } else {

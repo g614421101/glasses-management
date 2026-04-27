@@ -11,9 +11,7 @@
         </div>
 
         <h1 class="page-heading">顾客档案</h1>
-        <p class="page-subheading">
-          在一条时间线里串联验光、配镜和打印导出。现在验光单卡片、配镜信息卡片和记录列表都升级成了更清爽的蓝白界面。
-        </p>
+        <p class="page-title-en">Customer Archive</p>
       </div>
 
       <div class="page-toolbar hero-actions">
@@ -169,7 +167,6 @@
           <div>
             <div class="receipt-badge primary">验光记录</div>
             <h3 class="sheet-title">双眼屈光参数总览</h3>
-            <p class="sheet-subtitle">把 SPH、CYL、AXIS、视力和瞳距拆成更直观的参数卡片。</p>
           </div>
           <div class="sheet-halo"></div>
         </div>
@@ -217,7 +214,6 @@
           <div>
             <div class="receipt-badge success">配镜信息</div>
             <h3 class="sheet-title">订单 {{ currentDetail.data.recordNo }}</h3>
-            <p class="sheet-subtitle">把镜架、镜片与总金额拆成更清晰的产品卡片。</p>
           </div>
           <div class="total-bubble">
             <small>总计收讫</small>
@@ -832,12 +828,6 @@ const fmt = (val) => {
   line-height: 1.15;
   overflow-wrap: anywhere;
   word-break: break-word;
-}
-
-.sheet-subtitle {
-  margin: 0;
-  color: var(--text-secondary);
-  font-size: 14px;
 }
 
 .sheet-halo {
