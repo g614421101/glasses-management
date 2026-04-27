@@ -292,14 +292,14 @@ const exportExcel = () => {
   align-items: center;
   padding: 6px 10px;
   border-radius: 999px;
-  background: rgba(219, 234, 254, 0.82);
+  background: var(--primary-soft);
   color: var(--primary-color);
   font-size: 12px;
   font-weight: 700;
 }
 
 .item-tag--soft {
-  background: rgba(239, 246, 255, 0.92);
+  background: var(--surface-muted);
   color: var(--text-secondary);
 }
 

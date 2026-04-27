@@ -565,6 +565,10 @@ const fmt = (val) => {
   top: 102px;
 }
 
+:root[data-theme='dark'] .info-card::before {
+  opacity: 0;
+}
+
 .info-hero {
   text-align: center;
 }
@@ -613,8 +617,9 @@ const fmt = (val) => {
 .summary-chip {
   padding: 14px;
   border-radius: 18px;
-  background: rgba(239, 246, 255, 0.92);
-  border: 1px solid rgba(37, 99, 235, 0.12);
+  background: var(--primary-soft);
+  border: 1px solid var(--border-strong);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.18);
 }
 
 .summary-chip span {
@@ -629,10 +634,37 @@ const fmt = (val) => {
   font-size: 20px;
 }
 
+:root[data-theme='dark'] .summary-chip {
+  background: linear-gradient(145deg, rgba(30, 64, 115, 0.82) 0%, rgba(15, 23, 42, 0.9) 100%);
+  border-color: rgba(96, 165, 250, 0.38);
+  box-shadow: inset 0 1px 0 rgba(125, 211, 252, 0.12), 0 14px 30px rgba(2, 6, 23, 0.24);
+}
+
+:root[data-theme='dark'] .summary-chip span {
+  color: #bfdbfe;
+}
+
+:root[data-theme='dark'] .summary-chip strong {
+  color: #f8fbff;
+  text-shadow: 0 0 18px rgba(96, 165, 250, 0.22);
+}
+
 .base-info {
   margin-top: 0;
   padding-top: 20px;
-  border-top: 1px solid rgba(148, 163, 184, 0.14);
+  border-top: 1px solid var(--border-color);
+}
+
+:root[data-theme='dark'] .customer-meta :deep(.el-descriptions__cell),
+:root[data-theme='dark'] .customer-meta :deep(.el-descriptions__label),
+:root[data-theme='dark'] .customer-meta :deep(.el-descriptions__content) {
+  background: transparent !important;
+  border-color: rgba(148, 163, 184, 0.36) !important;
+  color: var(--text-primary) !important;
+}
+
+:root[data-theme='dark'] .customer-meta :deep(.el-descriptions__label) {
+  color: #c7d7ec !important;
 }
 
 .timeline-card {
@@ -662,7 +694,7 @@ const fmt = (val) => {
 .timeline-count {
   padding: 12px 16px;
   border-radius: 999px;
-  background: rgba(219, 234, 254, 0.78);
+  background: var(--primary-soft);
   color: var(--primary-color);
   font-size: 13px;
   font-weight: 800;
@@ -678,8 +710,8 @@ const fmt = (val) => {
   overflow: hidden;
   padding: 20px;
   border-radius: 24px;
-  border: 1px solid rgba(148, 163, 184, 0.14);
-  background: rgba(255, 255, 255, 0.94);
+  border: 1px solid var(--border-color);
+  background: var(--surface-overlay);
   box-shadow: 0 18px 40px rgba(15, 23, 42, 0.08);
   cursor: pointer;
 }
@@ -720,15 +752,15 @@ const fmt = (val) => {
   align-items: center;
   padding: 6px 12px;
   border-radius: 999px;
-  background: rgba(219, 234, 254, 0.92);
+  background: var(--primary-soft);
   color: var(--primary-color);
   font-size: 12px;
   font-weight: 800;
 }
 
 .timeline-detail-card.is-sales .record-badge {
-  background: rgba(224, 242, 254, 0.9);
-  color: #0369a1;
+  background: var(--surface-muted);
+  color: var(--primary-color);
 }
 
 .subtitle {
@@ -741,7 +773,7 @@ const fmt = (val) => {
 .record-amount {
   padding: 10px 14px;
   border-radius: 18px;
-  background: linear-gradient(135deg, rgba(219, 234, 254, 0.95) 0%, rgba(239, 246, 255, 0.98) 100%);
+  background: var(--gradient-soft);
   color: var(--primary-color);
   font-size: 18px;
   font-weight: 800;
@@ -758,8 +790,8 @@ const fmt = (val) => {
 .glance-item {
   padding: 12px 14px;
   border-radius: 18px;
-  background: rgba(248, 250, 252, 0.96);
-  border: 1px solid rgba(148, 163, 184, 0.12);
+  background: var(--surface-muted);
+  border: 1px solid var(--border-color);
   min-width: 0;
 }
 
@@ -817,8 +849,8 @@ const fmt = (val) => {
   gap: 18px;
   padding: 20px;
   border-radius: 24px;
-  background: linear-gradient(135deg, rgba(219, 234, 254, 0.72) 0%, rgba(239, 246, 255, 0.92) 100%);
-  border: 1px solid rgba(37, 99, 235, 0.12);
+  background: var(--gradient-soft);
+  border: 1px solid var(--border-strong);
   margin-bottom: 18px;
 }
 
@@ -867,8 +899,8 @@ const fmt = (val) => {
 .product-card {
   padding: 18px;
   border-radius: 22px;
-  background: rgba(255, 255, 255, 0.95);
-  border: 1px solid rgba(148, 163, 184, 0.14);
+  background: var(--surface-overlay);
+  border: 1px solid var(--border-color);
   box-shadow: 0 16px 32px rgba(15, 23, 42, 0.06);
 }
 
@@ -885,7 +917,7 @@ const fmt = (val) => {
 .product-badge {
   padding: 6px 10px;
   border-radius: 999px;
-  background: rgba(219, 234, 254, 0.9);
+  background: var(--primary-soft);
   color: var(--primary-color);
   font-size: 12px;
   font-weight: 800;
@@ -905,8 +937,8 @@ const fmt = (val) => {
 .eye-metric {
   padding: 12px;
   border-radius: 16px;
-  background: rgba(248, 250, 252, 0.96);
-  border: 1px solid rgba(148, 163, 184, 0.12);
+  background: var(--surface-muted);
+  border: 1px solid var(--border-color);
 }
 
 .eye-metric span,
@@ -933,8 +965,8 @@ const fmt = (val) => {
 .info-tag {
   padding: 14px;
   border-radius: 18px;
-  background: rgba(248, 250, 252, 0.98);
-  border: 1px solid rgba(148, 163, 184, 0.12);
+  background: var(--surface-muted);
+  border: 1px solid var(--border-color);
 }
 
 .info-tag strong {
@@ -950,8 +982,8 @@ const fmt = (val) => {
 }
 
 .product-badge--soft {
-  background: rgba(224, 242, 254, 0.92);
-  color: #0369a1;
+  background: var(--surface-muted);
+  color: var(--primary-color);
 }
 
 .receipt-badge {
@@ -964,13 +996,13 @@ const fmt = (val) => {
 }
 
 .receipt-badge.primary {
-  background: rgba(219, 234, 254, 0.9);
+  background: var(--primary-soft);
   color: var(--primary-color);
 }
 
 .receipt-badge.success {
-  background: rgba(224, 242, 254, 0.9);
-  color: #0369a1;
+  background: var(--surface-muted);
+  color: var(--primary-color);
 }
 
 :deep(.elegant-dialog) {

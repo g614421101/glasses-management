@@ -277,8 +277,8 @@ const handleDelete = async (id) => {
   min-width: 120px;
   padding: 16px 18px;
   border-radius: 20px;
-  background: rgba(255, 255, 255, 0.8);
-  border: 1px solid rgba(148, 163, 184, 0.14);
+  background: var(--surface-muted);
+  border: 1px solid var(--border-color);
   box-shadow: 0 14px 28px rgba(37, 99, 235, 0.08);
 }
 

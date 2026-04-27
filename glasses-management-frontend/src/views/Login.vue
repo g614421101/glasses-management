@@ -101,10 +101,10 @@ const handleLogin = async () => {
   padding: 48px;
   text-align: center;
   z-index: 10;
-  background: rgba(255, 255, 255, 0.9);
+  background: var(--surface-overlay);
   border-radius: 28px;
-  box-shadow: 0 28px 60px rgba(37, 99, 235, 0.14);
-  border: 1px solid rgba(148, 163, 184, 0.16);
+  box-shadow: var(--shadow-card);
+  border: 1px solid var(--border-color);
 }
 
 .sys-title {

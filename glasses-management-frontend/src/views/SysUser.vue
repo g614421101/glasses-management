@@ -121,7 +121,7 @@ onMounted(() => {
 .table-card {
   border-radius: 24px;
   padding: 12px;
-  background: rgba(255, 255, 255, 0.92);
+  background: var(--surface-overlay);
 }
 
 @media (max-width: 640px) {

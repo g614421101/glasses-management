@@ -15,6 +15,19 @@
           <span class="user-label">当前账号</span>
           <strong class="welcome-text">{{ authStore.username }}</strong>
         </div>
+        <el-button
+          class="theme-toggle-btn"
+          plain
+          size="small"
+          :aria-label="isDark ? '切换到浅色模式' : '切换到暗色模式'"
+          @click="toggleTheme"
+        >
+          <el-icon>
+            <Sunny v-if="isDark" />
+            <Moon v-else />
+          </el-icon>
+          <span>{{ isDark ? '浅色' : '暗色' }}</span>
+        </el-button>
         <el-button type="primary" plain size="small" class="logout-btn" @click="handleLogout">退出登录</el-button>
       </div>
     </el-header>
@@ -56,11 +69,13 @@
 <script setup lang="ts">
 import { useAuthStore } from '../store/auth';
 import { useRouter, useRoute } from 'vue-router';
-import { Monitor, User, Setting, View, TrendCharts } from '@element-plus/icons-vue';
+import { Monitor, User, Setting, View, TrendCharts, Moon, Sunny } from '@element-plus/icons-vue';
+import { useTheme } from '../utils/theme';
 
 const authStore = useAuthStore();
 const router = useRouter();
 const route = useRoute();
+const { isDark, toggleTheme } = useTheme();
 
 const goHome = () => {
   router.push('/');
@@ -82,8 +97,8 @@ const handleLogout = () => {
 .glass-header {
   height: auto !important;
   min-height: 74px;
-  background: rgba(255, 255, 255, 0.86);
-  border-bottom: 1px solid rgba(148, 163, 184, 0.16);
+  background: var(--surface-overlay);
+  border-bottom: 1px solid var(--border-color);
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -156,9 +171,9 @@ const handleLogout = () => {
   gap: 10px;
   padding: 10px 14px;
   border-radius: 999px;
-  background: rgba(239, 246, 255, 0.85);
-  border: 1px solid rgba(148, 163, 184, 0.16);
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.8);
+  background: var(--surface-muted);
+  border: 1px solid var(--border-color);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.18);
   min-width: 0;
 }
 
@@ -178,6 +193,21 @@ const handleLogout = () => {
   font-weight: 800 !important;
 }
 
+.theme-toggle-btn {
+  min-width: 92px;
+  height: 36px !important;
+  color: var(--text-secondary) !important;
+  border-color: var(--border-color) !important;
+  background: var(--surface-muted) !important;
+  font-weight: 800 !important;
+}
+
+.theme-toggle-btn:hover {
+  color: var(--primary-color) !important;
+  border-color: var(--border-strong) !important;
+  transform: translateY(-1px);
+}
+
 .main-body {
   flex: 1;
   overflow: visible;
@@ -186,8 +216,8 @@ const handleLogout = () => {
 }
 
 .glass-aside {
-  background: rgba(255, 255, 255, 0.76);
-  border-right: 1px solid rgba(148, 163, 184, 0.14);
+  background: var(--surface-color);
+  border-right: 1px solid var(--border-color);
   z-index: 10;
   position: sticky;
   top: 86px;
@@ -223,14 +253,14 @@ const handleLogout = () => {
 }
 
 .side-menu :deep(.el-menu-item:hover) {
-  background: rgba(219, 234, 254, 0.6);
+  background: var(--primary-soft);
   color: var(--primary-color);
 }
 
 .side-menu :deep(.el-menu-item.is-active) {
-  background: linear-gradient(135deg, rgba(219, 234, 254, 0.95) 0%, rgba(239, 246, 255, 0.98) 100%);
+  background: var(--gradient-soft);
   color: var(--primary-color);
-  box-shadow: inset 0 0 0 1px rgba(37, 99, 235, 0.12), 0 12px 24px rgba(37, 99, 235, 0.12);
+  box-shadow: inset 0 0 0 1px var(--border-strong), 0 12px 24px rgba(37, 99, 235, 0.12);
 }
 
 .main-content {
@@ -335,6 +365,12 @@ const handleLogout = () => {
     justify-content: center;
   }
 
+  .theme-toggle-btn {
+    min-width: 92px;
+    height: 44px !important;
+    justify-content: center;
+  }
+
   .glass-aside,
   .main-content {
     margin-left: 12px;
@@ -348,6 +384,7 @@ const handleLogout = () => {
   }
 
   .user-chip,
+  .theme-toggle-btn,
   .logout-btn {
     width: 100%;
   }

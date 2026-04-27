@@ -144,9 +144,9 @@ const goCustomer = () => {
   top: calc(100% + 14px);
   left: 0;
   right: 0;
-  background: rgba(255, 255, 255, 0.95);
+  background: var(--surface-overlay);
   border-radius: 20px;
-  border: 1px solid rgba(148, 163, 184, 0.16);
+  border: 1px solid var(--border-color);
   z-index: 100;
   padding: 8px;
   box-shadow: 0 22px 45px rgba(15, 23, 42, 0.12);
@@ -163,7 +163,7 @@ const goCustomer = () => {
 }
 
 .result-item:hover {
-  background: rgba(219, 234, 254, 0.62);
+  background: var(--primary-soft);
   transform: translateX(4px);
 }
 
@@ -193,13 +193,13 @@ const goCustomer = () => {
 .shortcut-card {
   width: 240px;
   padding: 30px 20px;
-  background: rgba(255, 255, 255, 0.92);
+  background: var(--surface-overlay);
   border-radius: 24px;
   text-align: center;
   cursor: pointer;
   transition: all 0.3s ease;
   box-shadow: 0 20px 40px rgba(37, 99, 235, 0.1);
-  border: 1px solid rgba(148, 163, 184, 0.14);
+  border: 1px solid var(--border-color);
   position: relative;
   overflow: hidden;
 }
