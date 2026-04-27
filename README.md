@@ -93,6 +93,19 @@ git log --oneline --all -- src/views/Archive.vue
 
 - `http://localhost:8080`
 
+如果只想把当前前端同步到两个后端，不需要完整打包，可以在根目录运行：
+
+```powershell
+.\sync-frontend.ps1
+```
+
+如果只同步其中一套后端：
+
+```powershell
+.\sync-frontend.ps1 -Backend H2
+.\sync-frontend.ps1 -Backend MySQL
+```
+
 ## 桌面版打包
 
 根目录脚本会按下面流程打包 H2 桌面版：

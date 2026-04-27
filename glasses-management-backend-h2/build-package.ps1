@@ -5,8 +5,6 @@ $ErrorActionPreference = 'Stop'
 
 $backendDir = $PSScriptRoot
 $rootDir = Split-Path -Parent $backendDir
-$frontendDir = Join-Path $rootDir 'glasses-management-frontend'
-$staticDir = Join-Path $backendDir 'src\main\resources\static'
 $tempDir = Join-Path $backendDir 'jpackage-temp'
 $distDir = Join-Path $backendDir 'dist-install'
 $jarName = 'glasses-management-backend-h2-0.0.1-SNAPSHOT.jar'
@@ -36,21 +34,9 @@ function Resolve-Jpackage {
     return $candidates | Where-Object { $_ -and (Test-Path $_) } | Select-Object -First 1
 }
 
-Write-Host "[1/5] Building Frontend..." -ForegroundColor Cyan
-Push-Location $frontendDir
-if (-not (Test-Path 'node_modules')) {
-    Write-Host "Installing frontend dependencies..." -ForegroundColor Yellow
-    npm install
-    Assert-Success 'Frontend dependency install failed.'
-}
-npm run build
-Assert-Success 'Frontend build failed.'
-Pop-Location
-
-Write-Host "[2/5] Copying frontend resources to H2 backend static dir..." -ForegroundColor Cyan
-Remove-Item (Join-Path $staticDir '*') -Recurse -Force -ErrorAction SilentlyContinue
-New-Item -ItemType Directory -Force -Path $staticDir | Out-Null
-Copy-Item -Path (Join-Path $frontendDir 'dist\*') -Destination $staticDir -Recurse -Force
+Write-Host "[1/5] Building and syncing Frontend..." -ForegroundColor Cyan
+& (Join-Path $rootDir 'sync-frontend.ps1') -Backend H2
+Assert-Success 'Frontend sync failed.'
 
 Write-Host "[3/5] Building H2 Spring Boot Backend (Maven)..." -ForegroundColor Cyan
 Push-Location $backendDir

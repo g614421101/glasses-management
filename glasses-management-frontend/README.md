@@ -61,6 +61,13 @@ npm run build
 
 如果要让后端直接托管页面，需要把 `dist` 内容同步到后端的 `src/main/resources/static`。
 
+项目根目录提供了同步脚本：
+
+```powershell
+cd ..
+.\sync-frontend.ps1
+```
+
 ## 说明
 
 - 当前 UI 已统一为蓝白配色，并针对顾客管理、档案卡片、分页和响应式布局做过优化。

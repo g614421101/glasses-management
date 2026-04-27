@@ -110,6 +110,32 @@ cd ..
 
 两个脚本都会自动构建前端、同步静态资源、打包后端 JAR，并按当前目录下的 `jpackage.cfg` 输出安装包。
 
+## 只同步前端到后端
+
+如果你只是想让 `http://localhost:8080` 直接看到最新前端，不需要生成安装包，可以在根目录运行：
+
+```powershell
+.\sync-frontend.ps1
+```
+
+只同步 H2 后端：
+
+```powershell
+.\sync-frontend.ps1 -Backend H2
+```
+
+只同步 MySQL 后端：
+
+```powershell
+.\sync-frontend.ps1 -Backend MySQL
+```
+
+如果已经有最新的 `glasses-management-frontend/dist`，也可以跳过前端构建：
+
+```powershell
+.\sync-frontend.ps1 -SkipBuild
+```
+
 ### 手动步骤
 
 无论是 MySQL 版还是 H2 版，都建议先做完这三步：
