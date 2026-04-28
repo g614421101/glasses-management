@@ -1,5 +1,6 @@
 const { app, BrowserWindow } = require('electron');
 const path = require('path');
+const { pathToFileURL } = require('url');
 const { spawn, exec } = require('child_process');
 const fs = require('fs');
 
@@ -84,16 +85,18 @@ async function ensureJavaEnvironment() {
 function startBackend(javaCommand) {
     let jarPath = path.join(__dirname, '..', 'glasses-management-backend-h2', 'target');
     let finalJar = null;
+    let backendDir = null;
     
     if (!app.isPackaged) {
         // Dev mode
         if(fs.existsSync(jarPath)){
              const files = fs.readdirSync(jarPath).filter(f => f.endsWith('.jar') && !f.endsWith('.original'));
              if (files.length > 0) finalJar = path.join(jarPath, files[0]);
+             backendDir = path.join(__dirname, '..', 'glasses-management-backend-h2');
         }
     } else {
         // Prod mode
-        const backendDir = path.join(process.resourcesPath, 'backend');
+        backendDir = path.join(process.resourcesPath, 'backend');
         if (fs.existsSync(backendDir)) {
             const files = fs.readdirSync(backendDir).filter(f => f.endsWith('.jar'));
             if(files.length > 0) finalJar = path.join(backendDir, files[0]);
@@ -107,10 +110,15 @@ function startBackend(javaCommand) {
     }
 
     console.log(`Starting: ${javaCommand} -jar ${finalJar}`);
+    const configLocations = resolveConfigLocations(backendDir);
+    const javaArgs = ['-jar', finalJar, '--app.browser.auto-launch=false'];
+    if (configLocations) {
+        javaArgs.push(`--spring.config.additional-location=${configLocations}`);
+    }
     const spawnOptions = {
         cwd: app.getPath('userData')
     };
-    javaProcess = spawn(javaCommand, ['-jar', finalJar, '--app.browser.auto-launch=false'], spawnOptions);
+    javaProcess = spawn(javaCommand, javaArgs, spawnOptions);
 
     let errorLog = '';
 
@@ -127,6 +135,22 @@ function startBackend(javaCommand) {
     });
 
     return true;
+}
+
+function resolveConfigLocations(backendDir) {
+    const candidates = [];
+
+    if (backendDir) {
+        candidates.push(path.join(backendDir, 'application-local.yml'));
+    }
+
+    candidates.push(path.join(app.getPath('userData'), 'application-local.yml'));
+
+    const existing = candidates
+        .filter(candidate => candidate && fs.existsSync(candidate))
+        .map(candidate => `optional:${pathToFileURL(candidate).href}`);
+
+    return existing.join(',');
 }
 
 function waitForBackend(url, timeoutMs) {

@@ -6,6 +6,12 @@ Write-Host "[1/5] Building and syncing Frontend..." -ForegroundColor Cyan
 & "$PSScriptRoot\sync-frontend.ps1" -Backend H2
 if ($LASTEXITCODE -ne 0) { Write-Host "Error: Frontend sync failed." -ForegroundColor Red; exit }
 
+$h2LocalConfig = Join-Path $PSScriptRoot 'glasses-management-backend-h2\application-local.yml'
+if (-not (Test-Path $h2LocalConfig)) {
+    Write-Host "Error: H2 application-local.yml not found. Copy glasses-management-backend-h2\application-local.example.yml first." -ForegroundColor Red
+    exit 1
+}
+
 # Step 3: Build Spring Boot JAR
 Write-Host "[3/5] Building Spring Boot Backend (Maven)..." -ForegroundColor Cyan
 cd "$PSScriptRoot\glasses-management-backend-h2"

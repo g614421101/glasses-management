@@ -8,12 +8,16 @@ glasses:
   admin:
     username: ${GLASSES_ADMIN_USERNAME:admin}
     password: ${GLASSES_ADMIN_PASSWORD}
-    real-name: ${GLASSES_ADMIN_REAL_NAME:System Administrator}
+    real-name: ${GLASSES_ADMIN_REAL_NAME:系统管理员}
     enabled: ${GLASSES_ADMIN_ENABLED:true}
 
 spring:
   config:
-    import: optional:file:./application-local.yml
+    import:
+      - optional:file:./application-local.yml
+      - optional:file:./app/application-local.yml
+      - optional:file:${user.home}/.glasses_management/application-local.yml
+      - optional:file:${user.home}/.glasses_management_mysql/application-local.yml
   profiles:
     active: ${SPRING_PROFILES_ACTIVE:dev}
   datasource:

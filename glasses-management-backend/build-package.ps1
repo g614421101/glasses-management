@@ -9,6 +9,7 @@ $tempDir = Join-Path $backendDir 'jpackage-temp'
 $distDir = Join-Path $backendDir 'dist-install'
 $jarName = 'glasses-management-backend-0.0.1-SNAPSHOT.jar'
 $jarPath = Join-Path $backendDir "target\$jarName"
+$localConfigPath = Join-Path $backendDir 'application-local.yml'
 
 function Assert-Success {
     param([string]$Message)
@@ -54,6 +55,12 @@ Remove-Item $tempDir -Recurse -Force -ErrorAction SilentlyContinue
 Remove-Item $distDir -Recurse -Force -ErrorAction SilentlyContinue
 New-Item -ItemType Directory -Force -Path $tempDir | Out-Null
 Copy-Item -LiteralPath $jarPath -Destination $tempDir -Force
+if (Test-Path $localConfigPath) {
+    Copy-Item -LiteralPath $localConfigPath -Destination $tempDir -Force
+    Write-Host 'Included local application-local.yml for this private installer.' -ForegroundColor Yellow
+} else {
+    Write-Host 'Warning: application-local.yml not found. Packaged app will require environment variables or an external config file.' -ForegroundColor Yellow
+}
 
 Write-Host "[5/5] Building MySQL native installer..." -ForegroundColor Cyan
 $jpackage = Resolve-Jpackage
