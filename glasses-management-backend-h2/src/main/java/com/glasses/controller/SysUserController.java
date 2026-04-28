@@ -1,6 +1,7 @@
 package com.glasses.controller;
 
 import cn.dev33.satoken.annotation.SaCheckRole;
+import cn.dev33.satoken.stp.StpUtil;
 import cn.hutool.crypto.digest.BCrypt;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.glasses.constant.RoleConstants;
@@ -60,6 +61,7 @@ public class SysUserController {
         user.setDisabled(true);
         user.setDisabledTime(new Date());
         sysUserMapper.updateById(user);
+        StpUtil.logout(user.getId());
         return Result.success(true);
     }
 
@@ -86,6 +88,7 @@ public class SysUserController {
         user.setDisabled(true);
         user.setDisabledTime(new Date());
         sysUserMapper.updateById(user);
+        StpUtil.logout(user.getId());
         return Result.success(true);
     }
 
