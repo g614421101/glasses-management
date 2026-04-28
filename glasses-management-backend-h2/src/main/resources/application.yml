@@ -1,24 +1,26 @@
 server:
-  port: 8080
+  port: ${SERVER_PORT:8080}
 
 app:
-  invite-code: REMOVED_INVITE_CODE
+  invite-code: ${APP_INVITE_CODE}
 
 glasses:
   admin:
-    username: admin
-    password: "REMOVED_ADMIN_PASSWORD"
-    real-name: "系统管理员"
-    enabled: true
+    username: ${GLASSES_ADMIN_USERNAME:admin}
+    password: ${GLASSES_ADMIN_PASSWORD}
+    real-name: ${GLASSES_ADMIN_REAL_NAME:System Administrator}
+    enabled: ${GLASSES_ADMIN_ENABLED:true}
 
 spring:
+  config:
+    import: optional:file:./application-local.yml
   profiles:
-    active: dev
+    active: ${SPRING_PROFILES_ACTIVE:dev}
   datasource:
     driver-class-name: org.h2.Driver
-    url: jdbc:h2:file:./data/glasses_management;MODE=MySQL;DATABASE_TO_UPPER=FALSE;CASE_INSENSITIVE_IDENTIFIERS=TRUE;AUTO_SERVER=TRUE
-    username: sa
-    password: ""
+    url: ${SPRING_DATASOURCE_URL:jdbc:h2:file:./data/glasses_management;MODE=MySQL;DATABASE_TO_UPPER=FALSE;CASE_INSENSITIVE_IDENTIFIERS=TRUE;AUTO_SERVER=TRUE}
+    username: ${SPRING_DATASOURCE_USERNAME:sa}
+    password: ${SPRING_DATASOURCE_PASSWORD:}
   sql:
     init:
       mode: always

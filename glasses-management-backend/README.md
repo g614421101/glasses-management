@@ -1,82 +1,46 @@
 # 视光档案管理系统 MySQL 后端
 
-`glasses-management-backend` 是面向外部 MySQL 数据库部署的后端项目，负责登录鉴权、顾客管理、档案记录、营收统计、打印与账号管理等接口。
+`glasses-management-backend` 是连接外部 MySQL 的 Spring Boot 后端，提供登录鉴权、顾客管理、档案记录、统计、打印和账号管理接口。
 
-## 技术栈
+## 私密配置
 
-- Java 21
-- Spring Boot 3.2
-- MyBatis Plus
-- Sa-Token
-- MySQL 8+
-- iText7
-- EasyExcel
+仓库中的 `src/main/resources/application.yml` 只保留公开占位配置。真实邀请码、管理员初始密码和数据库连接信息请放在本目录的 `application-local.yml`，或通过环境变量传入。
 
-## 目录说明
+创建本地配置：
 
-- `src/main/java`：业务代码
-- `src/main/resources`：配置文件、Mapper、静态资源
-- `sql/schema.sql`：MySQL 初始化脚本
-- `jpackage.cfg`：原生 EXE 打包参数
+```powershell
+Copy-Item application-local.example.yml application-local.yml
+```
 
-## 默认配置
+需要填写：
 
-- 服务端口：`8080`
-- 默认超管账号：`admin`
-- 默认超管密码：`REMOVED_ADMIN_PASSWORD`
-- 注册邀请码：`REMOVED_INVITE_CODE`
+- `app.invite-code`
+- `glasses.admin.password`
+- `spring.datasource.url`
+- `spring.datasource.username`
+- `spring.datasource.password`
 
-数据库连接默认写在 [application.yml](./src/main/resources/application.yml) 中：
-
-- 地址：`jdbc:mysql://127.0.0.1:3306/glasses_management`
-- 用户名：`REMOVED_MYSQL_USERNAME`
-- 密码：`REMOVED_MYSQL_PASSWORD`
+`application-local.yml` 已被根目录 `.gitignore` 忽略，不要提交。
 
 ## 本地启动
 
-1. 准备 MySQL 8+，并创建数据库 `glasses_management`
-2. 执行 [sql/schema.sql](./sql/schema.sql) 初始化表结构
-3. 按需修改 [application.yml](./src/main/resources/application.yml) 中的数据库配置
-4. 在当前目录运行：
+1. 准备 JDK 21 和 MySQL 8+。
+2. 创建业务数据库，并执行 `sql/schema.sql` 初始化表结构。
+3. 填写本地私密配置。
+4. 启动后端：
 
-```bash
+```powershell
 mvn spring-boot:run
 ```
 
-启动后默认访问：
+默认访问地址：
 
 - `http://localhost:8080`
 
-如果前端构建产物已经同步到 `src/main/resources/static`，后端也可以直接托管整套页面。
-
 ## 打包
-
-推荐直接运行当前目录下的打包脚本：
 
 ```powershell
 .\build-package.ps1
 ```
 
-脚本会自动完成：
-
-1. 构建前端
-2. 同步前端到 MySQL 后端静态目录
-3. 打包 MySQL 后端 JAR
-4. 按 [jpackage.cfg](./jpackage.cfg) 生成 Windows 原生安装包
-
-安装包输出目录：
-
-- `dist-install`
-
-如果只需要构建 JAR，也可以运行：
-
-```bash
-mvn clean package -DskipTests
-```
-
-MySQL 原生安装包依赖外部 MySQL 服务，不会把数据库一起打进安装包。
-
-## 说明
-
-- 当前前端依赖 `/api/auth/info` 做登录态校验，MySQL 版后端已经补齐对应接口。
-- 当前权限控制主要集中在登录和账号管理，业务数据默认没有商户级隔离。
+脚本会构建前端、同步静态资源、打包后端 JAR，并按 `jpackage.cfg` 生成 Windows 原生安装包。

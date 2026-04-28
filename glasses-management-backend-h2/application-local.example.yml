@@ -1,0 +1,16 @@
+app:
+  invite-code: replace-with-your-private-invite-code
+
+glasses:
+  admin:
+    username: admin
+    password: replace-with-a-strong-initial-admin-password
+    real-name: System Administrator
+    enabled: true
+
+spring:
+  datasource:
+    # The H2 URL has a safe default in application.yml; override it only when needed.
+    url: jdbc:h2:file:./data/glasses_management;MODE=MySQL;DATABASE_TO_UPPER=FALSE;CASE_INSENSITIVE_IDENTIFIERS=TRUE;AUTO_SERVER=TRUE
+    username: sa
+    password:

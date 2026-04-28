@@ -67,9 +67,10 @@ const fetchUsers = async () => {
 };
 
 const resetPwd = async (row: any) => {
-  await ElMessageBox.confirm(`确定将 ${row.username} 的密码重置为 REMOVED_RESET_PASSWORD 吗？`, '重置密码', { type: 'warning' });
-  await request.post(`/sys-user/reset-password/${row.id}`);
-  ElMessage.success('密码已重置为 REMOVED_RESET_PASSWORD');
+  await ElMessageBox.confirm(`确定为 ${row.username} 生成一次性临时密码吗？`, '重置密码', { type: 'warning' });
+  const temporaryPassword = await request.post(`/sys-user/reset-password/${row.id}`);
+  await ElMessageBox.alert(String(temporaryPassword), '临时密码', { confirmButtonText: '确定' });
+  ElMessage.success('密码已重置，用户下次登录必须修改。');
   fetchUsers();
 };
 

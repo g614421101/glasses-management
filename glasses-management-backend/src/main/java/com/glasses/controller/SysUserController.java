@@ -8,8 +8,15 @@ import com.glasses.entity.SysUser;
 import com.glasses.mapper.SysUserMapper;
 import com.glasses.util.Result;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 
+import java.security.SecureRandom;
 import java.util.Date;
 import java.util.List;
 
@@ -17,6 +24,11 @@ import java.util.List;
 @RequestMapping("/api/sys-user")
 @SaCheckRole(RoleConstants.ADMIN)
 public class SysUserController {
+
+    private static final SecureRandom PASSWORD_RANDOM = new SecureRandom();
+    private static final char[] RESET_PASSWORD_CHARS =
+            "ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz23456789!@#$%".toCharArray();
+    private static final int RESET_PASSWORD_LENGTH = 12;
 
     @Autowired
     private SysUserMapper sysUserMapper;
@@ -113,10 +125,20 @@ public class SysUserController {
         if (Boolean.TRUE.equals(user.getDeleted())) {
             return Result.error("已删除账号不能重置密码，请先恢复");
         }
-        user.setPassword(BCrypt.hashpw("REMOVED_RESET_PASSWORD"));
+
+        String temporaryPassword = generateTemporaryPassword();
+        user.setPassword(BCrypt.hashpw(temporaryPassword));
         user.setMustChangePassword(true);
         sysUserMapper.updateById(user);
-        return Result.success("密码已重置为：REMOVED_RESET_PASSWORD");
+        return Result.success("临时密码：" + temporaryPassword);
+    }
+
+    private String generateTemporaryPassword() {
+        StringBuilder password = new StringBuilder(RESET_PASSWORD_LENGTH);
+        for (int i = 0; i < RESET_PASSWORD_LENGTH; i++) {
+            password.append(RESET_PASSWORD_CHARS[PASSWORD_RANDOM.nextInt(RESET_PASSWORD_CHARS.length)]);
+        }
+        return password.toString();
     }
 
     private SysUser findMerchant(Long id) {

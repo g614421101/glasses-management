@@ -1,0 +1,15 @@
+app:
+  invite-code: replace-with-your-private-invite-code
+
+glasses:
+  admin:
+    username: admin
+    password: replace-with-a-strong-initial-admin-password
+    real-name: System Administrator
+    enabled: true
+
+spring:
+  datasource:
+    url: replace-with-mysql-jdbc-url
+    username: replace-with-mysql-user
+    password: replace-with-mysql-password
