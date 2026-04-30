@@ -74,3 +74,5 @@ pnpm-debug.log*
 **/application-secret.properties
 *.pem
 *.key
+
+/changelog/AI_CONTEXT.md
