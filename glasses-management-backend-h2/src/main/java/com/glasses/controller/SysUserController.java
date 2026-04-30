@@ -3,7 +3,6 @@ package com.glasses.controller;
 import cn.dev33.satoken.annotation.SaCheckRole;
 import cn.dev33.satoken.stp.StpUtil;
 import cn.hutool.crypto.digest.BCrypt;
-import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.glasses.constant.RoleConstants;
 import com.glasses.entity.SysUser;
 import com.glasses.mapper.SysUserMapper;
@@ -36,15 +35,7 @@ public class SysUserController {
 
     @GetMapping("/list")
     public Result<List<SysUser>> listUsers(@RequestParam(defaultValue = "false") Boolean includeDeleted) {
-        LambdaQueryWrapper<SysUser> wrapper = new LambdaQueryWrapper<SysUser>()
-                .ne(SysUser::getRole, RoleConstants.ADMIN);
-        if (!Boolean.TRUE.equals(includeDeleted)) {
-            wrapper.eq(SysUser::getDeleted, false);
-        }
-        wrapper.orderByDesc(SysUser::getDeleted)
-                .orderByDesc(SysUser::getCreateTime);
-
-        List<SysUser> users = sysUserMapper.selectList(wrapper);
+        List<SysUser> users = sysUserMapper.selectMerchants(Boolean.TRUE.equals(includeDeleted), RoleConstants.ADMIN);
         users.forEach(u -> u.setPassword(null));
         return Result.success(users);
     }
@@ -83,11 +74,7 @@ public class SysUserController {
         if (user == null) {
             return Result.error("账号不存在或不允许操作");
         }
-        user.setDeleted(true);
-        user.setDeletedTime(new Date());
-        user.setDisabled(true);
-        user.setDisabledTime(new Date());
-        sysUserMapper.updateById(user);
+        sysUserMapper.softDeleteMerchantById(id, RoleConstants.ADMIN, new Date());
         StpUtil.logout(user.getId());
         return Result.success(true);
     }
@@ -98,11 +85,7 @@ public class SysUserController {
         if (user == null) {
             return Result.error("账号不存在或不允许操作");
         }
-        user.setDeleted(false);
-        user.setDeletedTime(null);
-        user.setDisabled(false);
-        user.setDisabledTime(null);
-        sysUserMapper.updateById(user);
+        sysUserMapper.restoreMerchantById(id, RoleConstants.ADMIN);
         return Result.success(true);
     }
 
@@ -115,7 +98,7 @@ public class SysUserController {
         if (!Boolean.TRUE.equals(user.getDeleted())) {
             return Result.error("只能彻底删除已进入回收站的商户账号");
         }
-        sysUserMapper.deleteById(id);
+        sysUserMapper.physicalDeleteMerchantById(id, RoleConstants.ADMIN);
         return Result.success(true);
     }
 
@@ -145,7 +128,7 @@ public class SysUserController {
     }
 
     private SysUser findMerchant(Long id) {
-        SysUser user = sysUserMapper.selectById(id);
+        SysUser user = sysUserMapper.selectAnyById(id);
         if (user == null || RoleConstants.ADMIN.equals(user.getRole())) {
             return null;
         }

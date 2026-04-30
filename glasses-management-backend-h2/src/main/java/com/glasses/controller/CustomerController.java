@@ -1,11 +1,9 @@
 package com.glasses.controller;
 
 import cn.dev33.satoken.stp.StpUtil;
-import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.glasses.entity.Customer;
-import com.glasses.entity.OptometryRecord;
-import com.glasses.entity.SalesRecord;
+import com.glasses.mapper.CustomerMapper;
 import com.glasses.mapper.OptometryRecordMapper;
 import com.glasses.mapper.SalesRecordMapper;
 import com.glasses.service.CustomerService;
@@ -21,6 +19,9 @@ public class CustomerController {
 
     @Autowired
     private CustomerService customerService;
+
+    @Autowired
+    private CustomerMapper customerMapper;
 
     @Autowired
     private OptometryRecordMapper optometryRecordMapper;
@@ -54,26 +55,9 @@ public class CustomerController {
         }
         Date now = new Date();
         Long loginId = StpUtil.getLoginIdAsLong();
-        customer.setDeleted(true);
-        customer.setDeletedTime(now);
-        customer.setDeletedBy(loginId);
-        customerService.updateById(customer);
-
-        OptometryRecord optometryUpdate = new OptometryRecord();
-        optometryUpdate.setDeleted(true);
-        optometryUpdate.setDeletedTime(now);
-        optometryUpdate.setDeletedBy(loginId);
-        optometryRecordMapper.update(optometryUpdate, new LambdaQueryWrapper<OptometryRecord>()
-                .eq(OptometryRecord::getCustomerId, id)
-                .eq(OptometryRecord::getDeleted, false));
-
-        SalesRecord salesUpdate = new SalesRecord();
-        salesUpdate.setDeleted(true);
-        salesUpdate.setDeletedTime(now);
-        salesUpdate.setDeletedBy(loginId);
-        salesRecordMapper.update(salesUpdate, new LambdaQueryWrapper<SalesRecord>()
-                .eq(SalesRecord::getCustomerId, id)
-                .eq(SalesRecord::getDeleted, false));
+        customerMapper.softDeleteById(id, now, loginId);
+        optometryRecordMapper.softDeleteByCustomerId(id, now, loginId);
+        salesRecordMapper.softDeleteByCustomerId(id, now, loginId);
 
         return Result.success(true);
     }

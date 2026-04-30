@@ -1,7 +1,6 @@
 package com.glasses.config;
 
 import cn.hutool.crypto.digest.BCrypt;
-import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.glasses.constant.RoleConstants;
 import com.glasses.entity.SysUser;
 import com.glasses.mapper.SysUserMapper;
@@ -30,14 +29,9 @@ public class DataInitializer implements ApplicationRunner {
             return;
         }
 
-        SysUser admin = sysUserMapper.selectOne(new LambdaQueryWrapper<SysUser>()
-                .eq(SysUser::getRole, RoleConstants.ADMIN)
-                .eq(SysUser::getDeleted, false)
-                .last("LIMIT 1"));
+        SysUser admin = sysUserMapper.selectAnyByRole(RoleConstants.ADMIN);
 
-        SysUser configuredUser = sysUserMapper.selectOne(new LambdaQueryWrapper<SysUser>()
-                .eq(SysUser::getUsername, adminProperties.getUsername())
-                .last("LIMIT 1"));
+        SysUser configuredUser = sysUserMapper.selectAnyByUsername(adminProperties.getUsername());
         if (admin == null && configuredUser != null) {
             admin = configuredUser;
         }
@@ -77,7 +71,7 @@ public class DataInitializer implements ApplicationRunner {
         }
 
         if (changed) {
-            sysUserMapper.updateById(admin);
+            sysUserMapper.syncAdminAccount(admin.getId(), RoleConstants.ADMIN, adminProperties.getRealName());
             log.info("[DataInitializer] admin account {} status synchronized", admin.getUsername());
         } else {
             log.info("[DataInitializer] admin account {} exists; password is not overwritten", admin.getUsername());

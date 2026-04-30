@@ -3,6 +3,7 @@ package com.glasses.controller;
 import cn.dev33.satoken.stp.StpUtil;
 import cn.hutool.core.date.DateUtil;
 import com.glasses.entity.SalesRecord;
+import com.glasses.mapper.SalesRecordMapper;
 import com.glasses.service.SalesRecordService;
 import com.glasses.util.Result;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,6 +21,9 @@ public class SalesRecordController {
 
     @Autowired
     private SalesRecordService salesRecordService;
+
+    @Autowired
+    private SalesRecordMapper salesRecordMapper;
 
     @PostMapping("/add")
     public Result<Boolean> addRecord(@RequestBody SalesRecord record) {
@@ -51,10 +55,7 @@ public class SalesRecordController {
         if (record == null) {
             return Result.error("配镜记录不存在");
         }
-        record.setDeleted(true);
-        record.setDeletedTime(DateUtil.date());
-        record.setDeletedBy(StpUtil.getLoginIdAsLong());
-        return Result.success(salesRecordService.updateById(record));
+        return Result.success(salesRecordMapper.softDeleteById(id, DateUtil.date(), StpUtil.getLoginIdAsLong()) > 0);
     }
 
     @GetMapping("/stats")

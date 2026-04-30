@@ -19,6 +19,7 @@ import com.itextpdf.layout.Document;
 import com.itextpdf.layout.element.Cell;
 import com.itextpdf.layout.element.Paragraph;
 import com.itextpdf.layout.element.Table;
+import com.itextpdf.layout.properties.Property;
 import com.itextpdf.layout.properties.TextAlignment;
 import com.itextpdf.layout.properties.UnitValue;
 import jakarta.servlet.http.HttpServletResponse;
@@ -93,8 +94,8 @@ public class PrintController {
         }
 
         // 标题
-        doc.add(new Paragraph("配 镜 处 方 单")
-                .setFont(chineseFont).setFontSize(22).setBold()
+        doc.add(bold(new Paragraph("配 镜 处 方 单")
+                .setFont(chineseFont).setFontSize(22))
                 .setTextAlignment(TextAlignment.CENTER).setMarginBottom(5));
         doc.add(new Paragraph("Glasses Prescription")
                 .setFontSize(10).setTextAlignment(TextAlignment.CENTER)
@@ -113,7 +114,7 @@ public class PrintController {
 
         // 验光数据表格
         if (opto != null) {
-            doc.add(new Paragraph("【验光数据】").setFont(chineseFont).setFontSize(12).setBold().setMarginBottom(5));
+            doc.add(bold(new Paragraph("【验光数据】").setFont(chineseFont).setFontSize(12)).setMarginBottom(5));
 
             Table optoTable = new Table(UnitValue.createPercentArray(new float[] { 15, 17, 17, 17, 17, 17 }))
                     .useAllAvailableWidth().setMarginBottom(10);
@@ -121,7 +122,7 @@ public class PrintController {
             // 表头
             String[] headers = { "眼别", "球镜 SPH", "柱镜 CYL", "轴位 AXIS", "矫正视力 VA", "瞳距 PD" };
             for (String h : headers) {
-                optoTable.addHeaderCell(new Cell().add(new Paragraph(h).setFont(chineseFont).setFontSize(9).setBold())
+                optoTable.addHeaderCell(new Cell().add(bold(new Paragraph(h).setFont(chineseFont).setFontSize(9)))
                         .setTextAlignment(TextAlignment.CENTER));
             }
 
@@ -158,14 +159,14 @@ public class PrintController {
         }
 
         // 配镜信息表格
-        doc.add(new Paragraph("【配镜明细】").setFont(chineseFont).setFontSize(12).setBold().setMarginBottom(5));
+        doc.add(bold(new Paragraph("【配镜明细】").setFont(chineseFont).setFontSize(12)).setMarginBottom(5));
 
         Table salesTable = new Table(UnitValue.createPercentArray(new float[] { 20, 30, 25, 25 }))
                 .useAllAvailableWidth().setMarginBottom(15);
 
         String[] sHeaders = { "项目", "品牌/参数", "型号/规格", "价格(元)" };
         for (String h : sHeaders) {
-            salesTable.addHeaderCell(new Cell().add(new Paragraph(h).setFont(chineseFont).setFontSize(9).setBold())
+            salesTable.addHeaderCell(new Cell().add(bold(new Paragraph(h).setFont(chineseFont).setFontSize(9)))
                     .setTextAlignment(TextAlignment.CENTER));
         }
 
@@ -184,8 +185,8 @@ public class PrintController {
         doc.add(salesTable);
 
         // 合计金额
-        doc.add(new Paragraph("实收合计:  ￥" + salesRecord.getTotalAmount())
-                .setFont(chineseFont).setFontSize(16).setBold()
+        doc.add(bold(new Paragraph("实收合计:  ￥" + salesRecord.getTotalAmount())
+                .setFont(chineseFont).setFontSize(16))
                 .setTextAlignment(TextAlignment.RIGHT).setMarginBottom(30));
 
         // 签名区域
@@ -331,6 +332,11 @@ public class PrintController {
     private Cell cell(String text, PdfFont font) {
         return new Cell().add(new Paragraph(text).setFont(font).setFontSize(9))
                 .setTextAlignment(TextAlignment.CENTER);
+    }
+
+    private Paragraph bold(Paragraph paragraph) {
+        paragraph.setProperty(Property.BOLD_SIMULATION, true);
+        return paragraph;
     }
 
     private String fmtDiopter(java.math.BigDecimal val) {

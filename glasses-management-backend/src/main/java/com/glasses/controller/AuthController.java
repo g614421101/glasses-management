@@ -83,10 +83,7 @@ public class AuthController {
             return Result.error("两次输入的密码不一致");
         }
 
-        Long duplicateCount = sysUserMapper.selectCount(new LambdaQueryWrapper<SysUser>()
-                .eq(SysUser::getUsername, username)
-                .or()
-                .eq(SysUser::getPhone, phone));
+        Long duplicateCount = sysUserMapper.countByUsernameOrPhoneIncludingDeleted(username, phone);
         if (duplicateCount != null && duplicateCount > 0) {
             return Result.error("用户名或手机号已被注册");
         }
@@ -173,9 +170,7 @@ public class AuthController {
             return Result.error("该账号已封禁");
         }
 
-        Long duplicateCount = sysUserMapper.selectCount(new LambdaQueryWrapper<SysUser>()
-                .ne(SysUser::getId, user.getId())
-                .and(w -> w.eq(SysUser::getUsername, username).or().eq(SysUser::getPhone, phone)));
+        Long duplicateCount = sysUserMapper.countByUsernameOrPhoneExcludingIdIncludingDeleted(user.getId(), username, phone);
         if (duplicateCount != null && duplicateCount > 0) {
             return Result.error("用户名或手机号已被使用");
         }
