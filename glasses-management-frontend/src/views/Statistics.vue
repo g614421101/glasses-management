@@ -117,7 +117,7 @@
 <script setup lang="ts">
 import { ref, computed, onMounted, reactive } from 'vue';
 import { useRouter } from 'vue-router';
-import request from '../utils/request';
+import request, { downloadBlob } from '../utils/request';
 import { ElMessage } from 'element-plus';
 import { Money, Ticket, DataLine, Download } from '@element-plus/icons-vue';
 import dayjs from 'dayjs';
@@ -193,14 +193,18 @@ const goToArchive = (customerId: any) => {
   router.push('/archive/' + customerId);
 };
 
-const exportExcel = () => {
-  let url = `http://localhost:8080/api/print/export/revenue?showAll=${showAll.value}`;
+const exportExcel = async () => {
+  let url = `/print/export/revenue?showAll=${showAll.value}`;
   
   if (!showAll.value && dateRange.value) {
     url += `&startDate=${dateRange.value[0]}&endDate=${dateRange.value[1]}`;
   }
   
-  window.open(url, '_blank');
+  try {
+    await downloadBlob(url, 'revenue.xlsx');
+  } catch {
+    // request helper already shows the user-facing error.
+  }
 };
 </script>
 

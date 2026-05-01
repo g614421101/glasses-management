@@ -320,7 +320,7 @@
 <script setup lang="ts">
 import { ref, reactive, onMounted, computed } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
-import request from '../utils/request';
+import request, { openBlob, downloadBlob } from '../utils/request';
 import { ElMessage, ElMessageBox } from 'element-plus';
 import {
   Back,
@@ -495,14 +495,20 @@ const handleDelete = (item) => {
   });
 };
 
-const printRecord = (id) => {
-  const url = `http://localhost:8080/api/print/prescription/${id}`;
-  window.open(url, '_blank');
+const printRecord = async (id) => {
+  try {
+    await openBlob(`/print/prescription/${id}`);
+  } catch {
+    // request helper already shows the user-facing error.
+  }
 };
 
-const exportExcel = () => {
-  const url = `http://localhost:8080/api/print/export/customer/${customerId}`;
-  window.open(url, '_blank');
+const exportExcel = async () => {
+  try {
+    await downloadBlob(`/print/export/customer/${customerId}`, 'customer-records.xlsx');
+  } catch {
+    // request helper already shows the user-facing error.
+  }
 };
 
 const fmt = (val) => {
