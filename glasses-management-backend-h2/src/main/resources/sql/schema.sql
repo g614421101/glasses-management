@@ -12,8 +12,8 @@ CREATE TABLE IF NOT EXISTS `sys_user` (
   `deleted_time` datetime DEFAULT NULL,
   `create_time` datetime DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
-  UNIQUE KEY `uk_username` (`username`),
-  UNIQUE KEY `uk_phone` (`phone`)
+  UNIQUE KEY `uk_sys_user_username` (`username`),
+  UNIQUE KEY `uk_sys_user_phone` (`phone`)
 );
 
 CREATE TABLE IF NOT EXISTS `customer` (
@@ -29,7 +29,7 @@ CREATE TABLE IF NOT EXISTS `customer` (
   `create_time` datetime DEFAULT CURRENT_TIMESTAMP,
   `update_time` datetime DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
-  UNIQUE KEY `uk_phone` (`phone`)
+  UNIQUE KEY `uk_customer_phone` (`phone`)
 );
 
 CREATE TABLE IF NOT EXISTS `optometry_record` (
@@ -77,5 +77,5 @@ CREATE TABLE IF NOT EXISTS `sales_record` (
   `deleted_time` datetime DEFAULT NULL,
   `deleted_by` bigint DEFAULT NULL,
   PRIMARY KEY (`id`),
-  UNIQUE KEY `uk_record_no` (`record_no`)
+  UNIQUE KEY `uk_sales_record_record_no` (`record_no`)
 );
