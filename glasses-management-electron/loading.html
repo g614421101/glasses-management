@@ -30,7 +30,20 @@
             100% { transform: rotate(360deg); }
         }
         h2 { margin: 0 0 10px 0; font-size: 20px; color: #2c3e50; }
-        #status { color: #666; font-size: 14px; text-align: center; max-width: 80%; line-height: 1.5; }
+        #status {
+            color: #666;
+            font-size: 14px;
+            text-align: center;
+            max-width: 80%;
+            line-height: 1.6;
+            white-space: pre-wrap;
+            word-break: break-all;
+        }
+        #status.error {
+            color: #c0392b;
+            max-width: 90%;
+            font-size: 13px;
+        }
         .progress-container {
             width: 60%;
             height: 8px;
@@ -46,27 +59,87 @@
             width: 0%;
             transition: width 0.3s;
         }
+        #log-actions {
+            display: none;
+            margin-top: 16px;
+        }
+        #log-actions button {
+            background: #4a90e2;
+            color: #fff;
+            border: none;
+            border-radius: 4px;
+            padding: 8px 18px;
+            margin: 4px 6px;
+            font-size: 13px;
+            cursor: pointer;
+        }
+        #log-actions button:hover {
+            background: #357abd;
+        }
+        #log-actions button.secondary {
+            background: #6c757d;
+        }
+        #log-actions button.secondary:hover {
+            background: #545b62;
+        }
     </style>
 </head>
 <body>
-    <div class="loader"></div>
+    <div class="loader" id="loader"></div>
     <h2>视光管理系统</h2>
     <div id="status">正在检查运行环境...</div>
     <div class="progress-container" id="progress-container">
         <div class="progress-bar" id="progress-bar"></div>
     </div>
+    <div id="log-actions">
+        <button id="btn-open-log">📁 打开日志文件夹</button>
+        <button id="btn-copy-path" class="secondary">📋 复制日志路径</button>
+    </div>
 
     <script>
-        // Use Electron IPC to receive status updates
+        var errorOccurred = false;
+
+        function showLogActions() {
+            document.getElementById('log-actions').style.display = 'block';
+            document.getElementById('loader').style.display = 'none';
+        }
+
         if (window.electronAPI) {
             window.electronAPI.onUpdateStatus((text, progress) => {
-                document.getElementById('status').innerText = text;
+                var el = document.getElementById('status');
+                el.innerText = text;
+
+                // Detect error states
+                if (text.includes('失败') || text.includes('异常') || text.includes('超时') || text.includes('错误')) {
+                    el.className = 'error';
+                    errorOccurred = true;
+                    showLogActions();
+                }
+
                 if (progress !== undefined) {
-                    const pct = Math.round(progress * 100);
-                    const container = document.getElementById('progress-container');
-                    const bar = document.getElementById('progress-bar');
+                    var container = document.getElementById('progress-container');
+                    var bar = document.getElementById('progress-bar');
                     container.style.display = 'block';
-                    bar.style.width = pct + '%';
+                    bar.style.width = (Math.round(progress * 100)) + '%';
+                }
+            });
+
+            document.getElementById('btn-open-log').addEventListener('click', function () {
+                window.electronAPI.openLogFolder();
+            });
+
+            document.getElementById('btn-copy-path').addEventListener('click', async function () {
+                try {
+                    var p = await window.electronAPI.getLogPath();
+                    if (p) {
+                        await navigator.clipboard.writeText(p);
+                        var btn = document.getElementById('btn-copy-path');
+                        var orig = btn.innerText;
+                        btn.innerText = '已复制!';
+                        setTimeout(function () { btn.innerText = orig; }, 2000);
+                    }
+                } catch (e) {
+                    // clipboard API may not be available; ignore
                 }
             });
         }
