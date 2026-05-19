@@ -48,6 +48,10 @@
             <el-icon><TrendCharts /></el-icon>
             <span>营收统计</span>
           </el-menu-item>
+          <el-menu-item index="/data-manage">
+            <el-icon><FolderOpened /></el-icon>
+            <span>数据管理</span>
+          </el-menu-item>
           <el-menu-item index="/profile">
             <el-icon><User /></el-icon>
             <span>个人主页</span>
@@ -77,7 +81,7 @@
 <script setup lang="ts">
 import { useAuthStore } from '../store/auth';
 import { useRouter, useRoute } from 'vue-router';
-import { Monitor, User, Setting, View, TrendCharts, Moon, Sunny, Delete } from '@element-plus/icons-vue';
+import { Monitor, User, Setting, View, TrendCharts, Moon, Sunny, Delete, FolderOpened } from '@element-plus/icons-vue';
 import { useTheme } from '../utils/theme';
 
 const authStore = useAuthStore();

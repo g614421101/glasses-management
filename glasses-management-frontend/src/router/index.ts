@@ -46,6 +46,11 @@ const routes: Array<RouteRecordRaw> = [
         path: 'stats',
         name: 'Statistics',
         component: () => import('../views/Statistics.vue')
+      },
+      {
+        path: 'data-manage',
+        name: 'DataManage',
+        component: () => import('../views/DataManage.vue')
       }
     ]
   },
