@@ -80,4 +80,7 @@ public interface SysUserMapper extends BaseMapper<SysUser> {
 
     @Delete("DELETE FROM sys_user WHERE deleted = true AND role <> #{adminRole} AND deleted_time < #{expireBefore}")
     int physicalDeleteExpired(@Param("adminRole") String adminRole, @Param("expireBefore") Date expireBefore);
+
+    @Select("SELECT * FROM sys_user")
+    List<SysUser> selectAllIncludingDeleted();
 }

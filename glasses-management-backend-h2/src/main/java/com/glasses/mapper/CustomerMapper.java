@@ -32,4 +32,10 @@ public interface CustomerMapper extends BaseMapper<Customer> {
 
     @Delete("DELETE FROM customer WHERE deleted = true AND deleted_time < #{expireBefore}")
     int physicalDeleteExpired(@Param("expireBefore") Date expireBefore);
+
+    @Select("SELECT * FROM customer")
+    List<Customer> selectAllIncludingDeleted();
+
+    @Select("SELECT * FROM customer WHERE phone = #{phone} LIMIT 1")
+    Customer selectByPhoneIncludingDeleted(@Param("phone") String phone);
 }

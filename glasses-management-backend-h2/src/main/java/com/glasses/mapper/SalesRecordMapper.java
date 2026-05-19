@@ -43,4 +43,10 @@ public interface SalesRecordMapper extends BaseMapper<SalesRecord> {
 
     @Delete("DELETE FROM sales_record WHERE deleted = true AND deleted_time < #{expireBefore}")
     int physicalDeleteExpired(@Param("expireBefore") Date expireBefore);
+
+    @Select("SELECT * FROM sales_record")
+    List<SalesRecord> selectAllIncludingDeleted();
+
+    @Select("SELECT * FROM sales_record WHERE record_no = #{recordNo} LIMIT 1")
+    SalesRecord selectByRecordNoIncludingDeleted(@Param("recordNo") String recordNo);
 }

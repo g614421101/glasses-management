@@ -43,4 +43,11 @@ public interface OptometryRecordMapper extends BaseMapper<OptometryRecord> {
 
     @Delete("DELETE FROM optometry_record WHERE deleted = true AND deleted_time < #{expireBefore}")
     int physicalDeleteExpired(@Param("expireBefore") Date expireBefore);
+
+    @Select("SELECT * FROM optometry_record")
+    List<OptometryRecord> selectAllIncludingDeleted();
+
+    @Select("SELECT * FROM optometry_record WHERE customer_id = #{customerId} AND exam_date = #{examDate}")
+    List<OptometryRecord> findByCustomerAndExamDate(@Param("customerId") Long customerId,
+                                                     @Param("examDate") Date examDate);
 }
