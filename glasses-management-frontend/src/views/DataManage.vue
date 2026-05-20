@@ -75,12 +75,30 @@
           </el-button>
         </div>
 
-        <div v-if="importResult" class="import-result" :class="{ 'import-error': importResult.error }">
-          <el-icon :size="18">
-            <CircleCheckFilled v-if="!importResult.error" />
-            <CircleCloseFilled v-else />
-          </el-icon>
-          <span>{{ importResult.message }}</span>
+        <div v-if="importResult" class="import-result-container">
+          <div class="import-result-header" :class="{ 'import-error': importResult.error }">
+            <el-icon :size="18">
+              <CircleCheckFilled v-if="!importResult.error" />
+              <CircleCloseFilled v-else />
+            </el-icon>
+            <span>{{ importResult.message }}</span>
+          </div>
+
+          <div v-if="!importResult.error && importResult.detail && importResult.detail.mode === 'merge'" class="import-result-detail">
+            <el-table :data="tableData" border stripe size="small" style="width: 100%; margin-top: 16px;">
+              <el-table-column prop="name" label="数据表" />
+              <el-table-column prop="inserted" label="新增数量" align="center">
+                <template #default="{ row }">
+                  <span class="text-success">+{{ row.inserted }}</span>
+                </template>
+              </el-table-column>
+              <el-table-column prop="skipped" label="跳过数量" align="center">
+                <template #default="{ row }">
+                  <span class="text-muted">{{ row.skipped }}</span>
+                </template>
+              </el-table-column>
+            </el-table>
+          </div>
         </div>
       </section>
     </div>
@@ -108,7 +126,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue';
+import { ref, computed } from 'vue';
 import { ElMessage, ElMessageBox } from 'element-plus';
 import {
   Download,
@@ -126,9 +144,33 @@ const importLoading = ref(false);
 const selectedFile = ref<File | null>(null);
 const fileInputRef = ref<HTMLInputElement | null>(null);
 const importMode = ref('merge');
-const importResult = ref<{ message: string; error: boolean } | null>(null);
+
+interface ImportDetail {
+  mode: string;
+  sysUserInserted: number;
+  sysUserSkipped: number;
+  customerInserted: number;
+  customerSkipped: number;
+  optometryInserted: number;
+  optometrySkipped: number;
+  salesInserted: number;
+  salesSkipped: number;
+}
+
+const importResult = ref<{ message: string; error: boolean; detail?: ImportDetail } | null>(null);
 const resetLoading = ref(false);
 const resetResult = ref<{ message: string; error: boolean } | null>(null);
+
+const tableData = computed(() => {
+  if (!importResult.value?.detail) return [];
+  const d = importResult.value.detail;
+  return [
+    { name: '用户数据', inserted: d.sysUserInserted, skipped: d.sysUserSkipped },
+    { name: '顾客档案', inserted: d.customerInserted, skipped: d.customerSkipped },
+    { name: '验光记录', inserted: d.optometryInserted, skipped: d.optometrySkipped },
+    { name: '销售记录', inserted: d.salesInserted, skipped: d.salesSkipped },
+  ];
+});
 
 const handleExport = async () => {
   exportLoading.value = true;
@@ -188,8 +230,13 @@ const handleImport = async () => {
       headers: { 'Content-Type': 'multipart/form-data' }
     });
     // request interceptor unwraps Result<T> and returns the data field
-    importResult.value = { message: String(res || '导入成功'), error: false };
-    ElMessage.success(String(res || '导入成功'));
+    const resData = res as any as ImportDetail;
+    const isReplaceFinished = resData.mode === 'replace';
+    const totalInserted = resData.sysUserInserted + resData.customerInserted + resData.optometryInserted + resData.salesInserted;
+    
+    let msg = isReplaceFinished ? `成功导入 ${totalInserted} 条记录（全量替换）` : `导入完成`;
+    importResult.value = { message: msg, error: false, detail: resData };
+    ElMessage.success(msg);
     if (fileInputRef.value) {
       fileInputRef.value.value = '';
     }
@@ -396,8 +443,12 @@ const handleReset = async () => {
   border-radius: 12px;
 }
 
-.import-result {
+.import-result-container {
   margin-top: 16px;
+  width: 100%;
+}
+
+.import-result-header {
   padding: 12px 18px;
   border-radius: 10px;
   font-size: 14px;
@@ -407,13 +458,21 @@ const handleReset = async () => {
   gap: 8px;
   background: rgba(34, 197, 94, 0.1);
   color: #16a34a;
-  width: 100%;
   justify-content: center;
 }
 
-.import-result.import-error {
+.import-result-header.import-error {
   background: rgba(239, 68, 68, 0.1);
   color: #dc2626;
+}
+
+.text-success {
+  color: #16a34a;
+  font-weight: bold;
+}
+
+.text-muted {
+  color: #94a3b8;
 }
 
 .reset-card {

@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.glasses.constant.RoleConstants;
 import com.glasses.dto.DataExportDTO;
+import com.glasses.dto.ImportResultDTO;
 import com.glasses.entity.Customer;
 import com.glasses.entity.OptometryRecord;
 import com.glasses.entity.SalesRecord;
@@ -58,7 +59,7 @@ public class DataServiceImpl implements DataService {
 
     @Override
     @Transactional
-    public int importData(MultipartFile file, String mode) throws IOException {
+    public ImportResultDTO importData(MultipartFile file, String mode) throws IOException {
         DataExportDTO dto = objectMapper.readValue(file.getInputStream(), DataExportDTO.class);
 
         if ("replace".equals(mode)) {
@@ -70,7 +71,7 @@ public class DataServiceImpl implements DataService {
     /**
      * Full replace: clear all tables (except admin) then insert everything fresh.
      */
-    private int importReplace(DataExportDTO dto) {
+    private ImportResultDTO importReplace(DataExportDTO dto) {
         // Clear in reverse dependency order
         salesRecordMapper.deleteAll();
         optometryRecordMapper.deleteAll();
@@ -78,7 +79,8 @@ public class DataServiceImpl implements DataService {
         sysUserMapper.deleteAllNonAdmin(RoleConstants.ADMIN);
         log.info("All data cleared (admin preserved). Starting import...");
 
-        int totalImported = 0;
+        ImportResultDTO result = new ImportResultDTO();
+        result.setMode("replace");
 
         // 1. sys_user: skip admin if already exists (preserved by deleteAllNonAdmin)
         Map<Long, Long> userIdMap = new HashMap<>();
@@ -88,6 +90,7 @@ public class DataServiceImpl implements DataService {
                     SysUser existingAdmin = sysUserMapper.selectAnyByRole(RoleConstants.ADMIN);
                     if (existingAdmin != null) {
                         userIdMap.put(user.getId(), existingAdmin.getId());
+                        result.setSysUserSkipped(result.getSysUserSkipped() + 1);
                         continue;
                     }
                 }
@@ -102,7 +105,7 @@ public class DataServiceImpl implements DataService {
                     sysUserMapper.updateById(user);
                 }
                 userIdMap.put(oldId, user.getId());
-                totalImported++;
+                result.setSysUserInserted(result.getSysUserInserted() + 1);
             }
         }
 
@@ -125,7 +128,7 @@ public class DataServiceImpl implements DataService {
                     customerMapper.updateById(customer);
                 }
                 customerIdMap.put(oldId, customer.getId());
-                totalImported++;
+                result.setCustomerInserted(result.getCustomerInserted() + 1);
             }
         }
 
@@ -151,7 +154,7 @@ public class DataServiceImpl implements DataService {
                     optometryRecordMapper.updateById(record);
                 }
                 optometryIdMap.put(oldId, record.getId());
-                totalImported++;
+                result.setOptometryInserted(result.getOptometryInserted() + 1);
             }
         }
 
@@ -180,19 +183,20 @@ public class DataServiceImpl implements DataService {
                     record.setDeleted(true);
                     salesRecordMapper.updateById(record);
                 }
-                totalImported++;
+                result.setSalesInserted(result.getSalesInserted() + 1);
             }
         }
 
-        log.info("Replace import completed. Total records imported: {}", totalImported);
-        return totalImported;
+        log.info("Replace import completed.");
+        return result;
     }
 
     /**
      * Merge append: dedup by business keys, skip existing records.
      */
-    private int importMerge(DataExportDTO dto) {
-        int totalImported = 0;
+    private ImportResultDTO importMerge(DataExportDTO dto) {
+        ImportResultDTO result = new ImportResultDTO();
+        result.setMode("merge");
 
         // 1. sys_user: dedup by username
         Map<Long, Long> userIdMap = new HashMap<>();
@@ -201,6 +205,7 @@ public class DataServiceImpl implements DataService {
                 SysUser existing = sysUserMapper.selectAnyByUsername(user.getUsername());
                 if (existing != null) {
                     userIdMap.put(user.getId(), existing.getId());
+                    result.setSysUserSkipped(result.getSysUserSkipped() + 1);
                 } else {
                     boolean wasDeleted = Boolean.TRUE.equals(user.getDeleted());
                     Long oldId = user.getId();
@@ -215,7 +220,7 @@ public class DataServiceImpl implements DataService {
                         sysUserMapper.updateById(user);
                     }
                     userIdMap.put(oldId, user.getId());
-                    totalImported++;
+                    result.setSysUserInserted(result.getSysUserInserted() + 1);
                 }
             }
         }
@@ -227,6 +232,7 @@ public class DataServiceImpl implements DataService {
                 Customer existing = findCustomerByPhone(customer.getPhone());
                 if (existing != null) {
                     customerIdMap.put(customer.getId(), existing.getId());
+                    result.setCustomerSkipped(result.getCustomerSkipped() + 1);
                 } else {
                     boolean wasDeleted = Boolean.TRUE.equals(customer.getDeleted());
                     if (customer.getDeletedBy() != null) {
@@ -243,7 +249,7 @@ public class DataServiceImpl implements DataService {
                         customerMapper.updateById(customer);
                     }
                     customerIdMap.put(oldId, customer.getId());
-                    totalImported++;
+                    result.setCustomerInserted(result.getCustomerInserted() + 1);
                 }
             }
         }
@@ -280,6 +286,7 @@ public class DataServiceImpl implements DataService {
                     }
                 }
                 if (found) {
+                    result.setOptometrySkipped(result.getOptometrySkipped() + 1);
                     continue;
                 }
 
@@ -295,7 +302,7 @@ public class DataServiceImpl implements DataService {
                     optometryRecordMapper.updateById(record);
                 }
                 optometryIdMap.put(oldId, record.getId());
-                totalImported++;
+                result.setOptometryInserted(result.getOptometryInserted() + 1);
             }
         }
 
@@ -304,6 +311,7 @@ public class DataServiceImpl implements DataService {
             for (SalesRecord record : dto.getSalesRecords()) {
                 SalesRecord existing = findSalesRecordByNo(record.getRecordNo());
                 if (existing != null) {
+                    result.setSalesSkipped(result.getSalesSkipped() + 1);
                     continue;
                 }
                 boolean wasDeleted = Boolean.TRUE.equals(record.getDeleted());
@@ -328,12 +336,12 @@ public class DataServiceImpl implements DataService {
                     record.setDeleted(true);
                     salesRecordMapper.updateById(record);
                 }
-                totalImported++;
+                result.setSalesInserted(result.getSalesInserted() + 1);
             }
         }
 
-        log.info("Merge import completed. Total records imported: {}", totalImported);
-        return totalImported;
+        log.info("Merge import completed.");
+        return result;
     }
 
     private Customer findCustomerByPhone(String phone) {

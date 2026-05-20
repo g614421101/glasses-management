@@ -3,6 +3,7 @@ package com.glasses.controller;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.glasses.dto.DataExportDTO;
+import com.glasses.dto.ImportResultDTO;
 import com.glasses.service.DataService;
 import com.glasses.util.Result;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -45,15 +46,14 @@ public class DataController {
     }
 
     @PostMapping("/import")
-    public Result<String> importData(@RequestParam("file") MultipartFile file,
-                                     @RequestParam(defaultValue = "merge") String mode) {
+    public Result<ImportResultDTO> importData(@RequestParam("file") MultipartFile file,
+                                              @RequestParam(defaultValue = "merge") String mode) {
         if (file == null || file.isEmpty()) {
             return Result.error("请选择要导入的文件");
         }
         try {
-            int count = dataService.importData(file, mode);
-            String label = "replace".equals(mode) ? "（全量替换）" : "（合并追加）";
-            return Result.success("成功导入 " + count + " 条记录" + label);
+            ImportResultDTO result = dataService.importData(file, mode);
+            return Result.success(result);
         } catch (IOException e) {
             return Result.error("文件读取失败: " + e.getMessage());
         } catch (Exception e) {
