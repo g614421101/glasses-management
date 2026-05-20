@@ -38,4 +38,7 @@ public interface CustomerMapper extends BaseMapper<Customer> {
 
     @Select("SELECT * FROM customer WHERE phone = #{phone} LIMIT 1")
     Customer selectByPhoneIncludingDeleted(@Param("phone") String phone);
+
+    @Delete("DELETE FROM customer")
+    int deleteAll();
 }

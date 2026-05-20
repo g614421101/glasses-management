@@ -49,4 +49,7 @@ public interface SalesRecordMapper extends BaseMapper<SalesRecord> {
 
     @Select("SELECT * FROM sales_record WHERE record_no = #{recordNo} LIMIT 1")
     SalesRecord selectByRecordNoIncludingDeleted(@Param("recordNo") String recordNo);
+
+    @Delete("DELETE FROM sales_record")
+    int deleteAll();
 }

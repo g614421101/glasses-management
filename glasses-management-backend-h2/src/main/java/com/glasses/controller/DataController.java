@@ -45,17 +45,29 @@ public class DataController {
     }
 
     @PostMapping("/import")
-    public Result<String> importData(@RequestParam("file") MultipartFile file) {
+    public Result<String> importData(@RequestParam("file") MultipartFile file,
+                                     @RequestParam(defaultValue = "merge") String mode) {
         if (file == null || file.isEmpty()) {
             return Result.error("请选择要导入的文件");
         }
         try {
-            int count = dataService.importData(file);
-            return Result.success("成功导入 " + count + " 条记录");
+            int count = dataService.importData(file, mode);
+            String label = "replace".equals(mode) ? "（全量替换）" : "（合并追加）";
+            return Result.success("成功导入 " + count + " 条记录" + label);
         } catch (IOException e) {
             return Result.error("文件读取失败: " + e.getMessage());
         } catch (Exception e) {
             return Result.error("导入失败: " + e.getMessage());
+        }
+    }
+
+    @PostMapping("/reset")
+    public Result<String> resetData() {
+        try {
+            int deleted = dataService.resetAllData();
+            return Result.success("已清空 " + deleted + " 条记录（管理员账号已保留）");
+        } catch (Exception e) {
+            return Result.error("清空失败: " + e.getMessage());
         }
     }
 }

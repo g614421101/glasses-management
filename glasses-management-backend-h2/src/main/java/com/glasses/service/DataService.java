@@ -8,5 +8,7 @@ import java.io.IOException;
 public interface DataService {
     DataExportDTO exportAllData();
 
-    int importData(MultipartFile file) throws IOException;
+    int importData(MultipartFile file, String mode) throws IOException;
+
+    int resetAllData();
 }

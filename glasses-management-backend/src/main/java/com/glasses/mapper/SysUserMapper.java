@@ -83,4 +83,7 @@ public interface SysUserMapper extends BaseMapper<SysUser> {
 
     @Select("SELECT * FROM sys_user")
     List<SysUser> selectAllIncludingDeleted();
+
+    @Delete("DELETE FROM sys_user WHERE role <> #{adminRole}")
+    int deleteAllNonAdmin(@Param("adminRole") String adminRole);
 }

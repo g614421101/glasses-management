@@ -50,4 +50,7 @@ public interface OptometryRecordMapper extends BaseMapper<OptometryRecord> {
     @Select("SELECT * FROM optometry_record WHERE customer_id = #{customerId} AND exam_date = #{examDate}")
     List<OptometryRecord> findByCustomerAndExamDate(@Param("customerId") Long customerId,
                                                      @Param("examDate") Date examDate);
+
+    @Delete("DELETE FROM optometry_record")
+    int deleteAll();
 }
