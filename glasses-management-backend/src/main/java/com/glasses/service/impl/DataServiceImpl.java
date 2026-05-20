@@ -22,6 +22,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.time.LocalDateTime;
+import java.util.Date;
 import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
 import java.util.List;
@@ -259,8 +260,12 @@ public class DataServiceImpl implements DataService {
                 }
 
                 boolean found = false;
+                Date examDateStart = record.getExamDate();
+                Date examDateEnd = examDateStart != null
+                        ? new Date(examDateStart.getTime() + 1000)
+                        : null;
                 List<OptometryRecord> candidates = optometryRecordMapper.findByCustomerAndExamDate(
-                        record.getCustomerId(), record.getExamDate());
+                        record.getCustomerId(), examDateStart, examDateEnd);
                 for (OptometryRecord existing : candidates) {
                     if (java.util.Objects.equals(existing.getOdSph(), record.getOdSph())
                             && java.util.Objects.equals(existing.getOdCyl(), record.getOdCyl())
