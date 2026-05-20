@@ -4,6 +4,7 @@ import cn.dev33.satoken.stp.StpUtil;
 import cn.hutool.core.date.DateUtil;
 import com.glasses.entity.SalesRecord;
 import com.glasses.mapper.SalesRecordMapper;
+import com.glasses.service.CustomerService;
 import com.glasses.service.SalesRecordService;
 import com.glasses.util.Result;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,6 +25,9 @@ public class SalesRecordController {
 
     @Autowired
     private SalesRecordMapper salesRecordMapper;
+
+    @Autowired
+    private CustomerService customerService;
 
     @PostMapping("/add")
     public Result<Boolean> addRecord(@RequestBody SalesRecord record) {
@@ -87,6 +91,25 @@ public class SalesRecordController {
                 new com.baomidou.mybatisplus.extension.plugins.pagination.Page<>(current, size);
         com.baomidou.mybatisplus.extension.plugins.pagination.Page<SalesRecord> recordsPage = 
                 salesRecordService.page(page, wrapper);
+        
+        // 补充顾客姓名
+        if (recordsPage.getRecords() != null && !recordsPage.getRecords().isEmpty()) {
+            List<Long> customerIds = recordsPage.getRecords().stream()
+                    .map(SalesRecord::getCustomerId)
+                    .filter(java.util.Objects::nonNull)
+                    .distinct()
+                    .collect(java.util.stream.Collectors.toList());
+            if (!customerIds.isEmpty()) {
+                List<com.glasses.entity.Customer> customers = customerService.listByIds(customerIds);
+                Map<Long, String> customerNameMap = customers.stream()
+                        .collect(java.util.stream.Collectors.toMap(com.glasses.entity.Customer::getId, com.glasses.entity.Customer::getName));
+                recordsPage.getRecords().forEach(record -> {
+                    if (record.getCustomerId() != null) {
+                        record.setCustomerName(customerNameMap.get(record.getCustomerId()));
+                    }
+                });
+            }
+        }
         
         Map<String, Object> result = new HashMap<>();
         result.put("totalRevenue", totalRevenue);

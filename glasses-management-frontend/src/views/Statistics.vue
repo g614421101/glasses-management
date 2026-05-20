@@ -71,9 +71,10 @@
       </div>
 
       <el-table :data="statsData.records" style="width: 100%" v-loading="loading" class="stats-table">
-        <el-table-column prop="salesDate" label="日期" min-width="180" />
-        <el-table-column prop="recordNo" label="单号" min-width="200" />
-        <el-table-column label="商品项目" min-width="220">
+        <el-table-column prop="salesDate" label="日期" min-width="160" />
+        <el-table-column prop="recordNo" label="单号" min-width="180" />
+        <el-table-column prop="customerName" label="顾客姓名" min-width="100" />
+        <el-table-column label="商品项目" min-width="200">
           <template #default="scope">
             <div class="item-tags">
               <span class="item-tag">{{ scope.row.frameBrand }} {{ scope.row.frameModel }}</span>
