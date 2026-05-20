@@ -30,14 +30,24 @@
         <h2>导入数据</h2>
         <p>从之前导出的 JSON 文件中导入数据。已存在的用户（同名）和顾客（同手机号）会跳过，验光记录和销售记录会追加导入。</p>
 
+        <el-radio-group v-model="importMode" class="import-mode-group">
+          <el-radio value="merge">合并追加（不覆盖已有数据）</el-radio>
+          <el-radio value="replace">全量替换（清空后导入）</el-radio>
+        </el-radio-group>
+
         <el-alert
-          title="导入不会覆盖现有数据"
-          type="info"
+          :title="importMode === 'replace' ? '⚠️ 全量替换将清空现有数据' : '导入不会覆盖现有数据'"
+          :type="importMode === 'replace' ? 'warning' : 'info'"
           :closable="false"
           show-icon
           class="import-alert"
         >
-          同名用户和同手机号顾客已存在时会跳过；验光记录和销售记录按单据号去重，已存在则跳过。
+          <template v-if="importMode === 'replace'">
+            将清空全部顾客、验光记录、销售记录和非管理员账号，然后从文件导入。管理员账号会被保留。
+          </template>
+          <template v-else>
+            同名用户和同手机号顾客已存在时会跳过；验光记录按顾客+日期+度数去重；销售记录按单号去重。
+          </template>
         </el-alert>
 
         <div class="import-actions">
@@ -74,6 +84,26 @@
         </div>
       </section>
     </div>
+
+    <!-- System Reset -->
+    <section class="glass-card reset-card">
+      <div class="card-icon reset-icon">
+        <el-icon :size="28"><WarningFilled /></el-icon>
+      </div>
+      <h2>清空系统数据</h2>
+      <p>彻底删除全部顾客、验光记录、销售记录和非管理员账号。管理员账号会被保留。此操作不可撤销，请谨慎使用。</p>
+      <el-button type="danger" :loading="resetLoading" @click="handleReset" class="action-btn action-btn--reset">
+        <el-icon><Delete /></el-icon>
+        清空数据
+      </el-button>
+      <div v-if="resetResult" class="import-result" :class="{ 'import-error': resetResult.error }">
+        <el-icon :size="18">
+          <CircleCheckFilled v-if="!resetResult.error" />
+          <CircleCloseFilled v-else />
+        </el-icon>
+        <span>{{ resetResult.message }}</span>
+      </div>
+    </section>
   </div>
 </template>
 
@@ -85,7 +115,9 @@ import {
   Upload,
   FolderOpened,
   CircleCheckFilled,
-  CircleCloseFilled
+  CircleCloseFilled,
+  WarningFilled,
+  Delete
 } from '@element-plus/icons-vue';
 import request, { downloadBlob } from '../utils/request';
 
@@ -93,7 +125,10 @@ const exportLoading = ref(false);
 const importLoading = ref(false);
 const selectedFile = ref<File | null>(null);
 const fileInputRef = ref<HTMLInputElement | null>(null);
+const importMode = ref('merge');
 const importResult = ref<{ message: string; error: boolean } | null>(null);
+const resetLoading = ref(false);
+const resetResult = ref<{ message: string; error: boolean } | null>(null);
 
 const handleExport = async () => {
   exportLoading.value = true;
@@ -126,12 +161,15 @@ const handleImport = async () => {
     return;
   }
 
+  const isReplace = importMode.value === 'replace';
   try {
     await ElMessageBox.confirm(
-      '导入将追加数据，已存在的用户和顾客不会重复导入。确定要继续吗？',
+      isReplace
+        ? '将清空全部顾客、验光记录、销售记录和非管理员账号，然后从文件导入所有数据。此操作不可撤销，确定要继续吗？'
+        : '导入将追加数据，已存在的用户和顾客不会重复导入。确定要继续吗？',
       '确认导入',
       {
-        confirmButtonText: '确认导入',
+        confirmButtonText: isReplace ? '确认清空并导入' : '确认导入',
         cancelButtonText: '取消',
         type: 'warning'
       }
@@ -145,6 +183,7 @@ const handleImport = async () => {
   try {
     const formData = new FormData();
     formData.append('file', selectedFile.value);
+    formData.append('mode', importMode.value);
     const res = await request.post('/data/import', formData, {
       headers: { 'Content-Type': 'multipart/form-data' }
     });
@@ -161,6 +200,64 @@ const handleImport = async () => {
     ElMessage.error(msg);
   } finally {
     importLoading.value = false;
+  }
+};
+
+const handleReset = async () => {
+  // Step 1: risk warning confirmation
+  try {
+    await ElMessageBox.confirm(
+      '将彻底删除全部顾客、验光记录、销售记录和非管理员账号。管理员账号会被保留。此操作不可撤销！',
+      '⚠️ 确认清空数据',
+      {
+        confirmButtonText: '继续',
+        cancelButtonText: '取消',
+        type: 'error'
+      }
+    );
+  } catch {
+    return;
+  }
+
+  // Step 2: type verification
+  try {
+    const { value } = await ElMessageBox.prompt(
+      '请输入「清空数据」以确认操作：',
+      '二次确认',
+      {
+        confirmButtonText: '确认清空',
+        cancelButtonText: '取消',
+        type: 'error',
+        inputValidator: (val: string) => {
+          if (val !== '清空数据') {
+            return '输入不匹配，请检查后重试';
+          }
+          return true;
+        },
+        inputErrorMessage: '输入不匹配，请检查后重试'
+      }
+    );
+    if (value !== '清空数据') {
+      ElMessage.warning('输入不匹配，操作已取消');
+      return;
+    }
+  } catch {
+    return;
+  }
+
+  // Execute reset
+  resetLoading.value = true;
+  resetResult.value = null;
+  try {
+    const res = await request.post('/data/reset');
+    resetResult.value = { message: String(res || '数据已清空'), error: false };
+    ElMessage.success(String(res || '数据已清空'));
+  } catch (e: any) {
+    const msg = e?.message || '清空失败';
+    resetResult.value = { message: msg, error: true };
+    ElMessage.error(msg);
+  } finally {
+    resetLoading.value = false;
   }
 };
 </script>
@@ -277,6 +374,14 @@ const handleImport = async () => {
   vertical-align: middle;
 }
 
+.import-mode-group {
+  width: 100%;
+  margin-bottom: 16px;
+  display: flex;
+  justify-content: center;
+  gap: 24px;
+}
+
 .import-actions {
   display: flex;
   gap: 12px;
@@ -309,5 +414,40 @@ const handleImport = async () => {
 .import-result.import-error {
   background: rgba(239, 68, 68, 0.1);
   color: #dc2626;
+}
+
+.reset-card {
+  margin-top: 28px;
+  padding: 28px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  border: 1px solid rgba(239, 68, 68, 0.2);
+  background: rgba(239, 68, 68, 0.03);
+}
+
+.reset-icon {
+  background: linear-gradient(135deg, rgba(239, 68, 68, 0.18), rgba(220, 38, 38, 0.1));
+  color: #dc2626;
+}
+
+.reset-card h2 {
+  margin: 0 0 8px;
+  font-size: 18px;
+  font-weight: 700;
+  color: #dc2626;
+}
+
+.reset-card p {
+  margin: 0 0 20px;
+  font-size: 13px;
+  color: var(--text-secondary);
+  line-height: 1.6;
+  max-width: 480px;
+}
+
+.action-btn--reset {
+  min-width: 160px;
 }
 </style>
