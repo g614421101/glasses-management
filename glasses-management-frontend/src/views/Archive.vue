@@ -24,6 +24,9 @@
         <el-button class="action-pill" @click="exportExcel">
           <el-icon><Download /></el-icon>导出 Excel
         </el-button>
+        <el-button type="danger" plain @click="deleteCustomer">
+          <el-icon><Delete /></el-icon>删除档案
+        </el-button>
       </div>
     </section>
 
@@ -553,6 +556,21 @@ const exportExcel = async () => {
     await downloadBlob(`/print/export/customer/${customerId}`, 'customer-records.xlsx');
   } catch {
     // request helper already shows the user-facing error.
+  }
+};
+
+const deleteCustomer = async () => {
+  try {
+    await ElMessageBox.confirm('确定要删除该顾客及其所有验光单、配镜单吗？\n删除后数据将移入回收站。', '危险操作', {
+      type: 'warning',
+      confirmButtonText: '确定删除',
+      cancelButtonText: '取消'
+    });
+    await request.delete(`/customer/${customerId}`);
+    ElMessage.success('已删除并移入回收站');
+    router.push('/customer');
+  } catch {
+    // cancel or request error
   }
 };
 

@@ -19,6 +19,9 @@ public class OptometryRecord {
     private Long id;
     private Long customerId;
 
+    @TableField(exist = false)
+    private String customerName;
+
     // Right eye values
     private BigDecimal odSph;
     private BigDecimal odCyl;

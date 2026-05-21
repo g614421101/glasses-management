@@ -36,4 +36,9 @@ public class RecycleBinController {
     public Result<Map<String, Integer>> purgeExpired() {
         return Result.success(recycleBinService.purgeExpired());
     }
+
+    @DeleteMapping("/empty")
+    public Result<Map<String, Integer>> empty() {
+        return Result.success(recycleBinService.empty());
+    }
 }

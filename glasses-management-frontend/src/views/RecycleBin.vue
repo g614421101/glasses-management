@@ -14,6 +14,7 @@
         </el-select>
         <el-button class="action-pill" @click="loadData">刷新</el-button>
         <el-button type="danger" plain @click="purgeExpired">清理超过 30 天</el-button>
+        <el-button type="danger" @click="emptyBin">一键清空</el-button>
       </div>
     </section>
 
@@ -43,7 +44,7 @@
         <span>{{ optometryRecords.length }} 条</span>
       </div>
       <el-table :data="optometryRecords" v-loading="loading" row-key="id" class="recycle-table">
-        <el-table-column prop="customerId" label="顾客ID" width="100" />
+        <el-table-column prop="customerName" label="顾客姓名" min-width="120" />
         <el-table-column prop="optometristName" label="验光师" min-width="140" />
         <el-table-column prop="examDate" label="验光时间" min-width="180" />
         <el-table-column prop="deletedTime" label="删除时间" min-width="180" />
@@ -65,7 +66,7 @@
       </div>
       <el-table :data="salesRecords" v-loading="loading" row-key="id" class="recycle-table">
         <el-table-column prop="recordNo" label="单号" min-width="180" />
-        <el-table-column prop="customerId" label="顾客ID" width="100" />
+        <el-table-column prop="customerName" label="顾客姓名" min-width="120" />
         <el-table-column prop="totalAmount" label="金额" width="120" />
         <el-table-column prop="deletedTime" label="删除时间" min-width="180" />
         <el-table-column label="操作" min-width="220" align="center" class-name="actions-column">
@@ -133,6 +134,17 @@ const purgeExpired = async () => {
   });
   await request.delete('/recycle-bin/purge-expired');
   ElMessage.success('过期数据清理完成');
+  loadData();
+};
+
+const emptyBin = async () => {
+  await ElMessageBox.confirm('这将会彻底清空回收站中所有的记录，此操作不可逆！确认继续吗？', '极度危险操作', {
+    type: 'error',
+    confirmButtonText: '确定清空',
+    cancelButtonText: '取消'
+  });
+  const res: any = await request.delete('/recycle-bin/empty');
+  ElMessage.success(`清空成功！共清理：顾客 ${res.customers} 条, 验光单 ${res.optometry} 条, 配镜单 ${res.sales} 条`);
   loadData();
 };
 

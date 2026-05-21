@@ -12,4 +12,6 @@ public interface RecycleBinService {
     Result<Boolean> purge(String type, Long id);
 
     Map<String, Integer> purgeExpired();
+
+    Map<String, Integer> empty();
 }

@@ -59,10 +59,24 @@ public class RecycleBinServiceImpl implements RecycleBinService {
             result.put("customers", customerMapper.selectDeletedList());
         }
         if ("all".equalsIgnoreCase(type) || "optometry".equalsIgnoreCase(type)) {
-            result.put("optometryRecords", optometryRecordMapper.selectDeletedList());
+            List<OptometryRecord> optometryRecords = optometryRecordMapper.selectDeletedList();
+            for (OptometryRecord r : optometryRecords) {
+                Customer c = customerMapper.selectAnyById(r.getCustomerId());
+                if (c != null) {
+                    r.setCustomerName(c.getName() + (Boolean.TRUE.equals(c.getDeleted()) ? " (已删除)" : ""));
+                }
+            }
+            result.put("optometryRecords", optometryRecords);
         }
         if ("all".equalsIgnoreCase(type) || "sales".equalsIgnoreCase(type)) {
-            result.put("salesRecords", salesRecordMapper.selectDeletedList());
+            List<SalesRecord> salesRecords = salesRecordMapper.selectDeletedList();
+            for (SalesRecord r : salesRecords) {
+                Customer c = customerMapper.selectAnyById(r.getCustomerId());
+                if (c != null) {
+                    r.setCustomerName(c.getName() + (Boolean.TRUE.equals(c.getDeleted()) ? " (已删除)" : ""));
+                }
+            }
+            result.put("salesRecords", salesRecords);
         }
         return result;
     }
@@ -145,6 +159,24 @@ public class RecycleBinServiceImpl implements RecycleBinService {
         int optometry = optometryRecordMapper.physicalDeleteExpired(expireBefore);
         int customers = customerMapper.physicalDeleteExpired(expireBefore);
         int users = sysUserMapper.physicalDeleteExpired(RoleConstants.ADMIN, expireBefore);
+
+        result.put("sales", sales);
+        result.put("optometry", optometry);
+        result.put("customers", customers);
+        result.put("users", users);
+        return result;
+    }
+
+    @Override
+    @Transactional
+    public Map<String, Integer> empty() {
+        Date farFuture = DateUtil.offsetMonth(new Date(), 1200); 
+        Map<String, Integer> result = new HashMap<>();
+
+        int sales = salesRecordMapper.physicalDeleteExpired(farFuture);
+        int optometry = optometryRecordMapper.physicalDeleteExpired(farFuture);
+        int customers = customerMapper.physicalDeleteExpired(farFuture);
+        int users = sysUserMapper.physicalDeleteExpired(RoleConstants.ADMIN, farFuture);
 
         result.put("sales", sales);
         result.put("optometry", optometry);
