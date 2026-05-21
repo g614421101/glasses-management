@@ -215,6 +215,8 @@ function startBackend(javaCommand) {
     const javaArgs = [
         `-Dapp.home=${userDataPath}`,              // so Spring logging file.path can use ${app.home}
         `-Dfile.encoding=UTF-8`,
+        `-Dstdout.encoding=UTF-8`,   // <-- 新增这行，强制标准输出为 UTF-8
+        `-Dstderr.encoding=UTF-8`,   // <-- 新增这行，强制错误输出为 UTF-8
         '-jar', finalJar,
         '--app.browser.auto-launch=false',
     ];
