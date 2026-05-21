@@ -10,6 +10,7 @@ import org.apache.ibatis.annotations.Update;
 
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 
 @Mapper
 public interface SalesRecordMapper extends BaseMapper<SalesRecord> {
@@ -35,6 +36,9 @@ public interface SalesRecordMapper extends BaseMapper<SalesRecord> {
     @Update("UPDATE sales_record SET deleted = false, deleted_time = NULL, deleted_by = NULL WHERE id = #{id}")
     int restoreByIdIgnoringLogic(@Param("id") Long id);
 
+    @Update("UPDATE sales_record SET deleted = false, deleted_time = NULL, deleted_by = NULL WHERE customer_id = #{customerId} AND deleted = true")
+    int restoreByCustomerIdIgnoringLogic(@Param("customerId") Long customerId);
+
     @Delete("DELETE FROM sales_record WHERE id = #{id} AND deleted = true")
     int physicalDeleteById(@Param("id") Long id);
 
@@ -49,6 +53,19 @@ public interface SalesRecordMapper extends BaseMapper<SalesRecord> {
 
     @Select("SELECT * FROM sales_record WHERE record_no = #{recordNo} LIMIT 1")
     SalesRecord selectByRecordNoIncludingDeleted(@Param("recordNo") String recordNo);
+
+    @Select("""
+            <script>
+            SELECT IFNULL(SUM(total_amount), 0) as totalRevenue, COUNT(*) as orderCount
+            FROM sales_record
+            WHERE deleted = false
+            <if test="startDate != null and endDate != null">
+                AND sales_date &gt;= #{startDate}
+                AND sales_date &lt;= #{endDate}
+            </if>
+            </script>
+            """)
+    Map<String, Object> selectRevenueSummary(@Param("startDate") String startDate, @Param("endDate") String endDate);
 
     @Delete("DELETE FROM sales_record")
     int deleteAll();

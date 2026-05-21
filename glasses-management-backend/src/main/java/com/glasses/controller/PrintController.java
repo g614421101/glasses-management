@@ -26,7 +26,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
-import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import java.io.IOException;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
@@ -212,6 +212,22 @@ public class PrintController {
         }
         List<SalesRecord> salesRecords = salesRecordService.listByCustomerId(customerId);
 
+        // 批量查询关联的验光记录，避免 N+1
+        java.util.Map<Long, OptometryRecord> optometryMap = new java.util.HashMap<>();
+        java.util.List<Long> optometryIds = salesRecords.stream()
+                .map(SalesRecord::getOptometryId)
+                .filter(java.util.Objects::nonNull)
+                .distinct()
+                .collect(java.util.stream.Collectors.toList());
+        if (!optometryIds.isEmpty()) {
+            java.util.List<OptometryRecord> optometryRecords = optometryRecordService.listByIds(optometryIds);
+            for (OptometryRecord o : optometryRecords) {
+                if (!Boolean.TRUE.equals(o.getDeleted())) {
+                    optometryMap.put(o.getId(), o);
+                }
+            }
+        }
+
         List<SalesRecordExcelDTO> dataList = new ArrayList<>();
         for (SalesRecord sr : salesRecords) {
             SalesRecordExcelDTO dto = new SalesRecordExcelDTO();
@@ -227,22 +243,20 @@ public class PrintController {
             dto.setLensPrice(sr.getLensPrice() != null ? sr.getLensPrice().toString() : "0");
             dto.setTotalAmount(sr.getTotalAmount() != null ? sr.getTotalAmount().toString() : "0");
 
-            // 如果关联了验光单则填充验光数据
-            if (sr.getOptometryId() != null) {
-                OptometryRecord opto = optometryRecordService.getById(sr.getOptometryId());
-                if (opto != null && !Boolean.TRUE.equals(opto.getDeleted())) {
-                    dto.setOdSph(fmtDiopter(opto.getOdSph()));
-                    dto.setOdCyl(fmtDiopter(opto.getOdCyl()));
-                    dto.setOdAxis(opto.getOdAxis() != null ? opto.getOdAxis().toString() : "");
-                    dto.setOdPd(opto.getOdPd() != null ? opto.getOdPd().toString() : "");
-                    dto.setOsSph(fmtDiopter(opto.getOsSph()));
-                    dto.setOsCyl(fmtDiopter(opto.getOsCyl()));
-                    dto.setOsAxis(opto.getOsAxis() != null ? opto.getOsAxis().toString() : "");
-                    dto.setOsPd(opto.getOsPd() != null ? opto.getOsPd().toString() : "");
-                    dto.setPdFar(opto.getPdFar() != null ? opto.getPdFar().toString() : "");
-                    dto.setPdNear(opto.getPdNear() != null ? opto.getPdNear().toString() : "");
-                    dto.setAddPower(opto.getAddPower() != null ? opto.getAddPower().toString() : "");
-                }
+            // 从批量查询的 Map 中取验光数据
+            OptometryRecord opto = optometryMap.get(sr.getOptometryId());
+            if (opto != null) {
+                dto.setOdSph(fmtDiopter(opto.getOdSph()));
+                dto.setOdCyl(fmtDiopter(opto.getOdCyl()));
+                dto.setOdAxis(opto.getOdAxis() != null ? opto.getOdAxis().toString() : "");
+                dto.setOdPd(opto.getOdPd() != null ? opto.getOdPd().toString() : "");
+                dto.setOsSph(fmtDiopter(opto.getOsSph()));
+                dto.setOsCyl(fmtDiopter(opto.getOsCyl()));
+                dto.setOsAxis(opto.getOsAxis() != null ? opto.getOsAxis().toString() : "");
+                dto.setOsPd(opto.getOsPd() != null ? opto.getOsPd().toString() : "");
+                dto.setPdFar(opto.getPdFar() != null ? opto.getPdFar().toString() : "");
+                dto.setPdNear(opto.getPdNear() != null ? opto.getPdNear().toString() : "");
+                dto.setAddPower(opto.getAddPower() != null ? opto.getAddPower().toString() : "");
             }
             dataList.add(dto);
         }
@@ -268,22 +282,52 @@ public class PrintController {
             @RequestParam(defaultValue = "false") Boolean showAll,
             HttpServletResponse response) throws IOException {
         
-        QueryWrapper<SalesRecord> wrapper = new QueryWrapper<>();
-        wrapper.eq("deleted", false);
+        LambdaQueryWrapper<SalesRecord> wrapper = new LambdaQueryWrapper<>();
+        wrapper.eq(SalesRecord::getDeleted, false);
         if (!showAll && startDate != null && endDate != null) {
-            wrapper.ge("sales_date", startDate + " 00:00:00")
-                   .le("sales_date", endDate + " 23:59:59");
+            wrapper.ge(SalesRecord::getSalesDate, startDate + " 00:00:00")
+                   .le(SalesRecord::getSalesDate, endDate + " 23:59:59");
         }
-        wrapper.orderByDesc("sales_date");
+        wrapper.orderByDesc(SalesRecord::getSalesDate);
         
         List<SalesRecord> records = salesRecordService.list(wrapper);
+
+        // 批量查询顾客信息，避免 N+1
+        java.util.Map<Long, Customer> customerMap = new java.util.HashMap<>();
+        java.util.List<Long> customerIds = records.stream()
+                .map(SalesRecord::getCustomerId)
+                .filter(java.util.Objects::nonNull)
+                .distinct()
+                .collect(java.util.stream.Collectors.toList());
+        if (!customerIds.isEmpty()) {
+            java.util.List<Customer> customers = customerService.listByIds(customerIds);
+            for (Customer c : customers) {
+                if (!Boolean.TRUE.equals(c.getDeleted())) {
+                    customerMap.put(c.getId(), c);
+                }
+            }
+        }
+
+        // 批量查询验光记录，避免 N+1
+        java.util.Map<Long, OptometryRecord> optometryMap = new java.util.HashMap<>();
+        java.util.List<Long> optometryIds = records.stream()
+                .map(SalesRecord::getOptometryId)
+                .filter(java.util.Objects::nonNull)
+                .distinct()
+                .collect(java.util.stream.Collectors.toList());
+        if (!optometryIds.isEmpty()) {
+            java.util.List<OptometryRecord> optometryRecords = optometryRecordService.listByIds(optometryIds);
+            for (OptometryRecord o : optometryRecords) {
+                if (!Boolean.TRUE.equals(o.getDeleted())) {
+                    optometryMap.put(o.getId(), o);
+                }
+            }
+        }
+
         List<SalesRecordExcelDTO> dataList = new ArrayList<>();
         
         for (SalesRecord sr : records) {
-            Customer customer = customerService.getById(sr.getCustomerId());
-            if (customer != null && Boolean.TRUE.equals(customer.getDeleted())) {
-                customer = null;
-            }
+            Customer customer = customerMap.get(sr.getCustomerId());
             SalesRecordExcelDTO dto = new SalesRecordExcelDTO();
             dto.setCustomerName(customer != null ? customer.getName() : "-");
             dto.setPhone(customer != null ? customer.getPhone() : "-");
@@ -297,21 +341,19 @@ public class PrintController {
             dto.setLensPrice(sr.getLensPrice() != null ? sr.getLensPrice().toString() : "0");
             dto.setTotalAmount(sr.getTotalAmount() != null ? sr.getTotalAmount().toString() : "0");
 
-            if (sr.getOptometryId() != null) {
-                OptometryRecord opto = optometryRecordService.getById(sr.getOptometryId());
-                if (opto != null && !Boolean.TRUE.equals(opto.getDeleted())) {
-                    dto.setOdSph(fmtDiopter(opto.getOdSph()));
-                    dto.setOdCyl(fmtDiopter(opto.getOdCyl()));
-                    dto.setOdAxis(opto.getOdAxis() != null ? opto.getOdAxis().toString() : "");
-                    dto.setOdPd(opto.getOdPd() != null ? opto.getOdPd().toString() : "");
-                    dto.setOsSph(fmtDiopter(opto.getOsSph()));
-                    dto.setOsCyl(fmtDiopter(opto.getOsCyl()));
-                    dto.setOsAxis(opto.getOsAxis() != null ? opto.getOsAxis().toString() : "");
-                    dto.setOsPd(opto.getOsPd() != null ? opto.getOsPd().toString() : "");
-                    dto.setPdFar(opto.getPdFar() != null ? opto.getPdFar().toString() : "");
-                    dto.setPdNear(opto.getPdNear() != null ? opto.getPdNear().toString() : "");
-                    dto.setAddPower(opto.getAddPower() != null ? opto.getAddPower().toString() : "");
-                }
+            OptometryRecord opto = optometryMap.get(sr.getOptometryId());
+            if (opto != null) {
+                dto.setOdSph(fmtDiopter(opto.getOdSph()));
+                dto.setOdCyl(fmtDiopter(opto.getOdCyl()));
+                dto.setOdAxis(opto.getOdAxis() != null ? opto.getOdAxis().toString() : "");
+                dto.setOdPd(opto.getOdPd() != null ? opto.getOdPd().toString() : "");
+                dto.setOsSph(fmtDiopter(opto.getOsSph()));
+                dto.setOsCyl(fmtDiopter(opto.getOsCyl()));
+                dto.setOsAxis(opto.getOsAxis() != null ? opto.getOsAxis().toString() : "");
+                dto.setOsPd(opto.getOsPd() != null ? opto.getOsPd().toString() : "");
+                dto.setPdFar(opto.getPdFar() != null ? opto.getPdFar().toString() : "");
+                dto.setPdNear(opto.getPdNear() != null ? opto.getPdNear().toString() : "");
+                dto.setAddPower(opto.getAddPower() != null ? opto.getAddPower().toString() : "");
             }
             dataList.add(dto);
         }

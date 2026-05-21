@@ -35,6 +35,9 @@ public interface OptometryRecordMapper extends BaseMapper<OptometryRecord> {
     @Update("UPDATE optometry_record SET deleted = false, deleted_time = NULL, deleted_by = NULL WHERE id = #{id}")
     int restoreByIdIgnoringLogic(@Param("id") Long id);
 
+    @Update("UPDATE optometry_record SET deleted = false, deleted_time = NULL, deleted_by = NULL WHERE customer_id = #{customerId} AND deleted = true")
+    int restoreByCustomerIdIgnoringLogic(@Param("customerId") Long customerId);
+
     @Delete("DELETE FROM optometry_record WHERE id = #{id} AND deleted = true")
     int physicalDeleteById(@Param("id") Long id);
 

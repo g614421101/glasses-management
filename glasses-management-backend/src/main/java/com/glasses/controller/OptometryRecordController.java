@@ -2,8 +2,8 @@ package com.glasses.controller;
 
 import cn.dev33.satoken.stp.StpUtil;
 import cn.hutool.core.date.DateUtil;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.glasses.entity.OptometryRecord;
-import com.glasses.mapper.OptometryRecordMapper;
 import com.glasses.service.OptometryRecordService;
 import com.glasses.util.Result;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,9 +18,6 @@ public class OptometryRecordController {
     @Autowired
     private OptometryRecordService optometryRecordService;
 
-    @Autowired
-    private OptometryRecordMapper optometryRecordMapper;
-
     @PostMapping("/add")
     public Result<Boolean> addRecord(@RequestBody OptometryRecord record) {
         if (record.getOptometristName() == null || record.getOptometristName().trim().isEmpty()) {
@@ -28,16 +25,21 @@ public class OptometryRecordController {
             if (realName == null || realName.trim().isEmpty()) {
                 realName = StpUtil.getSession().getString("username");
             }
-            record.setOptometristName(realName); // 默认当前登录人
+            record.setOptometristName(realName);
         }
         if (record.getExamDate() == null) {
-            record.setExamDate(DateUtil.date()); // 使用 Hutool DateTime
+            record.setExamDate(DateUtil.date());
         }
         return Result.success(optometryRecordService.save(record));
     }
 
     @GetMapping("/customer/{customerId}")
-    public Result<List<OptometryRecord>> getByCustomer(@PathVariable Long customerId) {
+    public Result<?> getByCustomer(@PathVariable Long customerId,
+                                   @RequestParam(required = false) Integer current,
+                                   @RequestParam(required = false) Integer size) {
+        if (current != null && size != null) {
+            return Result.success(optometryRecordService.listByCustomerId(customerId, current, size));
+        }
         return Result.success(optometryRecordService.listByCustomerId(customerId));
     }
 
@@ -48,10 +50,9 @@ public class OptometryRecordController {
 
     @DeleteMapping("/{id}")
     public Result<Boolean> deleteRecord(@PathVariable Long id) {
-        OptometryRecord record = optometryRecordService.getById(id);
-        if (record == null) {
+        if (!optometryRecordService.softDeleteRecord(id)) {
             return Result.error("验光记录不存在");
         }
-        return Result.success(optometryRecordMapper.softDeleteById(id, DateUtil.date(), StpUtil.getLoginIdAsLong()) > 0);
+        return Result.success(true);
     }
 }

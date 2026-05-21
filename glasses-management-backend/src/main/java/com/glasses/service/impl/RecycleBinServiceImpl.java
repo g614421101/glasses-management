@@ -21,6 +21,20 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * 回收站服务实现。
+ * <p>
+ * 注意：本类直接注入 Mapper 而非 Service，不继承 {@code ServiceImpl}。
+ * 原因：
+ * <ol>
+ *   <li>回收站操作跨越 4 个实体（Customer / OptometryRecord / SalesRecord / SysUser），
+ *       无法选择单一 BaseMapper 作为 ServiceImpl 的泛型参数。</li>
+ *   <li>所有操作都涉及已软删除（{@code deleted = true}）的记录，必须使用
+ *       绕过 {@code @TableLogic} 的 Mapper 自定义方法（如 {@code selectAnyById}、
+ *       {@code selectDeletedList}、{@code physicalDeleteById} 等），
+ *       Service 层的标准 CRUD 方法会自动附加 {@code deleted = false} 过滤，无法用于回收站场景。</li>
+ * </ol>
+ */
 @Service
 public class RecycleBinServiceImpl implements RecycleBinService {
 
@@ -145,15 +159,8 @@ public class RecycleBinServiceImpl implements RecycleBinService {
     }
 
     private void restoreRecordsByCustomer(Long customerId) {
-        List<OptometryRecord> optometryRecords = optometryRecordMapper.selectDeletedByCustomerId(customerId);
-        for (OptometryRecord record : optometryRecords) {
-            optometryRecordMapper.restoreByIdIgnoringLogic(record.getId());
-        }
-
-        List<SalesRecord> salesRecords = salesRecordMapper.selectDeletedByCustomerId(customerId);
-        for (SalesRecord record : salesRecords) {
-            salesRecordMapper.restoreByIdIgnoringLogic(record.getId());
-        }
+        optometryRecordMapper.restoreByCustomerIdIgnoringLogic(customerId);
+        salesRecordMapper.restoreByCustomerIdIgnoringLogic(customerId);
     }
 
     private void purgeRecordsByCustomer(Long customerId) {

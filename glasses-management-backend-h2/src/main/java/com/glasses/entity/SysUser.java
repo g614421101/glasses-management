@@ -1,6 +1,8 @@
 package com.glasses.entity;
 
+import com.baomidou.mybatisplus.annotation.FieldFill;
 import com.baomidou.mybatisplus.annotation.IdType;
+import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableLogic;
 import com.baomidou.mybatisplus.annotation.TableName;
@@ -24,5 +26,6 @@ public class SysUser {
     @TableLogic
     private Boolean deleted = false;
     private Date deletedTime;
+    @TableField(fill = FieldFill.INSERT)
     private Date createTime;
 }
