@@ -141,7 +141,22 @@ Copy-Item glasses-management-backend-h2\application-local.example.yml glasses-ma
 
 两个后端默认端口都是 `8080`。Jackson 时区配置为 `Asia/Shanghai`。
 
-H2 开发默认数据库路径为 `./data/glasses_management`，生产配置默认写到用户目录下的 `.glasses_management/data/glasses_management`。MySQL 生产日志默认写到用户目录下的 `.glasses_management_mysql/logs`。
+## 日志与数据存储
+
+### 数据库位置
+- H2 开发默认数据库路径为 `./data/glasses_management`。
+- 生产配置（原生 `jpackage` 打包激活 `prod` profile 时）默认写到用户目录下的 `.glasses_management/data/glasses_management`。
+- **Electron 桌面版专属说明**：Electron 启动后台时并未显式激活 `prod` profile，会回退使用 `dev` 的相对路径 `./data/glasses_management`。由于 Electron 指定了工作目录（CWD）为 `userData`（通常是 `%APPDATA%\<应用名>`），因此 Electron 版的实际 H2 数据库存储在 `%APPDATA%\<应用名>\data\glasses_management.mv.db`。
+
+### 日志系统
+- **开发环境 (`dev`)**：使用 Spring Boot 默认的 Logback，输出到控制台。MyBatis-Plus SQL 打印开启，Sa-Token 权限日志开启。代码中基本通过 `@Slf4j` 进行记录（目前仅 `BrowserLauncher` 中较多使用）。
+- **生产环境 (`prod`)**：日志级别默认 `INFO`。为避免日志文件过大，MyBatis-Plus 的 SQL 打印会被关闭（`NoLoggingImpl`）。
+- **日志存放路径**：
+  - MySQL 版原生后端：`${user.home}/.glasses_management_mysql/logs/spring.log`
+  - H2 版原生安装包 (`jpackage`打包)：`${user.home}/.glasses_management/logs/spring.log`
+  - Electron 桌面版：Electron 会拦截 Java 进程的 stdout/stderr 输出，并保存在 `%APPDATA%\<应用名>\logs\backend-*.log`（即 `userData/logs` 目录）。
+  - **避坑指南（Electron 乱码问题）**：在 Windows 平台上，即便给 Java 启动参数指定了 `-Dfile.encoding=UTF-8`，控制台标准输出（System.out）仍可能使用操作系统的本地编码（GBK），导致 Node.js 捕获时按 UTF-8 解码产生乱码（如将 `系统` 识别成 `ϵͳ`）。解决办法是在 Electron 启动 Java 的参数中补充 `-Dstdout.encoding=UTF-8` 和 `-Dstderr.encoding=UTF-8`。
+- **业务操作审计**：目前系统缺乏细粒度的业务级操作日志记录（如“谁在何时修改了哪个记录”）。如果未来有数据操作追踪需求，建议后续补充基于 Spring AOP 的统一操作日志拦截，或引入专门的操作记录表。
 
 ## 主要业务模型
 

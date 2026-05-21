@@ -178,10 +178,10 @@
               <strong>OD</strong>
             </div>
             <div class="eye-metric-grid">
-              <div class="eye-metric"><span>SPH</span><strong>{{ fmt(currentDetail.data.odSph) }}</strong></div>
-              <div class="eye-metric"><span>CYL</span><strong>{{ fmt(currentDetail.data.odCyl) }}</strong></div>
-              <div class="eye-metric"><span>AXIS</span><strong>{{ currentDetail.data.odAxis || '-' }}</strong></div>
-              <div class="eye-metric"><span>VA</span><strong>{{ currentDetail.data.odVa || '-' }}</strong></div>
+              <div class="eye-metric"><span>球镜</span><strong>{{ fmt(currentDetail.data.odSph) }}</strong></div>
+              <div class="eye-metric"><span>柱镜</span><strong>{{ fmt(currentDetail.data.odCyl) }}</strong></div>
+              <div class="eye-metric"><span>轴位</span><strong>{{ currentDetail.data.odAxis || '-' }}</strong></div>
+              <div class="eye-metric"><span>视力</span><strong>{{ currentDetail.data.odVa || '-' }}</strong></div>
             </div>
           </div>
 
@@ -191,20 +191,20 @@
               <strong>OS</strong>
             </div>
             <div class="eye-metric-grid">
-              <div class="eye-metric"><span>SPH</span><strong>{{ fmt(currentDetail.data.osSph) }}</strong></div>
-              <div class="eye-metric"><span>CYL</span><strong>{{ fmt(currentDetail.data.osCyl) }}</strong></div>
-              <div class="eye-metric"><span>AXIS</span><strong>{{ currentDetail.data.osAxis || '-' }}</strong></div>
-              <div class="eye-metric"><span>VA</span><strong>{{ currentDetail.data.osVa || '-' }}</strong></div>
+              <div class="eye-metric"><span>球镜</span><strong>{{ fmt(currentDetail.data.osSph) }}</strong></div>
+              <div class="eye-metric"><span>柱镜</span><strong>{{ fmt(currentDetail.data.osCyl) }}</strong></div>
+              <div class="eye-metric"><span>轴位</span><strong>{{ currentDetail.data.osAxis || '-' }}</strong></div>
+              <div class="eye-metric"><span>视力</span><strong>{{ currentDetail.data.osVa || '-' }}</strong></div>
             </div>
           </div>
         </div>
 
         <div class="extra-grid">
-          <div class="info-tag"><span>右眼 PD</span><strong>{{ currentDetail.data.odPd || '-' }}</strong></div>
-          <div class="info-tag"><span>左眼 PD</span><strong>{{ currentDetail.data.osPd || '-' }}</strong></div>
-          <div class="info-tag"><span>远用 PD</span><strong>{{ currentDetail.data.pdFar || '-' }}</strong></div>
-          <div class="info-tag"><span>近用 PD</span><strong>{{ currentDetail.data.pdNear || '-' }}</strong></div>
-          <div class="info-tag"><span>ADD</span><strong>{{ currentDetail.data.addPower || '-' }}</strong></div>
+          <div class="info-tag"><span>右眼瞳距</span><strong>{{ currentDetail.data.odPd || '-' }}</strong></div>
+          <div class="info-tag"><span>左眼瞳距</span><strong>{{ currentDetail.data.osPd || '-' }}</strong></div>
+          <div class="info-tag"><span>远用瞳距</span><strong>{{ currentDetail.data.pdFar || '-' }}</strong></div>
+          <div class="info-tag"><span>近用瞳距</span><strong>{{ currentDetail.data.pdNear || '-' }}</strong></div>
+          <div class="info-tag"><span>下加光</span><strong>{{ currentDetail.data.addPower || '-' }}</strong></div>
           <div class="info-tag"><span>验光师</span><strong>{{ currentDetail.data.optometristName || '-' }}</strong></div>
         </div>
       </div>
@@ -216,8 +216,14 @@
             <h3 class="sheet-title">订单 {{ currentDetail.data.recordNo }}</h3>
           </div>
           <div class="total-bubble">
-            <small>总计收讫</small>
+            <small>
+              <del v-if="currentDetail.data.totalRetailPrice > 0" style="margin-right:4px; opacity:0.7;">￥{{ currentDetail.data.totalRetailPrice }}</del>
+              总计收讫
+            </small>
             <strong>￥{{ currentDetail.data.totalAmount }}</strong>
+            <span v-if="currentDetail.data.totalRetailPrice > 0" style="display:block; font-size:12px; margin-top:2px; text-align:right; font-weight:normal; opacity:0.9;">
+              {{ ((currentDetail.data.totalAmount / currentDetail.data.totalRetailPrice) * 10).toFixed(1) }}折
+            </span>
           </div>
         </div>
 
@@ -225,7 +231,10 @@
           <div class="product-card">
             <div class="product-card-head">
               <span class="product-badge">镜架</span>
-              <strong>￥{{ currentDetail.data.framePrice || 0 }}</strong>
+              <div>
+                <del v-if="currentDetail.data.frameRetailPrice > 0" style="color:#999; font-size:12px; margin-right:6px; font-weight:normal;">￥{{ currentDetail.data.frameRetailPrice }}</del>
+                <strong>￥{{ currentDetail.data.framePrice || 0 }}</strong>
+              </div>
             </div>
             <h4>{{ currentDetail.data.frameBrand || '-' }}</h4>
             <p>{{ currentDetail.data.frameModel || '未填写型号' }}</p>
@@ -234,11 +243,19 @@
           <div class="product-card">
             <div class="product-card-head">
               <span class="product-badge product-badge--soft">镜片</span>
-              <strong>￥{{ currentDetail.data.lensPrice || 0 }}</strong>
+              <div>
+                <del v-if="currentDetail.data.lensRetailPrice > 0" style="color:#999; font-size:12px; margin-right:6px; font-weight:normal;">￥{{ currentDetail.data.lensRetailPrice }}</del>
+                <strong>￥{{ currentDetail.data.lensPrice || 0 }}</strong>
+              </div>
             </div>
             <h4>{{ currentDetail.data.lensBrand || '-' }}</h4>
             <p>{{ currentDetail.data.lensParams || '未填写参数' }}</p>
           </div>
+        </div>
+
+        <div v-if="currentDetail.data.remark" style="margin-top: 16px; padding: 12px; background: var(--surface-muted); border-radius: 12px; font-size: 13px; line-height: 1.5;">
+          <span style="color: var(--text-secondary); margin-right: 6px;">备注:</span>
+          <span style="color: var(--text-primary);">{{ currentDetail.data.remark }}</span>
         </div>
       </div>
     </el-dialog>
@@ -247,31 +264,31 @@
       <el-form :model="optoForm" label-width="100px" label-position="left" class="record-form">
         <h4 class="form-block-title">右眼 (OD)</h4>
         <el-row :gutter="12">
-          <el-col :xs="24" :sm="12" :md="6"><el-form-item label="SPH" label-width="48px"><el-input v-model="optoForm.odSph" /></el-form-item></el-col>
-          <el-col :xs="24" :sm="12" :md="6"><el-form-item label="CYL" label-width="48px"><el-input v-model="optoForm.odCyl" /></el-form-item></el-col>
-          <el-col :xs="24" :sm="12" :md="6"><el-form-item label="AXIS" label-width="52px"><el-input v-model="optoForm.odAxis" /></el-form-item></el-col>
-          <el-col :xs="24" :sm="12" :md="6"><el-form-item label="VA" label-width="40px"><el-input v-model="optoForm.odVa" /></el-form-item></el-col>
+          <el-col :xs="24" :sm="12" :md="6"><el-form-item label="球镜" label-width="56px"><el-input v-model="optoForm.odSph" /></el-form-item></el-col>
+          <el-col :xs="24" :sm="12" :md="6"><el-form-item label="柱镜" label-width="56px"><el-input v-model="optoForm.odCyl" /></el-form-item></el-col>
+          <el-col :xs="24" :sm="12" :md="6"><el-form-item label="轴位" label-width="56px"><el-input v-model="optoForm.odAxis" /></el-form-item></el-col>
+          <el-col :xs="24" :sm="12" :md="6"><el-form-item label="视力" label-width="56px"><el-input v-model="optoForm.odVa" /></el-form-item></el-col>
         </el-row>
 
         <h4 class="form-block-title">左眼 (OS)</h4>
         <el-row :gutter="12">
-          <el-col :xs="24" :sm="12" :md="6"><el-form-item label="SPH" label-width="48px"><el-input v-model="optoForm.osSph" /></el-form-item></el-col>
-          <el-col :xs="24" :sm="12" :md="6"><el-form-item label="CYL" label-width="48px"><el-input v-model="optoForm.osCyl" /></el-form-item></el-col>
-          <el-col :xs="24" :sm="12" :md="6"><el-form-item label="AXIS" label-width="52px"><el-input v-model="optoForm.osAxis" /></el-form-item></el-col>
-          <el-col :xs="24" :sm="12" :md="6"><el-form-item label="VA" label-width="40px"><el-input v-model="optoForm.osVa" /></el-form-item></el-col>
+          <el-col :xs="24" :sm="12" :md="6"><el-form-item label="球镜" label-width="56px"><el-input v-model="optoForm.osSph" /></el-form-item></el-col>
+          <el-col :xs="24" :sm="12" :md="6"><el-form-item label="柱镜" label-width="56px"><el-input v-model="optoForm.osCyl" /></el-form-item></el-col>
+          <el-col :xs="24" :sm="12" :md="6"><el-form-item label="轴位" label-width="56px"><el-input v-model="optoForm.osAxis" /></el-form-item></el-col>
+          <el-col :xs="24" :sm="12" :md="6"><el-form-item label="视力" label-width="56px"><el-input v-model="optoForm.osVa" /></el-form-item></el-col>
         </el-row>
 
         <el-divider />
 
         <el-row :gutter="12">
-          <el-col :xs="24" :sm="12" :md="8"><el-form-item label="右眼PD" label-width="68px"><el-input v-model="optoForm.odPd" @input="calcPdTotal" /></el-form-item></el-col>
-          <el-col :xs="24" :sm="12" :md="8"><el-form-item label="左眼PD" label-width="68px"><el-input v-model="optoForm.osPd" @input="calcPdTotal" /></el-form-item></el-col>
-          <el-col :xs="24" :sm="12" :md="8"><el-form-item label="远用PD" label-width="68px"><el-input v-model="optoForm.pdFar" /></el-form-item></el-col>
+          <el-col :xs="24" :sm="12" :md="8"><el-form-item label="右眼瞳距" label-width="84px"><el-input v-model="optoForm.odPd" @input="calcPdTotal" /></el-form-item></el-col>
+          <el-col :xs="24" :sm="12" :md="8"><el-form-item label="左眼瞳距" label-width="84px"><el-input v-model="optoForm.osPd" @input="calcPdTotal" /></el-form-item></el-col>
+          <el-col :xs="24" :sm="12" :md="8"><el-form-item label="远用瞳距" label-width="84px"><el-input v-model="optoForm.pdFar" /></el-form-item></el-col>
         </el-row>
 
         <el-row :gutter="12">
-          <el-col :xs="24" :sm="12" :md="8"><el-form-item label="近用PD" label-width="68px"><el-input v-model="optoForm.pdNear" /></el-form-item></el-col>
-          <el-col :xs="24" :sm="12" :md="8"><el-form-item label="ADD" label-width="56px"><el-input v-model="optoForm.addPower" /></el-form-item></el-col>
+          <el-col :xs="24" :sm="12" :md="8"><el-form-item label="近用瞳距" label-width="84px"><el-input v-model="optoForm.pdNear" /></el-form-item></el-col>
+          <el-col :xs="24" :sm="12" :md="8"><el-form-item label="下加光" label-width="70px"><el-input v-model="optoForm.addPower" /></el-form-item></el-col>
           <el-col :xs="24" :sm="12" :md="8"><el-form-item label="验光师" label-width="68px"><el-input v-model="optoForm.optometristName" placeholder="默认操作人" /></el-form-item></el-col>
         </el-row>
       </el-form>
@@ -282,7 +299,7 @@
     </el-dialog>
 
     <el-dialog :title="salesForm.id ? '编辑配镜单' : '新建配镜单'" v-model="salesDialogVisible" width="min(94vw, 560px)">
-      <el-form :model="salesForm" label-width="84px" class="record-form">
+      <el-form :model="salesForm" label-width="106px" class="record-form">
         <el-form-item label="关联验光">
           <el-select v-model="salesForm.optometryId" placeholder="选择验光记录(可选)" clearable style="width: 100%">
             <el-option
@@ -295,18 +312,29 @@
         </el-form-item>
         <el-form-item label="镜架品牌"><el-input v-model="salesForm.frameBrand" /></el-form-item>
         <el-form-item label="镜架型号"><el-input v-model="salesForm.frameModel" /></el-form-item>
-        <el-form-item label="镜架售价"><el-input-number v-model="salesForm.framePrice" :precision="2" :step="10" @change="calcTotal" style="width: 100%" /></el-form-item>
+        <el-form-item label="镜架零售价"><el-input-number v-model="salesForm.frameRetailPrice" :precision="2" :step="10" @change="calcTotal" style="width: 100%" /></el-form-item>
+        <el-form-item label="镜架实际售价"><el-input-number v-model="salesForm.framePrice" :precision="2" :step="10" @change="calcTotal" style="width: 100%" /></el-form-item>
 
         <el-divider />
 
         <el-form-item label="镜片品牌"><el-input v-model="salesForm.lensBrand" /></el-form-item>
         <el-form-item label="镜片参数"><el-input v-model="salesForm.lensParams" placeholder="例: 1.60 防蓝光" /></el-form-item>
-        <el-form-item label="镜片售价"><el-input-number v-model="salesForm.lensPrice" :precision="2" :step="10" @change="calcTotal" style="width: 100%" /></el-form-item>
+        <el-form-item label="镜片零售价"><el-input-number v-model="salesForm.lensRetailPrice" :precision="2" :step="10" @change="calcTotal" style="width: 100%" /></el-form-item>
+        <el-form-item label="镜片实际售价"><el-input-number v-model="salesForm.lensPrice" :precision="2" :step="10" @change="calcTotal" style="width: 100%" /></el-form-item>
 
         <el-divider />
 
+        <el-form-item label="零售总价">
+          <el-input-number v-model="salesForm.totalRetailPrice" :precision="2" :step="10" style="width: 100%" />
+        </el-form-item>
         <el-form-item label="实收总价">
           <el-input-number v-model="salesForm.totalAmount" :precision="2" :step="10" style="width: 100%" />
+        </el-form-item>
+        <el-form-item label="折扣">
+          <el-input :value="computedDiscount" readonly placeholder="自动计算" />
+        </el-form-item>
+        <el-form-item label="备注">
+          <el-input type="textarea" v-model="salesForm.remark" placeholder="选填，如：送隐形眼镜盒..." />
         </el-form-item>
       </el-form>
       <template #footer>
@@ -362,11 +390,23 @@ const salesForm = reactive<any>({
   optometryId: null,
   frameBrand: '',
   frameModel: '',
+  frameRetailPrice: 0,
   framePrice: 0,
   lensBrand: '',
   lensParams: '',
+  lensRetailPrice: 0,
   lensPrice: 0,
-  totalAmount: 0
+  totalRetailPrice: 0,
+  totalAmount: 0,
+  remark: ''
+});
+
+const computedDiscount = computed(() => {
+  const retail = salesForm.totalRetailPrice || 0;
+  const actual = salesForm.totalAmount || 0;
+  if (retail <= 0) return '-';
+  const discount = (actual / retail) * 10;
+  return discount.toFixed(1) + '折';
 });
 
 const latestRecordLabel = computed(() => {
@@ -443,15 +483,20 @@ const resetSales = () => {
     optometryId: null,
     frameBrand: '',
     frameModel: '',
+    frameRetailPrice: 0,
     framePrice: 0,
     lensBrand: '',
     lensParams: '',
+    lensRetailPrice: 0,
     lensPrice: 0,
-    totalAmount: 0
+    totalRetailPrice: 0,
+    totalAmount: 0,
+    remark: ''
   });
 };
 
 const calcTotal = () => {
+  salesForm.totalRetailPrice = (salesForm.frameRetailPrice || 0) + (salesForm.lensRetailPrice || 0);
   salesForm.totalAmount = (salesForm.framePrice || 0) + (salesForm.lensPrice || 0);
 };
 

@@ -1,6 +1,6 @@
 {
   "name": "glasses-management-electron",
-  "version": "1.5.0",
+  "version": "1.7.0",
   "description": "Desktop wrapper for Glasses Management System",
   "main": "main.js",
   "scripts": {

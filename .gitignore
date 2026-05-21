@@ -75,4 +75,4 @@ pnpm-debug.log*
 *.pem
 *.key
 
-/changelog/AI_CONTEXT.md
+/changelog

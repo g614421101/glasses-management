@@ -28,14 +28,19 @@ public class SalesRecord {
     // 镜架信息
     private String frameBrand;
     private String frameModel;
+    private BigDecimal frameRetailPrice;
     private BigDecimal framePrice;
 
     // 镜片信息
     private String lensBrand;
     private String lensParams;
+    private BigDecimal lensRetailPrice;
     private BigDecimal lensPrice;
 
+    private BigDecimal totalRetailPrice;
     private BigDecimal totalAmount;
+    
+    private String remark;
 
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "Asia/Shanghai")
     private Date salesDate;
