@@ -210,6 +210,11 @@
           <div class="info-tag"><span>下加光</span><strong>{{ currentDetail.data.addPower || '-' }}</strong></div>
           <div class="info-tag"><span>验光师</span><strong>{{ currentDetail.data.optometristName || '-' }}</strong></div>
         </div>
+
+        <div v-if="currentDetail.data.remark" style="margin-top: 16px; padding: 12px; background: var(--surface-muted); border-radius: 12px; font-size: 13px; line-height: 1.5;">
+          <span style="color: var(--text-secondary); margin-right: 6px;">备注:</span>
+          <span style="color: var(--text-primary);">{{ currentDetail.data.remark }}</span>
+        </div>
       </div>
       
       <div v-else-if="currentDetail && currentDetail.type === 'SALES'" class="detail-box animate-fade-up sales-sheet">
@@ -293,6 +298,14 @@
           <el-col :xs="24" :sm="12" :md="8"><el-form-item label="近用瞳距" label-width="84px"><el-input v-model="optoForm.pdNear" /></el-form-item></el-col>
           <el-col :xs="24" :sm="12" :md="8"><el-form-item label="下加光" label-width="70px"><el-input v-model="optoForm.addPower" /></el-form-item></el-col>
           <el-col :xs="24" :sm="12" :md="8"><el-form-item label="验光师" label-width="68px"><el-input v-model="optoForm.optometristName" placeholder="默认操作人" /></el-form-item></el-col>
+        </el-row>
+
+        <el-row>
+          <el-col :span="24">
+            <el-form-item label="备注" label-width="60px">
+              <el-input type="textarea" v-model="optoForm.remark" placeholder="选填，记录眼部情况或其他补充信息..." />
+            </el-form-item>
+          </el-col>
         </el-row>
       </el-form>
       <template #footer>
@@ -383,7 +396,8 @@ const optoForm = reactive<any>({
   odSph: '', odCyl: '', odAxis: '', odVa: '',
   osSph: '', osCyl: '', osAxis: '', osVa: '',
   odPd: '', osPd: '', pdFar: '', pdNear: '', addPower: '',
-  optometristName: ''
+  optometristName: '',
+  remark: ''
 });
 
 const salesDialogVisible = ref(false);
@@ -448,7 +462,7 @@ const resetOpto = () => {
     odSph: '', odCyl: '', odAxis: '', odVa: '',
     osSph: '', osCyl: '', osAxis: '', osVa: '',
     odPd: '', osPd: '', pdFar: '', pdNear: '', addPower: '',
-    optometristName: ''
+    optometristName: '', remark: ''
   });
 };
 

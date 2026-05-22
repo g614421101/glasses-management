@@ -29,6 +29,7 @@ public class SchemaCompatibilityInitializer implements ApplicationRunner {
 
         addRecycleColumns("customer");
         addRecycleColumns("optometry_record");
+        addColumnIfMissing("optometry_record", "remark", "varchar(500) DEFAULT NULL");
         addRecycleColumns("sales_record");
 
         addColumnIfMissing("sales_record", "frame_retail_price", "decimal(10,2) DEFAULT NULL");
