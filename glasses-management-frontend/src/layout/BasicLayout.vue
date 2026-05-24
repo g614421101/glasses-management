@@ -40,27 +40,27 @@
             <el-icon><Monitor /></el-icon>
             <span>工作平台</span>
           </el-menu-item>
-          <el-menu-item index="/customer">
+          <el-menu-item index="/customer" v-if="FEATURES.CUSTOMER">
             <el-icon><User /></el-icon>
             <span>顾客管理</span>
           </el-menu-item>
-          <el-menu-item index="/stats">
+          <el-menu-item index="/stats" v-if="FEATURES.STATISTICS">
             <el-icon><TrendCharts /></el-icon>
             <span>营收统计</span>
           </el-menu-item>
-          <el-menu-item index="/data-manage">
+          <el-menu-item index="/data-manage" v-if="FEATURES.DATA_MANAGE">
             <el-icon><FolderOpened /></el-icon>
             <span>数据管理</span>
           </el-menu-item>
-          <el-menu-item index="/profile">
+          <el-menu-item index="/profile" v-if="FEATURES.PROFILE">
             <el-icon><User /></el-icon>
             <span>个人主页</span>
           </el-menu-item>
-          <el-menu-item index="/recycle-bin" v-if="authStore.role === 'admin'">
+          <el-menu-item index="/recycle-bin" v-if="FEATURES.RECYCLE_BIN && authStore.role === 'admin'">
             <el-icon><Delete /></el-icon>
             <span>回收站</span>
           </el-menu-item>
-          <el-menu-item index="/sys-user" v-if="authStore.role === 'admin'">
+          <el-menu-item index="/sys-user" v-if="FEATURES.SYS_USER && authStore.role === 'admin'">
             <el-icon><Setting /></el-icon>
             <span>账号管理(超管)</span>
           </el-menu-item>
@@ -83,6 +83,7 @@ import { useAuthStore } from '../store/auth';
 import { useRouter, useRoute } from 'vue-router';
 import { Monitor, User, Setting, View, TrendCharts, Moon, Sunny, Delete, FolderOpened } from '@element-plus/icons-vue';
 import { useTheme } from '../utils/theme';
+import { FEATURES } from '../config/features';
 
 const authStore = useAuthStore();
 const router = useRouter();

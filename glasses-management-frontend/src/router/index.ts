@@ -1,6 +1,7 @@
 import { createRouter, createWebHashHistory, RouteRecordRaw } from 'vue-router';
 import BasicLayout from '../layout/BasicLayout.vue';
 import { useAuthStore } from '../store/auth';
+import { FEATURES } from '../config/features';
 
 const routes: Array<RouteRecordRaw> = [
   {
@@ -17,41 +18,17 @@ const routes: Array<RouteRecordRaw> = [
         name: 'Home',
         component: () => import('../views/Home.vue')
       },
-      {
-        path: 'customer',
-        name: 'Customer',
-        component: () => import('../views/Customer.vue')
-      },
+      ...(FEATURES.CUSTOMER ? [{ path: 'customer', name: 'Customer', component: () => import('../views/Customer.vue') }] : []),
       {
         path: 'archive/:id',
         name: 'Archive',
         component: () => import('../views/Archive.vue')
       },
-      {
-        path: 'sys-user',
-        name: 'SysUser',
-        component: () => import('../views/SysUser.vue')
-      },
-      {
-        path: 'profile',
-        name: 'Profile',
-        component: () => import('../views/Profile.vue')
-      },
-      {
-        path: 'recycle-bin',
-        name: 'RecycleBin',
-        component: () => import('../views/RecycleBin.vue')
-      },
-      {
-        path: 'stats',
-        name: 'Statistics',
-        component: () => import('../views/Statistics.vue')
-      },
-      {
-        path: 'data-manage',
-        name: 'DataManage',
-        component: () => import('../views/DataManage.vue')
-      }
+      ...(FEATURES.SYS_USER ? [{ path: 'sys-user', name: 'SysUser', component: () => import('../views/SysUser.vue') }] : []),
+      ...(FEATURES.PROFILE ? [{ path: 'profile', name: 'Profile', component: () => import('../views/Profile.vue') }] : []),
+      ...(FEATURES.RECYCLE_BIN ? [{ path: 'recycle-bin', name: 'RecycleBin', component: () => import('../views/RecycleBin.vue') }] : []),
+      ...(FEATURES.STATISTICS ? [{ path: 'stats', name: 'Statistics', component: () => import('../views/Statistics.vue') }] : []),
+      ...(FEATURES.DATA_MANAGE ? [{ path: 'data-manage', name: 'DataManage', component: () => import('../views/DataManage.vue') }] : [])
     ]
   },
   {
