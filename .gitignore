@@ -49,6 +49,7 @@ pnpm-debug.log*
 **/runtime/
 *.tsbuildinfo
 *.local
+glasses-management-electron/package-lock.json
 
 # Generated frontend assets copied into Spring Boot static directories
 /glasses-management-backend/src/main/resources/static/

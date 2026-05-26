@@ -19,13 +19,13 @@
 ### 后端
 
 - Java 21
-- Spring Boot 3.2.4
-- MyBatis Plus 3.5.5
-- Sa-Token 1.37.0
+- Spring Boot 3.5.14
+- MyBatis Plus 3.5.16
+- Sa-Token 1.45.0
 - Lombok
-- Hutool
-- iText 7，用于 PDF 导出
-- EasyExcel，用于 Excel 导出
+- Hutool 5.8.44
+- iText 9.6.0，用于 PDF 导出
+- EasyExcel 4.0.3，用于 Excel 导出
 - MySQL 版依赖 `mysql-connector-j`
 - H2 版依赖 `com.h2database:h2`，并额外包含 Spring Boot Actuator
 
@@ -149,14 +149,69 @@ Copy-Item glasses-management-backend-h2\application-local.example.yml glasses-ma
 - **Electron 桌面版专属说明**：Electron 启动后台时并未显式激活 `prod` profile，会回退使用 `dev` 的相对路径 `./data/glasses_management`。由于 Electron 指定了工作目录（CWD）为 `userData`（通常是 `%APPDATA%\<应用名>`），因此 Electron 版的实际 H2 数据库存储在 `%APPDATA%\<应用名>\data\glasses_management.mv.db`。
 
 ### 日志系统
-- **开发环境 (`dev`)**：使用 Spring Boot 默认的 Logback，输出到控制台。MyBatis-Plus SQL 打印开启，Sa-Token 权限日志开启。代码中基本通过 `@Slf4j` 进行记录（目前仅 `BrowserLauncher` 中较多使用）。
-- **生产环境 (`prod`)**：日志级别默认 `INFO`。为避免日志文件过大，MyBatis-Plus 的 SQL 打印会被关闭（`NoLoggingImpl`）。
-- **日志存放路径**：
-  - MySQL 版原生后端：`${user.home}/.glasses_management_mysql/logs/spring.log`
-  - H2 版原生安装包 (`jpackage`打包)：`${user.home}/.glasses_management/logs/spring.log`
-  - Electron 桌面版：Electron 会拦截 Java 进程的 stdout/stderr 输出，并保存在 `%APPDATA%\<应用名>\logs\backend-*.log`（即 `userData/logs` 目录）。
-  - **避坑指南（Electron 乱码问题）**：在 Windows 平台上，即便给 Java 启动参数指定了 `-Dfile.encoding=UTF-8`，控制台标准输出（System.out）仍可能使用操作系统的本地编码（GBK），导致 Node.js 捕获时按 UTF-8 解码产生乱码（如将 `系统` 识别成 `ϵͳ`）。解决办法是在 Electron 启动 Java 的参数中补充 `-Dstdout.encoding=UTF-8` 和 `-Dstderr.encoding=UTF-8`。
-- **业务操作审计**：目前系统缺乏细粒度的业务级操作日志记录（如“谁在何时修改了哪个记录”）。如果未来有数据操作追踪需求，建议后续补充基于 Spring AOP 的统一操作日志拦截，或引入专门的操作记录表。
+
+#### 后端日志配置（logback-spring.xml）
+
+两个后端均使用 `logback-spring.xml` 进行日志配置（位于 `src/main/resources/`），按 Spring Profile 区分环境：
+
+- **开发环境 (`dev`)**：彩色控制台输出，`DEBUG` 级别，框架包（Spring、MyBatis、Sa-Token）降为 `INFO` 减少噪音。
+- **生产环境 (`prod`)**：滚动文件输出到 `${LOG_PATH}/app.log`，`INFO` 级别，按天轮转，单文件最大 50MB，保留 30 天，总上限 1GB。`LOG_PATH` 默认为 `${app.home}/logs`（Electron 通过 `-Dapp.home` 传入 `userData` 路径）。
+
+#### HTTP 请求日志（RequestLoggingFilter）
+
+两个后端均注册了 `RequestLoggingFilter`（`@Component` + `@Order(1)`），自动记录每个 `/api/**` 请求：
+
+```
+POST /api/customer/add | user=admin(1) | 200 | 15ms
+POST /api/auth/login | user=anonymous | 401 | 3ms
+```
+
+4xx/5xx 使用 `WARN` 级别，其余使用 `INFO`。静态资源和非 API 请求自动排除。
+
+#### 业务操作日志
+
+以下 Controller / Service 使用 `@Slf4j` 记录关键业务操作：
+
+- **AuthController**：登录成功/失败（含原因）、注册、修改密码、修改个人资料。
+- **CustomerServiceImpl**：软删除顾客。
+- **OptometryRecordServiceImpl**：软删除验光记录。
+- **SalesRecordServiceImpl**：软删除配镜记录。
+- **SysUserController**：封禁、解封、删除（软）、恢复、彻底删除（`WARN`）、重置密码。
+- **RecycleBinController**：恢复、彻底删除（`WARN`）、清空回收站（`WARN`）。
+- **DataController**：导出、导入成功/失败、数据重置（`WARN`）。
+- **RecycleCleanupScheduler**：定时清理结果和异常。
+
+#### 异常日志（GlobalExceptionHandler）
+
+`GlobalExceptionHandler` 使用 `@Slf4j`：
+- `RuntimeException`：`log.warn(“业务异常: {}”, e.getMessage())`
+- `Exception`：`log.error(“未处理异常: {}”, e.getMessage(), e)` 输出完整堆栈
+
+#### MyBatis SQL 日志
+
+- `application.yml`（dev）：`log-impl: StdOutImpl`，SQL 输出到控制台。
+- `application-prod.yml`（prod）：`log-impl: NoLoggingImpl`，关闭 SQL 日志避免文件膨胀。
+
+#### 日志存放路径
+
+| 场景 | 路径 |
+|------|------|
+| MySQL 版原生后端 (prod) | `${user.home}/.glasses_management_mysql/logs/app.log` |
+| H2 版原生安装包 (prod) | `${user.home}/.glasses_management/logs/app.log` |
+| Electron 桌面版 (后端日志) | `%APPDATA%\<应用名>\logs\app.log` |
+| Electron 桌面版 (Electron 层) | `%APPDATA%\<应用名>\logs\backend-{YYYYMMDD-HHmmss}.log` |
+
+#### Electron 层日志（main.js）
+
+Electron 主进程维护独立的日志系统：
+- 每次启动生成一个带时间戳的日志文件，同时捕获 Java 子进程的 stdout/stderr。
+- 自动清理：保留最近 30 个日志文件，超出的自动删除。
+- 提供 `logInfo`、`logError`、`logDebug`（仅开发模式）三个级别。
+- 通过 IPC 暴露 `get-log-path` 和 `open-log-folder` 供渲染进程使用。
+
+#### 避坑指南（Electron 乱码问题）
+
+Windows 平台上，即便给 Java 启动参数指定了 `-Dfile.encoding=UTF-8`，控制台标准输出（System.out）仍可能使用操作系统的本地编码（GBK），导致 Node.js 捕获时按 UTF-8 解码产生乱码。解决办法是在 Electron 启动 Java 的参数中补充 `-Dstdout.encoding=UTF-8` 和 `-Dstderr.encoding=UTF-8`。
 
 ## 主要业务模型
 
@@ -176,6 +231,7 @@ Copy-Item glasses-management-backend-h2\application-local.example.yml glasses-ma
 - `/api/sales`：销售记录创建、按顾客查询、更新、删除、统计。
 - `/api/print`：处方打印、顾客档案导出、营收导出。
 - `/api/recycle-bin`：回收站查询、恢复、彻底删除、清理过期数据。
+- `/api/data`：数据导出、导入（合并/替换）、重置。
 - `/api/sys-user`：系统用户列表、启用/禁用、删除/恢复/彻底删除、重置密码。
 
 ## 前端结构
@@ -187,6 +243,7 @@ Copy-Item glasses-management-backend-h2\application-local.example.yml glasses-ma
 - `src/store/auth.ts`：认证状态。
 - `src/utils/request.ts`：Axios 实例，`baseURL` 为 `/api`，从 `localStorage` 读取 `token` 写入 `Authorization` 请求头。
 - `src/utils/theme.ts`：主题相关工具。
+- `src/config/features.ts`：功能开关配置，控制导航菜单和路由是否注册（`CUSTOMER`、`STATISTICS`、`DATA_MANAGE`、`PROFILE`、`RECYCLE_BIN`、`SYS_USER`）。
 - `src/views/Login.vue`：登录页。
 - `src/views/Register.vue`：注册页。
 - `src/views/Home.vue`：首页。
@@ -196,6 +253,7 @@ Copy-Item glasses-management-backend-h2\application-local.example.yml glasses-ma
 - `src/views/Profile.vue`：个人资料。
 - `src/views/RecycleBin.vue`：回收站。
 - `src/views/Statistics.vue`：统计页。
+- `src/views/DataManage.vue`：数据管理（导入/导出/重置）。
 
 ## 后端结构
 
@@ -207,7 +265,7 @@ Copy-Item glasses-management-backend-h2\application-local.example.yml glasses-ma
 - `mapper`：MyBatis Plus Mapper。
 - `entity`：数据库实体。
 - `dto`：请求/响应 DTO。
-- `config`：Web 配置、Sa-Token 权限、初始化器、异常处理、定时清理、浏览器自动启动等。
+- `config`：Web 配置、Sa-Token 权限、初始化器、异常处理、定时清理、浏览器自动启动、HTTP 请求日志过滤器等。
 - `util/Result.java`：统一响应结构。
 - `constant/RoleConstants.java`：角色常量。
 
@@ -220,7 +278,7 @@ Copy-Item glasses-management-backend-h2\application-local.example.yml glasses-ma
 - 角色主要区分 `admin` 和 `merchant`。
 - 前端页面和后端接口路径已经耦合，改接口时需要同步检查对应 Vue 页面。
 - 打包桌面版主要依赖 H2 后端，不要只改 MySQL 后端后就认为桌面版已更新。
-- 版本号位置不同：Electron 安装包版本在 `glasses-management-electron/package.json`，后端原生安装包版本在各自的 `jpackage.cfg`。
+- 版本号位置不同：Electron 安装包版本在 `glasses-management-electron/package.json`，前端版本在 `glasses-management-frontend/package.json`，后端版本在各自的 `pom.xml`。后端原生安装包版本另在 `jpackage.cfg`。当前全项目统一版本为 **2.0.0**。
 
 ## 验证建议
 
