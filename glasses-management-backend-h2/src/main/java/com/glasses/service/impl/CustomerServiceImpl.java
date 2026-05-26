@@ -11,12 +11,14 @@ import com.glasses.mapper.CustomerMapper;
 import com.glasses.mapper.OptometryRecordMapper;
 import com.glasses.mapper.SalesRecordMapper;
 import com.glasses.service.CustomerService;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Date;
 
+@Slf4j
 @Service
 public class CustomerServiceImpl extends ServiceImpl<CustomerMapper, Customer> implements CustomerService {
 
@@ -53,6 +55,7 @@ public class CustomerServiceImpl extends ServiceImpl<CustomerMapper, Customer> i
         baseMapper.softDeleteById(id, now, loginId);
         optometryRecordMapper.softDeleteByCustomerId(id, now, loginId);
         salesRecordMapper.softDeleteByCustomerId(id, now, loginId);
+        log.info("软删除顾客: id={}, 操作人={}", id, loginId);
         return true;
     }
 }

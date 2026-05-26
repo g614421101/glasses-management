@@ -1,11 +1,13 @@
 package com.glasses.controller;
 
+import cn.dev33.satoken.stp.StpUtil;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.glasses.dto.DataExportDTO;
 import com.glasses.dto.ImportResultDTO;
 import com.glasses.service.DataService;
 import com.glasses.util.Result;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -19,6 +21,7 @@ import java.io.IOException;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 
+@Slf4j
 @RestController
 @RequestMapping("/api/data")
 public class DataController {
@@ -43,6 +46,7 @@ public class DataController {
                 "attachment; filename=" + URLEncoder.encode(fileName, StandardCharsets.UTF_8));
 
         response.getWriter().write(json);
+        log.info("数据导出: 操作人={}", StpUtil.getLoginIdAsLong());
     }
 
     @PostMapping("/import")
@@ -53,10 +57,13 @@ public class DataController {
         }
         try {
             ImportResultDTO result = dataService.importData(file, mode);
+            log.info("数据导入成功: mode={}, 文件名={}, 操作人={}", mode, file.getOriginalFilename(), StpUtil.getLoginIdAsLong());
             return Result.success(result);
         } catch (IOException e) {
+            log.error("数据导入失败(文件读取): {}", e.getMessage(), e);
             return Result.error("文件读取失败: " + e.getMessage());
         } catch (Exception e) {
+            log.error("数据导入失败: {}", e.getMessage(), e);
             return Result.error("导入失败: " + e.getMessage());
         }
     }
@@ -65,8 +72,10 @@ public class DataController {
     public Result<String> resetData() {
         try {
             int deleted = dataService.resetAllData();
+            log.warn("数据重置: 删除{}条记录, 操作人={}", deleted, StpUtil.getLoginIdAsLong());
             return Result.success("已清空 " + deleted + " 条记录（管理员账号已保留）");
         } catch (Exception e) {
+            log.error("数据重置失败: {}", e.getMessage(), e);
             return Result.error("清空失败: " + e.getMessage());
         }
     }

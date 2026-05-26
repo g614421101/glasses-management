@@ -14,8 +14,7 @@ import com.glasses.mapper.OptometryRecordMapper;
 import com.glasses.mapper.SalesRecordMapper;
 import com.glasses.mapper.SysUserMapper;
 import com.glasses.service.DataService;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -29,10 +28,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+@Slf4j
 @Service
 public class DataServiceImpl implements DataService {
 
-    private static final Logger log = LoggerFactory.getLogger(DataServiceImpl.class);
     private static final ObjectMapper objectMapper = new ObjectMapper()
             .registerModule(new JavaTimeModule());
 

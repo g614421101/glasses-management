@@ -8,10 +8,12 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.glasses.entity.OptometryRecord;
 import com.glasses.mapper.OptometryRecordMapper;
 import com.glasses.service.OptometryRecordService;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 
+@Slf4j
 @Service
 public class OptometryRecordServiceImpl extends ServiceImpl<OptometryRecordMapper, OptometryRecord> implements OptometryRecordService {
 
@@ -38,6 +40,11 @@ public class OptometryRecordServiceImpl extends ServiceImpl<OptometryRecordMappe
         if (record == null) {
             return false;
         }
-        return baseMapper.softDeleteById(id, DateUtil.date(), StpUtil.getLoginIdAsLong()) > 0;
+        Long loginId = StpUtil.getLoginIdAsLong();
+        boolean result = baseMapper.softDeleteById(id, DateUtil.date(), loginId) > 0;
+        if (result) {
+            log.info("软删除验光记录: id={}, 操作人={}", id, loginId);
+        }
+        return result;
     }
 }

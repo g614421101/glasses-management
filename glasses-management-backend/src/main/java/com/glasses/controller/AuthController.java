@@ -14,12 +14,14 @@ import com.glasses.dto.RegisterDTO;
 import com.glasses.entity.SysUser;
 import com.glasses.mapper.SysUserMapper;
 import com.glasses.util.Result;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.HashMap;
 import java.util.Map;
 
+@Slf4j
 @RestController
 @RequestMapping("/api/auth")
 public class AuthController {
@@ -42,17 +44,21 @@ public class AuthController {
                 .last("LIMIT 1"));
 
         if (user == null || !BCrypt.checkpw(loginDTO.getPassword(), user.getPassword())) {
+            log.info("用户登录失败: {} (用户名或密码错误)", account);
             return Result.error("用户名或密码错误");
         }
         if (Boolean.TRUE.equals(user.getDeleted())) {
+            log.info("用户登录失败: {} (账号已删除)", account);
             return Result.error("该账号已删除，请联系超管恢复");
         }
         if (Boolean.TRUE.equals(user.getDisabled())) {
+            log.info("用户登录失败: {} (账号已封禁)", account);
             return Result.error("该账号已封禁，请联系超管解除封禁");
         }
 
         StpUtil.login(user.getId());
         refreshSession(user);
+        log.info("用户登录成功: {} (id={})", account, user.getId());
 
         Map<String, Object> data = buildUserInfo(user);
         data.put("token", StpUtil.getTokenValue());
@@ -98,6 +104,7 @@ public class AuthController {
         newUser.setDisabled(false);
         newUser.setDeleted(false);
         sysUserMapper.insert(newUser);
+        log.info("新用户注册: {} (phone={})", username, phone);
         return Result.success("注册成功");
     }
 
@@ -139,6 +146,7 @@ public class AuthController {
         user.setMustChangePassword(false);
         sysUserMapper.updateById(user);
         refreshSession(user);
+        log.info("修改密码: userId={}", user.getId());
         return Result.success(true);
     }
 
@@ -180,6 +188,7 @@ public class AuthController {
         user.setRealName(StrUtil.isBlank(realName) ? username : realName);
         sysUserMapper.updateById(user);
         refreshSession(user);
+        log.info("修改个人资料: userId={}", user.getId());
         return Result.success(buildUserInfo(user));
     }
 

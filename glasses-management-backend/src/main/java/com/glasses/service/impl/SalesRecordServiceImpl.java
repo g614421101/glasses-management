@@ -8,10 +8,12 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.glasses.entity.SalesRecord;
 import com.glasses.mapper.SalesRecordMapper;
 import com.glasses.service.SalesRecordService;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 
+@Slf4j
 @Service
 public class SalesRecordServiceImpl extends ServiceImpl<SalesRecordMapper, SalesRecord> implements SalesRecordService {
 
@@ -38,7 +40,12 @@ public class SalesRecordServiceImpl extends ServiceImpl<SalesRecordMapper, Sales
         if (record == null) {
             return false;
         }
-        return baseMapper.softDeleteById(id, DateUtil.date(), StpUtil.getLoginIdAsLong()) > 0;
+        Long loginId = StpUtil.getLoginIdAsLong();
+        boolean result = baseMapper.softDeleteById(id, DateUtil.date(), loginId) > 0;
+        if (result) {
+            log.info("软删除配镜记录: id={}, 操作人={}", id, loginId);
+        }
+        return result;
     }
 
     @Override

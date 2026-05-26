@@ -29,6 +29,26 @@ function initLogger() {
     ].join('');
     logFilePath = path.join(logDir, `backend-${ts}.log`);
     logStream = fs.createWriteStream(logFilePath, { flags: 'a', encoding: 'utf-8' });
+
+    // Cleanup old log files (keep latest 30)
+    cleanupOldLogs();
+}
+
+function cleanupOldLogs() {
+    try {
+        const files = fs.readdirSync(logDir)
+            .filter(f => f.startsWith('backend-') && f.endsWith('.log'))
+            .map(f => ({ name: f, time: fs.statSync(path.join(logDir, f)).mtimeMs }))
+            .sort((a, b) => b.time - a.time);
+        if (files.length > 30) {
+            files.slice(30).forEach(f => {
+                try { fs.unlinkSync(path.join(logDir, f.name)); } catch (e) { /* ignore */ }
+            });
+            logToFile('INFO', `清理旧日志文件: 保留最近30个, 删除${files.length - 30}个`);
+        }
+    } catch (e) {
+        // ignore cleanup errors
+    }
 }
 
 function logToFile(level, message) {
@@ -47,6 +67,12 @@ function logInfo(msg) {
 function logError(msg) {
     console.error(msg);
     logToFile('ERROR', msg);
+}
+
+function logDebug(msg) {
+    if (!app.isPackaged) {
+        logToFile('DEBUG', msg);
+    }
 }
 
 function getLogFilePath() {

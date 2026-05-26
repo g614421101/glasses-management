@@ -5,9 +5,11 @@ import cn.dev33.satoken.exception.NotPermissionException;
 import cn.dev33.satoken.exception.NotRoleException;
 import com.glasses.util.Result;
 import jakarta.servlet.http.HttpServletResponse;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
+@Slf4j
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
@@ -25,12 +27,13 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(RuntimeException.class)
     public Result<String> handleRuntimeException(RuntimeException e) {
+        log.warn("\u4e1a\u52a1\u5f02\u5e38: {}", e.getMessage());
         return Result.error(e.getMessage());
     }
 
     @ExceptionHandler(Exception.class)
     public Result<String> handleException(Exception e) {
-        e.printStackTrace();
+        log.error("\u672a\u5904\u7406\u5f02\u5e38: {}", e.getMessage(), e);
         return Result.error(e.getMessage() != null ? e.getMessage() : "\u670d\u52a1\u5668\u5185\u90e8\u9519\u8bef");
     }
 }

@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+
+    <!-- 通用日志格式 -->
+    <property name="LOG_PATTERN" value="%d{yyyy-MM-dd HH:mm:ss.SSS} [%level] [%logger{36}] - %msg%n"/>
+
+    <!-- ═══════════════════════════════════════════════════════ -->
+    <!-- 开发环境：控制台输出                                      -->
+    <!-- ═══════════════════════════════════════════════════════ -->
+    <springProfile name="dev">
+        <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
+            <encoder>
+                <pattern>%d{HH:mm:ss.SSS} [%highlight(%level)] [%cyan(%logger{36})] - %msg%n</pattern>
+                <charset>UTF-8</charset>
+            </encoder>
+        </appender>
+
+        <root level="DEBUG">
+            <appender-ref ref="CONSOLE"/>
+        </root>
+
+        <!-- 减少框架噪音 -->
+        <logger name="org.springframework" level="INFO"/>
+        <logger name="org.apache.ibatis" level="INFO"/>
+        <logger name="cn.dev33.satoken" level="INFO"/>
+    </springProfile>
+
+    <!-- ═══════════════════════════════════════════════════════ -->
+    <!-- 生产环境：滚动文件输出                                    -->
+    <!-- ═══════════════════════════════════════════════════════ -->
+    <springProfile name="prod">
+        <property name="LOG_PATH" value="${LOG_PATH:-${app.home:-.}/logs}"/>
+
+        <appender name="FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
+            <file>${LOG_PATH}/app.log</file>
+            <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
+                <fileNamePattern>${LOG_PATH}/app.%d{yyyy-MM-dd}.%i.log</fileNamePattern>
+                <maxFileSize>50MB</maxFileSize>
+                <maxHistory>30</maxHistory>
+                <totalSizeCap>1GB</totalSizeCap>
+            </rollingPolicy>
+            <encoder>
+                <pattern>${LOG_PATTERN}</pattern>
+                <charset>UTF-8</charset>
+            </encoder>
+        </appender>
+
+        <root level="INFO">
+            <appender-ref ref="FILE"/>
+        </root>
+    </springProfile>
+
+</configuration>

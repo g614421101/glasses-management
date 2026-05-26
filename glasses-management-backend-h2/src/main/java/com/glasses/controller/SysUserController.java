@@ -7,6 +7,7 @@ import com.glasses.constant.RoleConstants;
 import com.glasses.entity.SysUser;
 import com.glasses.mapper.SysUserMapper;
 import com.glasses.util.Result;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -20,6 +21,7 @@ import java.security.SecureRandom;
 import java.util.Date;
 import java.util.List;
 
+@Slf4j
 @RestController
 @RequestMapping("/api/sys-user")
 @SaCheckRole(RoleConstants.ADMIN)
@@ -53,6 +55,7 @@ public class SysUserController {
         user.setDisabledTime(new Date());
         sysUserMapper.updateById(user);
         StpUtil.logout(user.getId());
+        log.info("封禁商户: id={}, username={}, 操作人={}", id, user.getUsername(), StpUtil.getLoginIdAsLong());
         return Result.success(true);
     }
 
@@ -65,6 +68,7 @@ public class SysUserController {
         user.setDisabled(false);
         user.setDisabledTime(null);
         sysUserMapper.updateById(user);
+        log.info("解封商户: id={}, username={}, 操作人={}", id, user.getUsername(), StpUtil.getLoginIdAsLong());
         return Result.success(true);
     }
 
@@ -76,6 +80,7 @@ public class SysUserController {
         }
         sysUserMapper.softDeleteMerchantById(id, RoleConstants.ADMIN, new Date());
         StpUtil.logout(user.getId());
+        log.info("删除商户(软): id={}, username={}, 操作人={}", id, user.getUsername(), StpUtil.getLoginIdAsLong());
         return Result.success(true);
     }
 
@@ -86,6 +91,7 @@ public class SysUserController {
             return Result.error("账号不存在或不允许操作");
         }
         sysUserMapper.restoreMerchantById(id, RoleConstants.ADMIN);
+        log.info("恢复商户: id={}, username={}, 操作人={}", id, user.getUsername(), StpUtil.getLoginIdAsLong());
         return Result.success(true);
     }
 
@@ -99,6 +105,7 @@ public class SysUserController {
             return Result.error("只能彻底删除已进入回收站的商户账号");
         }
         sysUserMapper.physicalDeleteMerchantById(id, RoleConstants.ADMIN);
+        log.warn("彻底删除商户: id={}, username={}, 操作人={}", id, user.getUsername(), StpUtil.getLoginIdAsLong());
         return Result.success(true);
     }
 
@@ -116,6 +123,7 @@ public class SysUserController {
         user.setPassword(BCrypt.hashpw(temporaryPassword));
         user.setMustChangePassword(true);
         sysUserMapper.updateById(user);
+        log.info("重置商户密码: id={}, username={}, 操作人={}", id, user.getUsername(), StpUtil.getLoginIdAsLong());
         return Result.success("临时密码：" + temporaryPassword);
     }
 
