@@ -135,7 +135,7 @@
 import { ref, reactive, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
 import request from '../utils/request';
-import { ElMessage } from 'element-plus';
+import { ElMessage, ElMessageBox } from 'element-plus';
 import { Plus, Search, View, Edit, Delete } from '@element-plus/icons-vue';
 
 const router = useRouter();
@@ -223,14 +223,32 @@ const submitForm = async () => {
         if (form.id) {
           await request.put('/customer/update', form);
           ElMessage.success('更新成功');
+          dialogVisible.value = false;
+          loadData();
         } else {
           await request.post('/customer/add', form);
           ElMessage.success('新建成功');
+          dialogVisible.value = false;
+          loadData();
         }
-        dialogVisible.value = false;
-        loadData();
-      } catch (e) {
-        console.error(e);
+      } catch (e: any) {
+        if (e.code === 409 && e.data) {
+          const existing = e.data;
+          ElMessageBox.confirm(
+            `该手机号已关联顾客：${existing.name}。是否直接进入该顾客档案？`,
+            '提示',
+            {
+              confirmButtonText: '确定',
+              cancelButtonText: '取消',
+              type: 'warning'
+            }
+          ).then(() => {
+            dialogVisible.value = false;
+            goArchive(existing.id);
+          }).catch(() => {});
+        } else {
+          console.error(e);
+        }
       }
     }
   });

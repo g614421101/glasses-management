@@ -97,8 +97,13 @@ request.interceptors.response.use(
     if (res.code === 200) {
       return res.data;
     } else {
-      ElMessage.error(res.msg || 'Error');
-      return Promise.reject(new Error(res.msg || 'Error'));
+      if (res.code !== 409) {
+        ElMessage.error(res.msg || 'Error');
+      }
+      const err = new Error(res.msg || 'Error') as any;
+      err.code = res.code;
+      err.data = res.data;
+      return Promise.reject(err);
     }
   },
   (error: any) => {

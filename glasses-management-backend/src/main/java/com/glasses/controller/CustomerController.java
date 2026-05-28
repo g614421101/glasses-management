@@ -26,15 +26,15 @@ public class CustomerController {
     }
 
     @PostMapping("/add")
-    public Result<Boolean> addCustomer(@RequestBody Customer customer) {
+    public Result<Object> addCustomer(@RequestBody Customer customer) {
         if (customer.getPhone() != null && !customer.getPhone().trim().isEmpty()) {
             Customer existing = customerMapper.selectByPhoneIncludingDeleted(customer.getPhone());
             if (existing != null) {
-                if (Boolean.TRUE.equals(existing.getDeleted())) {
-                    return Result.error("该手机号对应的顾客档案在回收站中，请先将其恢复或彻底删除");
-                } else {
-                    return Result.error("该手机号已关联其他活跃顾客，请更换");
-                }
+                Result<Object> conflictResult = new Result<>();
+                conflictResult.setCode(409);
+                conflictResult.setMsg("该手机号已关联顾客：" + existing.getName());
+                conflictResult.setData(existing);
+                return conflictResult;
             }
         }
         customer.setDeleted(false);
