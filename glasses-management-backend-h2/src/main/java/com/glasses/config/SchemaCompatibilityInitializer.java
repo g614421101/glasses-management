@@ -34,6 +34,8 @@ public class SchemaCompatibilityInitializer implements ApplicationRunner {
         addColumnIfMissing("SALES_RECORD", "LENS_RETAIL_PRICE", "decimal(10,2) DEFAULT NULL");
         addColumnIfMissing("SALES_RECORD", "TOTAL_RETAIL_PRICE", "decimal(10,2) DEFAULT NULL");
         addColumnIfMissing("SALES_RECORD", "REMARK", "varchar(500) DEFAULT NULL");
+        addColumnIfMissing("SALES_RECORD", "FRAME_QUANTITY", "INT NOT NULL DEFAULT 1");
+        addColumnIfMissing("SALES_RECORD", "LENS_QUANTITY", "INT NOT NULL DEFAULT 1");
 
         addIndexIfMissing("IDX_SYS_USER_DELETED", "CREATE INDEX IF NOT EXISTS idx_sys_user_deleted ON sys_user(deleted)");
         addIndexIfMissing("UK_PHONE", "CREATE UNIQUE INDEX IF NOT EXISTS uk_phone ON sys_user(phone)");

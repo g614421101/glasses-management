@@ -278,7 +278,7 @@ Windows 平台上，即便给 Java 启动参数指定了 `-Dfile.encoding=UTF-8`
 - 角色主要区分 `admin` 和 `merchant`。
 - 前端页面和后端接口路径已经耦合，改接口时需要同步检查对应 Vue 页面。
 - 打包桌面版主要依赖 H2 后端，不要只改 MySQL 后端后就认为桌面版已更新。
-- 版本号位置不同：Electron 安装包版本在 `glasses-management-electron/package.json`，前端版本在 `glasses-management-frontend/package.json`，后端版本在各自的 `pom.xml`。后端原生安装包版本另在 `jpackage.cfg`。当前全项目统一版本为 **2.0.0**。
+- 版本号位置不同：Electron 安装包版本在 `glasses-management-electron/package.json`，前端版本在 `glasses-management-frontend/package.json`，后端版本在各自的 `pom.xml`。后端原生安装包版本另在 `jpackage.cfg`。当前全项目统一版本为 **2.1.0**。
 
 ## 验证建议
 

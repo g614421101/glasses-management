@@ -35,6 +35,10 @@ public class SalesRecordExcelDTO {
     @ColumnWidth(14)
     private String frameModel;
 
+    @ExcelProperty("镜架数量")
+    @ColumnWidth(10)
+    private String frameQuantity;
+
     @ExcelProperty("镜架售价(元)")
     @ColumnWidth(14)
     private String framePrice;
@@ -46,6 +50,10 @@ public class SalesRecordExcelDTO {
     @ExcelProperty("镜片参数")
     @ColumnWidth(18)
     private String lensParams;
+
+    @ExcelProperty("镜片数量")
+    @ColumnWidth(10)
+    private String lensQuantity;
 
     @ExcelProperty("镜片售价(元)")
     @ColumnWidth(14)

@@ -161,10 +161,10 @@ public class PrintController {
         // 配镜信息表格
         doc.add(bold(new Paragraph("【配镜明细】").setFont(chineseFont).setFontSize(12)).setMarginBottom(5));
 
-        Table salesTable = new Table(UnitValue.createPercentArray(new float[] { 20, 30, 25, 25 }))
+        Table salesTable = new Table(UnitValue.createPercentArray(new float[] { 15, 25, 22, 13, 25 }))
                 .useAllAvailableWidth().setMarginBottom(15);
 
-        String[] sHeaders = { "项目", "品牌/参数", "型号/规格", "价格(元)" };
+        String[] sHeaders = { "项目", "品牌/参数", "型号/规格", "数量", "小计(元)" };
         for (String h : sHeaders) {
             salesTable.addHeaderCell(new Cell().add(bold(new Paragraph(h).setFont(chineseFont).setFontSize(9)))
                     .setTextAlignment(TextAlignment.CENTER));
@@ -173,14 +173,20 @@ public class PrintController {
         salesTable.addCell(cell("镜架", chineseFont));
         salesTable.addCell(cell(nvl(salesRecord.getFrameBrand()), chineseFont));
         salesTable.addCell(cell(nvl(salesRecord.getFrameModel()), chineseFont));
-        salesTable.addCell(
-                cell(salesRecord.getFramePrice() != null ? salesRecord.getFramePrice().toString() : "0", chineseFont));
+        int fq = salesRecord.getFrameQuantity() != null ? salesRecord.getFrameQuantity() : 1;
+        salesTable.addCell(cell(String.valueOf(fq), chineseFont));
+        java.math.BigDecimal frameSubtotal = salesRecord.getFramePrice() != null
+                ? salesRecord.getFramePrice().multiply(java.math.BigDecimal.valueOf(fq)) : java.math.BigDecimal.ZERO;
+        salesTable.addCell(cell(frameSubtotal.toString(), chineseFont));
 
         salesTable.addCell(cell("镜片", chineseFont));
         salesTable.addCell(cell(nvl(salesRecord.getLensBrand()), chineseFont));
         salesTable.addCell(cell(nvl(salesRecord.getLensParams()), chineseFont));
-        salesTable.addCell(
-                cell(salesRecord.getLensPrice() != null ? salesRecord.getLensPrice().toString() : "0", chineseFont));
+        int lq = salesRecord.getLensQuantity() != null ? salesRecord.getLensQuantity() : 1;
+        salesTable.addCell(cell(String.valueOf(lq), chineseFont));
+        java.math.BigDecimal lensSubtotal = salesRecord.getLensPrice() != null
+                ? salesRecord.getLensPrice().multiply(java.math.BigDecimal.valueOf(lq)) : java.math.BigDecimal.ZERO;
+        salesTable.addCell(cell(lensSubtotal.toString(), chineseFont));
 
         doc.add(salesTable);
 
@@ -242,6 +248,8 @@ public class PrintController {
             dto.setLensParams(nvl(sr.getLensParams()));
             dto.setLensPrice(sr.getLensPrice() != null ? sr.getLensPrice().toString() : "0");
             dto.setTotalAmount(sr.getTotalAmount() != null ? sr.getTotalAmount().toString() : "0");
+            dto.setFrameQuantity(sr.getFrameQuantity() != null ? sr.getFrameQuantity().toString() : "1");
+            dto.setLensQuantity(sr.getLensQuantity() != null ? sr.getLensQuantity().toString() : "1");
 
             // 从批量查询的 Map 中取验光数据
             OptometryRecord opto = optometryMap.get(sr.getOptometryId());
@@ -340,6 +348,8 @@ public class PrintController {
             dto.setLensParams(nvl(sr.getLensParams()));
             dto.setLensPrice(sr.getLensPrice() != null ? sr.getLensPrice().toString() : "0");
             dto.setTotalAmount(sr.getTotalAmount() != null ? sr.getTotalAmount().toString() : "0");
+            dto.setFrameQuantity(sr.getFrameQuantity() != null ? sr.getFrameQuantity().toString() : "1");
+            dto.setLensQuantity(sr.getLensQuantity() != null ? sr.getLensQuantity().toString() : "1");
 
             OptometryRecord opto = optometryMap.get(sr.getOptometryId());
             if (opto != null) {

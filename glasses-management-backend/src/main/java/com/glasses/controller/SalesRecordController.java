@@ -40,6 +40,12 @@ public class SalesRecordController {
         if (record.getSalesDate() == null) {
             record.setSalesDate(DateUtil.date());
         }
+        if (record.getFrameQuantity() == null) {
+            record.setFrameQuantity(1);
+        }
+        if (record.getLensQuantity() == null) {
+            record.setLensQuantity(1);
+        }
         return Result.success(salesRecordService.save(record));
     }
 

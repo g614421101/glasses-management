@@ -93,7 +93,14 @@
                   <h4>{{ item.title }}</h4>
                   <p class="subtitle">{{ item.subtitle }}</p>
                 </div>
-                <div v-if="item.type === 'SALES'" class="record-amount">￥{{ item.data.totalAmount || '0.00' }}</div>
+                <div v-if="item.type === 'SALES'" class="record-amount">
+                  ￥{{ item.data.totalAmount || '0.00' }}
+                  <span v-if="(item.data.frameQuantity && item.data.frameQuantity > 1) || (item.data.lensQuantity && item.data.lensQuantity > 1)" class="qty-badge">
+                    <template v-if="item.data.frameQuantity > 1">架×{{ item.data.frameQuantity }}</template>
+                    <template v-if="item.data.frameQuantity > 1 && item.data.lensQuantity > 1"> </template>
+                    <template v-if="item.data.lensQuantity > 1">片×{{ item.data.lensQuantity }}</template>
+                  </span>
+                </div>
               </div>
 
               <div class="record-glance">
@@ -152,7 +159,7 @@
 
     <el-dialog
       v-model="detailVisible"
-      width="min(92vw, 760px)"
+      width="min(92vw, 840px)"
       class="elegant-dialog"
       align-center
       destroy-on-close
@@ -242,6 +249,7 @@
               <div>
                 <del v-if="currentDetail.data.frameRetailPrice > 0" style="color:#999; font-size:12px; margin-right:6px; font-weight:normal;">￥{{ currentDetail.data.frameRetailPrice }}</del>
                 <strong>￥{{ currentDetail.data.framePrice || 0 }}</strong>
+                <span v-if="currentDetail.data.frameQuantity && currentDetail.data.frameQuantity > 1" style="margin-left:6px; font-size:12px; color:var(--primary-color); font-weight:700;">×{{ currentDetail.data.frameQuantity }}</span>
               </div>
             </div>
             <h4>{{ currentDetail.data.frameBrand || '-' }}</h4>
@@ -254,6 +262,7 @@
               <div>
                 <del v-if="currentDetail.data.lensRetailPrice > 0" style="color:#999; font-size:12px; margin-right:6px; font-weight:normal;">￥{{ currentDetail.data.lensRetailPrice }}</del>
                 <strong>￥{{ currentDetail.data.lensPrice || 0 }}</strong>
+                <span v-if="currentDetail.data.lensQuantity && currentDetail.data.lensQuantity > 1" style="margin-left:6px; font-size:12px; color:var(--primary-color); font-weight:700;">×{{ currentDetail.data.lensQuantity }}</span>
               </div>
             </div>
             <h4>{{ currentDetail.data.lensBrand || '-' }}</h4>
@@ -314,44 +323,114 @@
       </template>
     </el-dialog>
 
-    <el-dialog :title="salesForm.id ? '编辑配镜单' : '新建配镜单'" v-model="salesDialogVisible" width="min(94vw, 560px)">
-      <el-form :model="salesForm" label-width="106px" class="record-form">
-        <el-form-item label="关联验光">
-          <el-select v-model="salesForm.optometryId" placeholder="选择验光记录(可选)" clearable style="width: 100%">
-            <el-option
-              v-for="item in timelineData.filter(i => i.type === 'OPTOMETRY')"
-              :key="item.data.id"
-              :label="item.date + ' 验光单'"
-              :value="item.data.id"
-            />
-          </el-select>
-        </el-form-item>
-        <el-form-item label="镜架品牌"><el-input v-model="salesForm.frameBrand" /></el-form-item>
-        <el-form-item label="镜架型号"><el-input v-model="salesForm.frameModel" /></el-form-item>
-        <el-form-item label="镜架零售价"><el-input-number v-model="salesForm.frameRetailPrice" :precision="2" :step="10" @change="calcTotal" style="width: 100%" /></el-form-item>
-        <el-form-item label="镜架实际售价"><el-input-number v-model="salesForm.framePrice" :precision="2" :step="10" @change="calcTotal" style="width: 100%" /></el-form-item>
+    <el-dialog :title="salesForm.id ? '编辑配镜单' : '新建配镜单'" v-model="salesDialogVisible" width="min(94vw, 800px)">
+      <el-form :model="salesForm" label-width="80px" label-position="left" class="record-form">
+        <el-row>
+          <el-col :span="24">
+            <el-form-item label="关联验光" label-width="80px">
+              <el-select v-model="salesForm.optometryId" placeholder="选择验光记录(可选)" clearable style="width: 100%">
+                <el-option
+                  v-for="item in timelineData.filter(i => i.type === 'OPTOMETRY')"
+                  :key="item.data.id"
+                  :label="item.date + ' 验光单'"
+                  :value="item.data.id"
+                />
+              </el-select>
+            </el-form-item>
+          </el-col>
+        </el-row>
 
-        <el-divider />
+        <h4 class="form-block-title" style="margin-top: 8px;">镜架信息</h4>
+        <el-row :gutter="12">
+          <el-col :xs="24" :sm="12">
+            <el-form-item label="镜架品牌">
+              <el-input v-model="salesForm.frameBrand" />
+            </el-form-item>
+          </el-col>
+          <el-col :xs="24" :sm="12">
+            <el-form-item label="镜架型号">
+              <el-input v-model="salesForm.frameModel" />
+            </el-form-item>
+          </el-col>
+        </el-row>
+        <el-row :gutter="12">
+          <el-col :xs="24" :sm="8">
+            <el-form-item label="数量">
+              <el-input-number v-model="salesForm.frameQuantity" :min="1" :step="1" @change="calcTotal" style="width: 100%" />
+            </el-form-item>
+          </el-col>
+          <el-col :xs="24" :sm="8">
+            <el-form-item label="零售单价">
+              <el-input-number v-model="salesForm.frameRetailPrice" :precision="2" :step="10" @change="calcTotal" style="width: 100%" />
+            </el-form-item>
+          </el-col>
+          <el-col :xs="24" :sm="8">
+            <el-form-item label="实际售价">
+              <el-input-number v-model="salesForm.framePrice" :precision="2" :step="10" @change="calcTotal" style="width: 100%" />
+            </el-form-item>
+          </el-col>
+        </el-row>
 
-        <el-form-item label="镜片品牌"><el-input v-model="salesForm.lensBrand" /></el-form-item>
-        <el-form-item label="镜片参数"><el-input v-model="salesForm.lensParams" placeholder="例: 1.60 防蓝光" /></el-form-item>
-        <el-form-item label="镜片零售价"><el-input-number v-model="salesForm.lensRetailPrice" :precision="2" :step="10" @change="calcTotal" style="width: 100%" /></el-form-item>
-        <el-form-item label="镜片实际售价"><el-input-number v-model="salesForm.lensPrice" :precision="2" :step="10" @change="calcTotal" style="width: 100%" /></el-form-item>
+        <el-divider style="margin: 16px 0;" />
 
-        <el-divider />
+        <h4 class="form-block-title">镜片信息</h4>
+        <el-row :gutter="12">
+          <el-col :xs="24" :sm="12">
+            <el-form-item label="镜片品牌">
+              <el-input v-model="salesForm.lensBrand" />
+            </el-form-item>
+          </el-col>
+          <el-col :xs="24" :sm="12">
+            <el-form-item label="镜片参数">
+              <el-input v-model="salesForm.lensParams" placeholder="例: 1.60 防蓝光" />
+            </el-form-item>
+          </el-col>
+        </el-row>
+        <el-row :gutter="12">
+          <el-col :xs="24" :sm="8">
+            <el-form-item label="数量">
+              <el-input-number v-model="salesForm.lensQuantity" :min="1" :step="1" @change="calcTotal" style="width: 100%" />
+            </el-form-item>
+          </el-col>
+          <el-col :xs="24" :sm="8">
+            <el-form-item label="零售单价">
+              <el-input-number v-model="salesForm.lensRetailPrice" :precision="2" :step="10" @change="calcTotal" style="width: 100%" />
+            </el-form-item>
+          </el-col>
+          <el-col :xs="24" :sm="8">
+            <el-form-item label="实际售价">
+              <el-input-number v-model="salesForm.lensPrice" :precision="2" :step="10" @change="calcTotal" style="width: 100%" />
+            </el-form-item>
+          </el-col>
+        </el-row>
 
-        <el-form-item label="零售总价">
-          <el-input-number v-model="salesForm.totalRetailPrice" :precision="2" :step="10" style="width: 100%" />
-        </el-form-item>
-        <el-form-item label="实收总价">
-          <el-input-number v-model="salesForm.totalAmount" :precision="2" :step="10" style="width: 100%" />
-        </el-form-item>
-        <el-form-item label="折扣">
-          <el-input :value="computedDiscount" readonly placeholder="自动计算" />
-        </el-form-item>
-        <el-form-item label="备注">
-          <el-input type="textarea" v-model="salesForm.remark" placeholder="选填，如：送隐形眼镜盒..." />
-        </el-form-item>
+        <el-divider style="margin: 16px 0;" />
+
+        <h4 class="form-block-title">结算与备注</h4>
+        <el-row :gutter="12">
+          <el-col :xs="24" :sm="8">
+            <el-form-item label="零售总价">
+              <el-input-number v-model="salesForm.totalRetailPrice" :precision="2" :step="10" style="width: 100%" />
+            </el-form-item>
+          </el-col>
+          <el-col :xs="24" :sm="8">
+            <el-form-item label="实收总价">
+              <el-input-number v-model="salesForm.totalAmount" :precision="2" :step="10" style="width: 100%" />
+            </el-form-item>
+          </el-col>
+          <el-col :xs="24" :sm="8">
+            <el-form-item label="折扣">
+              <el-input :value="computedDiscount" readonly placeholder="自动计算" />
+            </el-form-item>
+          </el-col>
+        </el-row>
+        <el-row>
+          <el-col :span="24">
+            <el-form-item label="备注">
+              <el-input type="textarea" v-model="salesForm.remark" :rows="2" placeholder="选填，如：送隐形眼镜盒..." />
+            </el-form-item>
+          </el-col>
+        </el-row>
       </el-form>
       <template #footer>
         <el-button @click="salesDialogVisible = false">取消</el-button>
@@ -407,10 +486,12 @@ const salesForm = reactive<any>({
   optometryId: null,
   frameBrand: '',
   frameModel: '',
+  frameQuantity: 1,
   frameRetailPrice: 0,
   framePrice: 0,
   lensBrand: '',
   lensParams: '',
+  lensQuantity: 1,
   lensRetailPrice: 0,
   lensPrice: 0,
   totalRetailPrice: 0,
@@ -500,10 +581,12 @@ const resetSales = () => {
     optometryId: null,
     frameBrand: '',
     frameModel: '',
+    frameQuantity: 1,
     frameRetailPrice: 0,
     framePrice: 0,
     lensBrand: '',
     lensParams: '',
+    lensQuantity: 1,
     lensRetailPrice: 0,
     lensPrice: 0,
     totalRetailPrice: 0,
@@ -513,8 +596,10 @@ const resetSales = () => {
 };
 
 const calcTotal = () => {
-  salesForm.totalRetailPrice = (salesForm.frameRetailPrice || 0) + (salesForm.lensRetailPrice || 0);
-  salesForm.totalAmount = (salesForm.framePrice || 0) + (salesForm.lensPrice || 0);
+  const fq = salesForm.frameQuantity || 1;
+  const lq = salesForm.lensQuantity || 1;
+  salesForm.totalRetailPrice = (salesForm.frameRetailPrice || 0) * fq + (salesForm.lensRetailPrice || 0) * lq;
+  salesForm.totalAmount = (salesForm.framePrice || 0) * fq + (salesForm.lensPrice || 0) * lq;
 };
 
 const openSalesDialog = () => {
@@ -825,6 +910,11 @@ const fmt = (val) => {
   align-items: flex-start;
 }
 
+.record-title-wrap {
+  min-width: 0;
+  flex: 1;
+}
+
 .record-title-wrap h4 {
   margin: 10px 0 6px;
   font-size: 20px;
@@ -861,6 +951,15 @@ const fmt = (val) => {
   font-size: 18px;
   font-weight: 800;
   white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.qty-badge {
+  display: inline-block;
+  margin-left: 6px;
+  font-size: 11px;
+  font-weight: 700;
+  opacity: 0.75;
 }
 
 .record-glance {
@@ -953,12 +1052,13 @@ const fmt = (val) => {
 }
 
 .total-bubble {
-  min-width: 124px;
-  padding: 14px 16px;
+  min-width: 180px;
+  padding: 14px 24px;
   border-radius: 22px;
   background: linear-gradient(135deg, #1d4ed8 0%, #38bdf8 100%);
   color: #ffffff;
   box-shadow: 0 18px 36px rgba(37, 99, 235, 0.24);
+  white-space: nowrap;
 }
 
 .total-bubble small {

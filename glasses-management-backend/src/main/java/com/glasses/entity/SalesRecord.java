@@ -28,12 +28,14 @@ public class SalesRecord {
     // 镜架信息
     private String frameBrand;
     private String frameModel;
+    private Integer frameQuantity;
     private BigDecimal frameRetailPrice;
     private BigDecimal framePrice;
 
     // 镜片信息
     private String lensBrand;
     private String lensParams;
+    private Integer lensQuantity;
     private BigDecimal lensRetailPrice;
     private BigDecimal lensPrice;
 
