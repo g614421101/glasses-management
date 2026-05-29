@@ -13,7 +13,7 @@ public class BrowserLauncher implements ApplicationListener<ApplicationReadyEven
     public void onApplicationEvent(ApplicationReadyEvent event) {
         Boolean autoLaunch = event.getApplicationContext()
                 .getEnvironment()
-                .getProperty("app.browser.auto-launch", Boolean.class, true);
+                .getProperty("app.browser.auto-launch", Boolean.class, false);
         if (Boolean.FALSE.equals(autoLaunch)) {
             log.info("已跳过自动打开浏览器（根据配置已禁用）");
             return;
