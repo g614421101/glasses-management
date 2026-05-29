@@ -151,7 +151,7 @@ public class PrintController {
             if (opto.getPdNear() != null)
                 pdInfo.append("近用瞳距: ").append(opto.getPdNear()).append("    ");
             if (opto.getAddPower() != null)
-                pdInfo.append("下加光(ADD): ").append(opto.getAddPower());
+                pdInfo.append("下加光(ADD): ").append(fmtDiopter(opto.getAddPower()));
             if (!pdInfo.isEmpty()) {
                 doc.add(new Paragraph(pdInfo.toString())
                         .setFont(chineseFont).setFontSize(10).setMarginBottom(10));
@@ -264,7 +264,7 @@ public class PrintController {
                 dto.setOsPd(opto.getOsPd() != null ? opto.getOsPd().toString() : "");
                 dto.setPdFar(opto.getPdFar() != null ? opto.getPdFar().toString() : "");
                 dto.setPdNear(opto.getPdNear() != null ? opto.getPdNear().toString() : "");
-                dto.setAddPower(opto.getAddPower() != null ? opto.getAddPower().toString() : "");
+                dto.setAddPower(opto.getAddPower() != null ? fmtDiopter(opto.getAddPower()) : "");
             }
             dataList.add(dto);
         }
@@ -363,7 +363,7 @@ public class PrintController {
                 dto.setOsPd(opto.getOsPd() != null ? opto.getOsPd().toString() : "");
                 dto.setPdFar(opto.getPdFar() != null ? opto.getPdFar().toString() : "");
                 dto.setPdNear(opto.getPdNear() != null ? opto.getPdNear().toString() : "");
-                dto.setAddPower(opto.getAddPower() != null ? opto.getAddPower().toString() : "");
+                dto.setAddPower(opto.getAddPower() != null ? fmtDiopter(opto.getAddPower()) : "");
             }
             dataList.add(dto);
         }

@@ -214,7 +214,7 @@
           <div class="info-tag"><span>左眼瞳距</span><strong>{{ currentDetail.data.osPd || '-' }}</strong></div>
           <div class="info-tag"><span>远用瞳距</span><strong>{{ currentDetail.data.pdFar || '-' }}</strong></div>
           <div class="info-tag"><span>近用瞳距</span><strong>{{ currentDetail.data.pdNear || '-' }}</strong></div>
-          <div class="info-tag"><span>下加光</span><strong>{{ currentDetail.data.addPower || '-' }}</strong></div>
+          <div class="info-tag"><span>下加光</span><strong>{{ fmt(currentDetail.data.addPower) }}</strong></div>
           <div class="info-tag"><span>验光师</span><strong>{{ currentDetail.data.optometristName || '-' }}</strong></div>
         </div>
 
@@ -624,6 +624,11 @@ const submitSales = async () => {
 const openEdit = (item) => {
   if (item.type === 'OPTOMETRY') {
     Object.assign(optoForm, item.data);
+    optoForm.odSph = fmtInput(optoForm.odSph);
+    optoForm.odCyl = fmtInput(optoForm.odCyl);
+    optoForm.osSph = fmtInput(optoForm.osSph);
+    optoForm.osCyl = fmtInput(optoForm.osCyl);
+    optoForm.addPower = fmtInput(optoForm.addPower);
     optoDialogVisible.value = true;
   } else {
     Object.assign(salesForm, item.data);
@@ -676,6 +681,13 @@ const deleteCustomer = async () => {
 const fmt = (val) => {
   if (val === undefined || val === null || val === '') return '-';
   const num = parseFloat(val);
+  return num > 0 ? '+' + num.toFixed(2) : num.toFixed(2);
+};
+
+const fmtInput = (val) => {
+  if (val === undefined || val === null || val === '') return '';
+  const num = parseFloat(val);
+  if (isNaN(num)) return '';
   return num > 0 ? '+' + num.toFixed(2) : num.toFixed(2);
 };
 </script>
