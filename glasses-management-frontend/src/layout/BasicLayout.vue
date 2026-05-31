@@ -1,16 +1,22 @@
 <template>
   <el-container class="layout-container">
     <el-header class="glass-header">
-      <div class="logo-box" @click="goHome">
-        <div class="brand-orb">
-          <el-icon :size="22" color="#ffffff"><View /></el-icon>
+      <div class="logo-box">
+        <el-button link class="mobile-menu-toggle" v-if="isMobile" @click="drawerVisible = true" style="margin-right: 8px;">
+          <el-icon :size="20"><MenuIcon /></el-icon>
+        </el-button>
+        <div class="brand-orb" @click="goHome">
+          <el-icon :size="isMobile ? 18 : 22" color="#ffffff"><View /></el-icon>
         </div>
-        <div class="brand-copy">
+        <div class="brand-copy" v-if="!isMobile" @click="goHome">
           <span class="logo-text">视光档案管理系统</span>
           <span class="logo-subtext">Optical Record Management System</span>
         </div>
+        <span class="logo-text" v-else @click="goHome">视光档案</span>
       </div>
-      <div class="user-info">
+
+      <!-- Desktop User Info -->
+      <div class="user-info" v-if="!isMobile">
         <div class="user-chip user-chip--link" @click="router.push('/profile')">
           <span class="user-label">当前账号</span>
           <strong class="welcome-text">{{ authStore.username }}</strong>
@@ -30,12 +36,49 @@
         </el-button>
         <el-button type="primary" plain size="small" class="logout-btn" @click="handleLogout">退出登录</el-button>
       </div>
+
+      <!-- Mobile User Info Dropdown -->
+      <div class="user-info user-info--mobile" v-else>
+        <el-button
+          class="theme-toggle-btn theme-toggle-btn--mobile"
+          circle
+          size="default"
+          @click="toggleTheme"
+        >
+          <el-icon>
+            <Sunny v-if="isDark" />
+            <Moon v-else />
+          </el-icon>
+        </el-button>
+        <el-dropdown trigger="click" @command="handleCommand">
+          <el-button circle class="mobile-avatar-btn">
+            <el-icon :size="16"><User /></el-icon>
+          </el-button>
+          <template #dropdown>
+            <el-dropdown-menu class="mobile-dropdown-menu">
+              <el-dropdown-item command="profile" disabled>
+                <div class="user-profile-meta">
+                  <span class="user-meta-label">当前账号:</span>
+                  <strong class="user-meta-val">{{ authStore.username }}</strong>
+                </div>
+              </el-dropdown-item>
+              <el-dropdown-item command="profile" divided>
+                <el-icon><User /></el-icon>个人主页
+              </el-dropdown-item>
+              <el-dropdown-item command="logout" style="color: var(--el-color-danger)">
+                <el-icon><SwitchButton /></el-icon>退出登录
+              </el-dropdown-item>
+            </el-dropdown-menu>
+          </template>
+        </el-dropdown>
+      </div>
     </el-header>
     
     <el-container class="main-body">
-      <el-aside width="200px" class="glass-aside">
-        <div class="aside-title">导航菜单</div>
-        <el-menu :default-active="route.path" router class="side-menu" :border="false">
+      <!-- Desktop Sidebar Menu -->
+      <el-aside :width="isCollapsed ? '76px' : '220px'" class="glass-aside" :class="{ 'glass-aside--collapsed': isCollapsed }" v-if="!isMobile">
+        <div class="aside-title" v-show="!isCollapsed">导航菜单</div>
+        <el-menu :default-active="route.path" router class="side-menu" :border="false" :collapse="isCollapsed">
           <el-menu-item index="/">
             <el-icon><Monitor /></el-icon>
             <span>工作平台</span>
@@ -65,7 +108,64 @@
             <span>账号管理(超管)</span>
           </el-menu-item>
         </el-menu>
+        <div class="collapse-toggle-wrapper">
+          <el-button link class="collapse-toggle-btn" @click="isCollapsed = !isCollapsed">
+            <el-icon :size="18">
+              <Expand v-if="isCollapsed" />
+              <Fold v-else />
+            </el-icon>
+            <span v-show="!isCollapsed">收起菜单</span>
+          </el-button>
+        </div>
       </el-aside>
+
+      <!-- Mobile/Tablet Drawer Menu -->
+      <el-drawer
+        v-if="isMobile"
+        v-model="drawerVisible"
+        direction="ltr"
+        size="250px"
+        :with-header="false"
+        class="mobile-menu-drawer"
+      >
+        <div class="drawer-logo-box">
+          <div class="brand-orb">
+            <el-icon :size="20" color="#ffffff"><View /></el-icon>
+          </div>
+          <span class="logo-text">视光档案</span>
+        </div>
+        <div class="drawer-title">导航菜单</div>
+        <el-menu :default-active="route.path" router class="drawer-side-menu" @select="drawerVisible = false">
+          <el-menu-item index="/">
+            <el-icon><Monitor /></el-icon>
+            <span>工作平台</span>
+          </el-menu-item>
+          <el-menu-item index="/customer" v-if="FEATURES.CUSTOMER">
+            <el-icon><User /></el-icon>
+            <span>顾客管理</span>
+          </el-menu-item>
+          <el-menu-item index="/stats" v-if="FEATURES.STATISTICS">
+            <el-icon><TrendCharts /></el-icon>
+            <span>营收统计</span>
+          </el-menu-item>
+          <el-menu-item index="/data-manage" v-if="FEATURES.DATA_MANAGE">
+            <el-icon><FolderOpened /></el-icon>
+            <span>数据管理</span>
+          </el-menu-item>
+          <el-menu-item index="/profile" v-if="FEATURES.PROFILE">
+            <el-icon><User /></el-icon>
+            <span>个人主页</span>
+          </el-menu-item>
+          <el-menu-item index="/recycle-bin" v-if="FEATURES.RECYCLE_BIN && authStore.role === 'admin'">
+            <el-icon><Delete /></el-icon>
+            <span>回收站</span>
+          </el-menu-item>
+          <el-menu-item index="/sys-user" v-if="FEATURES.SYS_USER && authStore.role === 'admin'">
+            <el-icon><Setting /></el-icon>
+            <span>账号管理(超管)</span>
+          </el-menu-item>
+        </el-menu>
+      </el-drawer>
       
       <el-main class="main-content">
         <router-view v-slot="{ Component }">
@@ -79,9 +179,10 @@
 </template>
 
 <script setup lang="ts">
+import { ref, onMounted, onUnmounted } from 'vue';
 import { useAuthStore } from '../store/auth';
 import { useRouter, useRoute } from 'vue-router';
-import { Monitor, User, Setting, View, TrendCharts, Moon, Sunny, Delete, FolderOpened } from '@element-plus/icons-vue';
+import { Monitor, User, Setting, View, TrendCharts, Moon, Sunny, Delete, FolderOpened, SwitchButton, Menu as MenuIcon, Expand, Fold } from '@element-plus/icons-vue';
 import { useTheme } from '../utils/theme';
 import { FEATURES } from '../config/features';
 
@@ -89,6 +190,25 @@ const authStore = useAuthStore();
 const router = useRouter();
 const route = useRoute();
 const { isDark, toggleTheme } = useTheme();
+
+const drawerVisible = ref(false);
+const isCollapsed = ref(false);
+
+const isMobile = ref(window.matchMedia('(max-width: 900px)').matches);
+let mediaQuery: MediaQueryList | null = null;
+let mediaHandler: ((e: MediaQueryListEvent) => void) | null = null;
+
+onMounted(() => {
+  mediaQuery = window.matchMedia('(max-width: 900px)');
+  mediaHandler = (e: MediaQueryListEvent) => { isMobile.value = e.matches; };
+  mediaQuery.addEventListener('change', mediaHandler);
+});
+
+onUnmounted(() => {
+  if (mediaQuery && mediaHandler) {
+    mediaQuery.removeEventListener('change', mediaHandler);
+  }
+});
 
 const goHome = () => {
   router.push('/');
@@ -98,6 +218,14 @@ const handleLogout = () => {
   authStore.logout();
   router.push('/login');
 }
+
+const handleCommand = (command: string) => {
+  if (command === 'profile') {
+    router.push('/profile');
+  } else if (command === 'logout') {
+    handleLogout();
+  }
+};
 </script>
 
 <style scoped>
@@ -250,6 +378,11 @@ const handleLogout = () => {
   border-radius: 26px;
   backdrop-filter: blur(18px);
   box-shadow: 0 18px 35px rgba(15, 23, 42, 0.07);
+  transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1), padding 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.glass-aside--collapsed {
+  padding: 20px 6px 14px;
 }
 
 .aside-title {
@@ -259,10 +392,17 @@ const handleLogout = () => {
   color: var(--text-muted);
   letter-spacing: 0.14em;
   text-transform: uppercase;
+  white-space: nowrap;
+  overflow: hidden;
 }
 
 .side-menu {
   background: transparent;
+  border-right: none;
+}
+
+.side-menu.el-menu--collapse {
+  width: 100% !important;
   border-right: none;
 }
 
@@ -275,6 +415,13 @@ const handleLogout = () => {
   color: var(--text-secondary);
 }
 
+.glass-aside--collapsed .side-menu :deep(.el-menu-item) {
+  margin: 6px 4px !important;
+  padding: 0 !important;
+  display: flex;
+  justify-content: center;
+}
+
 .side-menu :deep(.el-menu-item:hover) {
   background: var(--primary-soft);
   color: var(--primary-color);
@@ -284,6 +431,37 @@ const handleLogout = () => {
   background: var(--gradient-soft);
   color: var(--primary-color);
   box-shadow: inset 0 0 0 1px var(--border-strong), 0 12px 24px rgba(37, 99, 235, 0.12);
+}
+
+.collapse-toggle-wrapper {
+  margin-top: 20px;
+  padding-top: 12px;
+  border-top: 1px solid var(--border-color);
+  display: flex;
+  justify-content: center;
+}
+
+.collapse-toggle-btn {
+  width: 100%;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 12px;
+  padding: 0 16px !important;
+  color: var(--text-secondary) !important;
+  border-radius: 12px;
+  transition: all 0.2s ease;
+}
+
+.glass-aside--collapsed .collapse-toggle-btn {
+  justify-content: center;
+  padding: 0 !important;
+}
+
+.collapse-toggle-btn:hover {
+  background: var(--primary-soft);
+  color: var(--primary-color) !important;
 }
 
 .main-content {
@@ -322,94 +500,153 @@ const handleLogout = () => {
 
 @media (max-width: 900px) {
   .main-body {
-    flex-direction: column;
-  }
-
-  .glass-aside {
-    width: auto !important;
-    position: static;
-    margin: 18px;
-    padding: 16px 10px 10px;
-  }
-
-  .side-menu {
-    display: flex;
-    overflow-x: auto;
-    padding-bottom: 4px;
-  }
-
-  .side-menu :deep(.el-menu-item) {
-    flex: 0 0 auto;
-    margin: 6px 8px;
+    flex-direction: column !important;
   }
 
   .main-content {
-    padding-top: 0;
+    padding-top: 16px !important;
+    padding-left: 12px !important;
+    padding-right: 12px !important;
   }
 }
 
 @media (max-width: 640px) {
   .glass-header {
-    flex-direction: column;
-    align-items: stretch;
-    padding: 14px 12px 16px;
-  }
-
-  .logo-box {
-    justify-content: flex-start;
-  }
-
-  .brand-copy {
-    gap: 2px;
-  }
-
-  .logo-subtext {
-    letter-spacing: 0.12em;
-  }
-
-  .user-info {
-    width: 100%;
-    display: grid;
-    grid-template-columns: minmax(0, 1fr) auto;
+    flex-direction: row;
+    justify-content: space-between;
     align-items: center;
-    gap: 10px;
+    padding: 10px 14px;
+    min-height: 56px;
   }
 
-  .user-chip {
-    width: auto;
-    min-height: 44px;
-    justify-content: center;
+  .brand-orb {
+    width: 34px;
+    height: 34px;
+    border-radius: 12px;
   }
 
-  .logout-btn {
-    width: auto;
-    min-width: 112px;
-    height: 44px !important;
-    justify-content: center;
-  }
-
-  .theme-toggle-btn {
-    min-width: 92px;
-    height: 44px !important;
-    justify-content: center;
-  }
-
-  .glass-aside,
-  .main-content {
-    margin-left: 12px;
-    margin-right: 12px;
+  .logo-text {
+    font-size: 16px;
   }
 }
 
-@media (max-width: 480px) {
-  .user-info {
-    grid-template-columns: 1fr;
-  }
+/* Mobile Menu Drawer Styling */
+.mobile-menu-drawer :deep(.el-drawer) {
+  background: var(--surface-overlay) !important;
+  backdrop-filter: blur(20px);
+  border-right: 1px solid var(--border-color);
+}
 
-  .user-chip,
-  .theme-toggle-btn,
-  .logout-btn {
-    width: 100%;
-  }
+.mobile-menu-drawer :deep(.el-drawer__body) {
+  padding: 24px 16px;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.drawer-logo-box {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 24px;
+  padding-left: 8px;
+}
+
+.drawer-title {
+  padding: 0 8px 12px;
+  font-size: 12px;
+  font-weight: 800;
+  color: var(--text-muted);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.drawer-side-menu {
+  background: transparent;
+  border-right: none;
+  flex: 1;
+}
+
+.drawer-side-menu :deep(.el-menu-item) {
+  height: 50px;
+  line-height: 50px;
+  margin: 6px 0;
+  border-radius: 16px;
+  font-weight: 700;
+  color: var(--text-secondary);
+}
+
+.drawer-side-menu :deep(.el-menu-item:hover) {
+  background: var(--primary-soft);
+  color: var(--primary-color);
+}
+
+.drawer-side-menu :deep(.el-menu-item.is-active) {
+  background: var(--gradient-soft);
+  color: var(--primary-color);
+  box-shadow: inset 0 0 0 1px var(--border-strong), 0 12px 24px rgba(37, 99, 235, 0.12);
+}
+
+.user-info--mobile {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.theme-toggle-btn--mobile {
+  width: 36px;
+  height: 36px !important;
+  min-width: 0 !important;
+  padding: 0 !important;
+  background: var(--surface-muted) !important;
+  border-color: var(--border-color) !important;
+  color: var(--text-secondary) !important;
+}
+
+.theme-toggle-btn--mobile:hover {
+  border-color: var(--border-strong) !important;
+  color: var(--primary-color) !important;
+}
+
+.mobile-avatar-btn {
+  width: 36px;
+  height: 36px !important;
+  min-width: 0 !important;
+  padding: 0 !important;
+  background: var(--primary-soft) !important;
+  border-color: var(--border-strong) !important;
+  color: var(--primary-color) !important;
+  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.12) !important;
+}
+
+.mobile-avatar-btn:hover {
+  background: var(--primary-color) !important;
+  color: #ffffff !important;
+}
+
+.user-profile-meta {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.4;
+  padding: 4px 0;
+  text-align: left;
+}
+
+.user-meta-label {
+  font-size: 11px;
+  color: var(--text-muted);
+}
+
+.user-meta-val {
+  font-size: 13px;
+  color: var(--text-primary);
+  font-weight: 700;
+  margin-top: 2px;
+}
+
+.mobile-dropdown-menu :deep(.el-dropdown-menu__item.is-disabled) {
+  cursor: default;
+  background-color: transparent !important;
+  opacity: 1;
 }
 </style>

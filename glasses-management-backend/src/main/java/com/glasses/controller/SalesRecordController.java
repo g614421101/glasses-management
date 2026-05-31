@@ -13,6 +13,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import java.math.BigDecimal;
+import java.util.concurrent.ThreadLocalRandom;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -32,7 +33,9 @@ public class SalesRecordController {
     @PostMapping("/add")
     public Result<Boolean> addRecord(@RequestBody SalesRecord record) {
         if (record.getRecordNo() == null || record.getRecordNo().isEmpty()) {
-            record.setRecordNo("SR" + DateUtil.format(DateUtil.date(), "yyyyMMddHHmmss"));
+            String timestamp = DateUtil.format(DateUtil.date(), "yyyyMMddHHmmssSSS");
+            int random = ThreadLocalRandom.current().nextInt(1000, 10000);
+            record.setRecordNo("SR" + timestamp + random);
         }
         if (record.getOperatorId() == null) {
             record.setOperatorId(StpUtil.getLoginIdAsLong());

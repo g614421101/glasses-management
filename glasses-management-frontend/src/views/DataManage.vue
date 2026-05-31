@@ -509,4 +509,46 @@ const handleReset = async () => {
 .action-btn--reset {
   min-width: 160px;
 }
+
+@media (max-width: 640px) {
+  .import-mode-group {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+    width: auto;
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  .import-mode-group :deep(.el-radio) {
+    margin-right: 0;
+  }
+
+  .import-actions {
+    flex-direction: column;
+    width: 100%;
+    gap: 12px;
+  }
+
+  .import-actions .action-btn {
+    width: 100%;
+  }
+
+  .action-btn--file {
+    max-width: none;
+  }
+
+  .file-btn-text {
+    max-width: none;
+  }
+
+  .action-btn--import {
+    min-width: 0;
+  }
+
+  .data-card .action-btn,
+  .reset-card .action-btn--reset {
+    width: 100%;
+  }
+}
 </style>

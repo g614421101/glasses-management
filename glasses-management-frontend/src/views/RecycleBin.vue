@@ -13,8 +13,8 @@
           <el-option label="配镜记录" value="sales" />
         </el-select>
         <el-button class="action-pill" @click="loadData">刷新</el-button>
-        <el-button type="danger" plain @click="purgeExpired">清理超过 30 天</el-button>
-        <el-button type="danger" @click="emptyBin">一键清空</el-button>
+        <el-button type="danger" plain @click="purgeExpired">{{ isMobile ? '清理过期' : '清理超过 30 天' }}</el-button>
+        <el-button class="empty-bin-btn" type="danger" @click="emptyBin">一键清空</el-button>
       </div>
     </section>
 
@@ -137,7 +137,7 @@ const loading = ref(false);
 const customers = ref<any[]>([]);
 const optometryRecords = ref<any[]>([]);
 const salesRecords = ref<any[]>([]);
-const isMobile = ref(window.matchMedia('(max-width: 640px)').matches);
+const isMobile = ref(window.matchMedia('(max-width: 760px)').matches);
 let mediaQuery: MediaQueryList | null = null;
 let mediaHandler: ((e: MediaQueryListEvent) => void) | null = null;
 
@@ -198,7 +198,7 @@ const emptyBin = async () => {
 
 onMounted(() => {
   loadData();
-  mediaQuery = window.matchMedia('(max-width: 640px)');
+  mediaQuery = window.matchMedia('(max-width: 760px)');
   mediaHandler = (e: MediaQueryListEvent) => { isMobile.value = e.matches; };
   mediaQuery.addEventListener('change', mediaHandler);
 });
@@ -289,11 +289,35 @@ onUnmounted(() => {
   .recycle-hero {
     flex-direction: column;
     align-items: stretch;
+    gap: 14px;
   }
 
-  .recycle-actions,
+  .recycle-actions {
+    width: 100% !important;
+    justify-content: space-between !important;
+    flex-wrap: wrap !important;
+    gap: 8px !important;
+  }
+
   .type-select {
+    width: 96px !important;
+    flex-shrink: 0;
+  }
+
+  .recycle-actions .el-button:not(.empty-bin-btn) {
+    padding: 8px 12px !important;
+    font-size: 12px !important;
+    margin: 0 !important;
+    flex: 1;
+    min-width: 70px;
+  }
+
+  .empty-bin-btn {
+    flex: 0 0 100%;
     width: 100%;
+    margin: 4px 0 0 0 !important;
+    padding: 10px 16px !important;
+    font-size: 13px !important;
   }
 }
 </style>

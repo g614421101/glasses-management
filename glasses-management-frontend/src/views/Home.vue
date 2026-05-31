@@ -15,6 +15,8 @@
           placeholder="输入顾客手机号或姓名进行搜索..."
           class="search-control home-search-control"
           clearable
+          @input="onSearchQueryInput"
+          @clear="clearResults"
           @keyup.enter="handleSearch"
         />
         <el-button type="primary" class="search-submit home-search-submit" @click="handleSearch">
@@ -25,12 +27,20 @@
       <!-- 搜索结果弹层（如果有多个，可以展示列表；精简版如果搜到一个直接跳转） -->
       <transition name="el-zoom-in-top">
         <div v-if="searchResults.length > 0" class="search-results-popper glass-card">
-          <div v-for="item in searchResults" :key="item.id" class="result-item" @click="goToArchive(item.id)">
-            <div class="result-info">
-              <span class="r-name">{{ item.name }}</span>
-              <span class="r-phone">{{ item.phone }}</span>
+          <div class="results-header">
+            <span>搜索结果 ({{ searchResults.length }})</span>
+            <el-button link class="close-results-btn" @click="clearResults">
+              <el-icon><Close /></el-icon>
+            </el-button>
+          </div>
+          <div class="results-list">
+            <div v-for="item in searchResults" :key="item.id" class="result-item" @click="goToArchive(item.id)">
+              <div class="result-info">
+                <span class="r-name">{{ item.name }}</span>
+                <span class="r-phone">{{ item.phone }}</span>
+              </div>
+              <el-icon color="#9ca3af"><ArrowRight /></el-icon>
             </div>
-            <el-icon color="#9ca3af"><ArrowRight /></el-icon>
           </div>
         </div>
       </transition>
@@ -70,12 +80,22 @@ import { ref, onMounted, nextTick } from 'vue';
 import { useRouter } from 'vue-router';
 import request from '../utils/request';
 import { ElMessage } from 'element-plus';
-import { Search, ArrowRight, UserFilled, Grid, Link } from '@element-plus/icons-vue';
+import { Search, ArrowRight, UserFilled, Grid, Link, Close } from '@element-plus/icons-vue';
 import QRCode from 'qrcode';
 
 const router = useRouter();
 const searchQuery = ref('');
 const searchResults = ref<any>([]);
+
+const clearResults = () => {
+  searchResults.value = [];
+};
+
+const onSearchQueryInput = (val: string) => {
+  if (!val) {
+    clearResults();
+  }
+};
 
 const lanUrl = ref('');
 const qrCanvas = ref<HTMLCanvasElement | null>(null);
@@ -193,6 +213,50 @@ const goCustomer = () => {
   box-shadow: 0 22px 45px rgba(15, 23, 42, 0.12);
 }
 
+.results-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 6px 10px 8px;
+  border-bottom: 1px solid var(--border-color);
+  margin-bottom: 6px;
+}
+
+.results-header span {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--text-muted);
+}
+
+.close-results-btn {
+  padding: 4px !important;
+  height: auto !important;
+  font-size: 16px;
+  color: var(--text-muted) !important;
+}
+
+.close-results-btn:hover {
+  color: var(--primary-color) !important;
+}
+
+.results-list {
+  max-height: 240px;
+  overflow-y: auto;
+}
+
+.results-list::-webkit-scrollbar {
+  width: 6px;
+}
+
+.results-list::-webkit-scrollbar-thumb {
+  background: var(--border-strong, rgba(37, 99, 235, 0.18));
+  border-radius: 3px;
+}
+
+.results-list::-webkit-scrollbar-track {
+  background: transparent;
+}
+
 .result-item {
   display: flex;
   justify-content: space-between;
@@ -296,9 +360,23 @@ const goCustomer = () => {
   }
 
   .result-info {
-    gap: 10px;
-    flex-direction: column;
-    align-items: flex-start;
+    gap: 12px;
+    flex-direction: row;
+    align-items: center;
+  }
+
+  .results-list {
+    max-height: 180px;
+  }
+
+  .search-results-popper {
+    border-radius: 16px;
+    padding: 6px;
+    box-shadow: 0 15px 35px rgba(15, 23, 42, 0.15);
+  }
+
+  .result-item {
+    padding: 10px 12px;
   }
 
   .shortcut-card {

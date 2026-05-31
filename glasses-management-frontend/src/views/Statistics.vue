@@ -122,7 +122,7 @@
           v-model:page-size="pageParams.size"
           :total="total"
           :page-sizes="[10, 20, 50, 100]"
-          layout="total, sizes, prev, pager, next"
+          :layout="isMobile ? 'prev, pager, next' : 'total, sizes, prev, pager, next'"
           prev-text="上一页"
           next-text="下一页"
           @size-change="fetchStats"

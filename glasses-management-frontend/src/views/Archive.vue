@@ -103,34 +103,118 @@
                 </div>
               </div>
 
-              <div class="record-glance">
+              <div class="record-body">
+                <!-- Optometry Record Glance -->
                 <template v-if="item.type === 'OPTOMETRY'">
-                  <div class="glance-item">
-                    <span>右眼</span>
-                    <strong>{{ fmt(item.data.odSph) }} / {{ fmt(item.data.odCyl) }}</strong>
+                  <!-- Mobile View: compact table layout -->
+                  <div v-if="isMobile">
+                    <div class="mini-optometry-table">
+                      <div class="table-header-row">
+                        <div class="cell title-cell"></div>
+                        <div class="cell">球镜(SPH)</div>
+                        <div class="cell">柱镜(CYL)</div>
+                        <div class="cell">轴位(AXIS)</div>
+                        <div class="cell">视力(VA)</div>
+                      </div>
+                      <div class="table-body-row">
+                        <div class="cell title-cell label-od">右眼</div>
+                        <div class="cell spherical">{{ fmt(item.data.odSph) }}</div>
+                        <div class="cell cylinder">{{ fmt(item.data.odCyl) }}</div>
+                        <div class="cell axis">{{ item.data.odAxis || '-' }}</div>
+                        <div class="cell va">{{ item.data.odVa || '-' }}</div>
+                      </div>
+                      <div class="table-body-row">
+                        <div class="cell title-cell label-os">左眼</div>
+                        <div class="cell spherical">{{ fmt(item.data.osSph) }}</div>
+                        <div class="cell cylinder">{{ fmt(item.data.osCyl) }}</div>
+                        <div class="cell axis">{{ item.data.osAxis || '-' }}</div>
+                        <div class="cell va">{{ item.data.osVa || '-' }}</div>
+                      </div>
+                    </div>
+                    
+                    <div class="optometry-footer">
+                      <span class="optometrist-tag" v-if="item.data.optometristName">
+                        <el-icon><User /></el-icon>
+                        验光师: <strong>{{ item.data.optometristName }}</strong>
+                      </span>
+                      <span class="pd-tag" v-if="item.data.pd">
+                        瞳距: <strong>{{ item.data.pd }} mm</strong>
+                      </span>
+                      <span class="add-tag" v-if="item.data.addSph">
+                        下加光: <strong>{{ fmt(item.data.addSph) }}</strong>
+                      </span>
+                    </div>
                   </div>
-                  <div class="glance-item">
-                    <span>左眼</span>
-                    <strong>{{ fmt(item.data.osSph) }} / {{ fmt(item.data.osCyl) }}</strong>
-                  </div>
-                  <div class="glance-item">
-                    <span>验光师</span>
-                    <strong>{{ item.data.optometristName || '-' }}</strong>
+                  
+                  <!-- Desktop View: original columns layout -->
+                  <div class="record-glance" v-else>
+                    <div class="glance-item">
+                      <span>右眼</span>
+                      <strong>{{ fmt(item.data.odSph) }} / {{ fmt(item.data.odCyl) }}</strong>
+                    </div>
+                    <div class="glance-item">
+                      <span>左眼</span>
+                      <strong>{{ fmt(item.data.osSph) }} / {{ fmt(item.data.osCyl) }}</strong>
+                    </div>
+                    <div class="glance-item">
+                      <span>验光师</span>
+                      <strong>{{ item.data.optometristName || '-' }}</strong>
+                    </div>
                   </div>
                 </template>
 
+                <!-- Sales Record Glance -->
                 <template v-else>
-                  <div class="glance-item">
-                    <span>镜架</span>
-                    <strong>{{ item.data.frameBrand || '-' }}</strong>
+                  <!-- Mobile View: product items layout -->
+                  <div v-if="isMobile">
+                    <div class="sales-product-glance">
+                      <div class="product-item" v-if="item.data.frameBrand || item.data.frameModel">
+                        <div class="p-icon"><el-icon><Grid /></el-icon></div>
+                        <div class="p-info">
+                          <span class="p-label">镜架</span>
+                          <strong class="p-val" :title="item.data.frameBrand + ' ' + (item.data.frameModel || '')">
+                            {{ item.data.frameBrand || '-' }}
+                            <small v-if="item.data.frameModel">{{ item.data.frameModel }}</small>
+                          </strong>
+                        </div>
+                      </div>
+                      
+                      <div class="product-item" v-if="item.data.lensBrand || item.data.lensModel">
+                        <div class="p-icon"><el-icon><Search /></el-icon></div>
+                        <div class="p-info">
+                          <span class="p-label">镜片</span>
+                          <strong class="p-val" :title="item.data.lensBrand + ' ' + (item.data.lensModel || '')">
+                            {{ item.data.lensBrand || '-' }}
+                            <small v-if="item.data.lensModel">{{ item.data.lensModel }}</small>
+                          </strong>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div class="sales-footer">
+                      <span class="sales-no-tag" v-if="item.data.recordNo">
+                        单号: <code class="sales-no">{{ item.data.recordNo }}</code>
+                      </span>
+                      <span class="operator-tag" v-if="item.data.operatorName">
+                        经手人: <strong>{{ item.data.operatorName }}</strong>
+                      </span>
+                    </div>
                   </div>
-                  <div class="glance-item">
-                    <span>镜片</span>
-                    <strong>{{ item.data.lensBrand || '-' }}</strong>
-                  </div>
-                  <div class="glance-item glance-item--record-no">
-                    <span>单号</span>
-                    <strong class="record-no-text" :title="item.data.recordNo || '-'">{{ item.data.recordNo || '-' }}</strong>
+
+                  <!-- Desktop View: original columns layout -->
+                  <div class="record-glance" v-else>
+                    <div class="glance-item">
+                      <span>镜架</span>
+                      <strong>{{ item.data.frameBrand || '-' }}</strong>
+                    </div>
+                    <div class="glance-item">
+                      <span>镜片</span>
+                      <strong>{{ item.data.lensBrand || '-' }}</strong>
+                    </div>
+                    <div class="glance-item glance-item--record-no">
+                      <span>单号</span>
+                      <strong class="record-no-text" :title="item.data.recordNo || '-'">{{ item.data.recordNo || '-' }}</strong>
+                    </div>
                   </div>
                 </template>
               </div>
@@ -319,7 +403,7 @@
       </el-form>
       <template #footer>
         <el-button @click="optoDialogVisible = false">取消</el-button>
-        <el-button type="primary" @click="submitOpto">保存</el-button>
+        <el-button type="primary" :loading="optoSubmitting" @click="submitOpto">保存</el-button>
       </template>
     </el-dialog>
 
@@ -434,14 +518,14 @@
       </el-form>
       <template #footer>
         <el-button @click="salesDialogVisible = false">取消</el-button>
-        <el-button type="primary" @click="submitSales">确认开单</el-button>
+        <el-button type="primary" :loading="salesSubmitting" @click="submitSales">确认开单</el-button>
       </template>
     </el-dialog>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, reactive, onMounted, computed } from 'vue';
+import { ref, reactive, onMounted, onUnmounted, computed } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import request, { openBlob, downloadBlob } from '../utils/request';
 import { ElMessage, ElMessageBox } from 'element-plus';
@@ -454,7 +538,9 @@ import {
   Download,
   Edit,
   Delete,
-  Close
+  Close,
+  User,
+  Grid
 } from '@element-plus/icons-vue';
 
 const route = useRoute();
@@ -464,11 +550,16 @@ const customerId = route.params.id;
 const customerInfo = reactive<any>({});
 const timelineData = ref<any>([]);
 
+const isMobile = ref(window.matchMedia('(max-width: 900px)').matches);
+let mediaQuery: MediaQueryList | null = null;
+let mediaHandler: ((e: MediaQueryListEvent) => void) | null = null;
+
 const detailVisible = ref(false);
 const drawerTitle = ref('');
 const currentDetail = ref<any>(null);
 
 const optoDialogVisible = ref(false);
+const optoSubmitting = ref(false);
 const optoForm = reactive<any>({
   id: null,
   customerId,
@@ -480,6 +571,7 @@ const optoForm = reactive<any>({
 });
 
 const salesDialogVisible = ref(false);
+const salesSubmitting = ref(false);
 const salesForm = reactive<any>({
   id: null,
   customerId,
@@ -515,6 +607,15 @@ const latestRecordLabel = computed(() => {
 onMounted(() => {
   loadCustomer();
   loadTimeline();
+  mediaQuery = window.matchMedia('(max-width: 900px)');
+  mediaHandler = (e: MediaQueryListEvent) => { isMobile.value = e.matches; };
+  mediaQuery.addEventListener('change', mediaHandler);
+});
+
+onUnmounted(() => {
+  if (mediaQuery && mediaHandler) {
+    mediaQuery.removeEventListener('change', mediaHandler);
+  }
 });
 
 const loadCustomer = async () => {
@@ -561,6 +662,8 @@ const openOptometryDialog = () => {
 };
 
 const submitOpto = async () => {
+  if (optoSubmitting.value) return;
+  optoSubmitting.value = true;
   try {
     if (optoForm.id) {
       await request.put('/optometry/update', optoForm);
@@ -571,7 +674,9 @@ const submitOpto = async () => {
     }
     optoDialogVisible.value = false;
     loadTimeline();
-  } catch (e) {}
+  } catch (e) {} finally {
+    optoSubmitting.value = false;
+  }
 };
 
 const resetSales = () => {
@@ -608,6 +713,8 @@ const openSalesDialog = () => {
 };
 
 const submitSales = async () => {
+  if (salesSubmitting.value) return;
+  salesSubmitting.value = true;
   try {
     if (salesForm.id) {
       await request.put('/sales/update', salesForm);
@@ -618,7 +725,9 @@ const submitSales = async () => {
     }
     salesDialogVisible.value = false;
     loadTimeline();
-  } catch (e) {}
+  } catch (e) {} finally {
+    salesSubmitting.value = false;
+  }
 };
 
 const openEdit = (item) => {
@@ -1015,6 +1124,168 @@ const fmtInput = (val) => {
   word-break: break-word;
 }
 
+.record-body {
+  margin-top: 14px;
+}
+
+.mini-optometry-table {
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  background: var(--surface-muted);
+  border: 1px solid var(--border-color);
+  border-radius: 16px;
+  overflow-x: auto;
+  margin-top: 8px;
+  box-shadow: inset 0 2px 8px rgba(15, 23, 42, 0.03);
+}
+
+.table-header-row, .table-body-row {
+  display: grid;
+  grid-template-columns: 52px repeat(4, 1fr);
+  width: 100%;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.table-body-row:last-child {
+  border-bottom: none;
+}
+
+.mini-optometry-table .cell {
+  width: 100%;
+  height: 100%;
+  padding: 8px 2px;
+  font-size: 12px;
+  text-align: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-primary);
+  min-width: 0;
+  font-weight: 700;
+  border-right: 1px solid var(--border-color);
+  box-sizing: border-box;
+}
+
+.mini-optometry-table .cell:last-child {
+  border-right: none;
+}
+
+.mini-optometry-table .table-header-row .cell {
+  color: var(--text-muted);
+  font-size: 11px;
+  font-weight: 800;
+  background: rgba(148, 163, 184, 0.05);
+}
+
+.mini-optometry-table .title-cell {
+  font-weight: 800;
+  font-size: 11px;
+  background: rgba(148, 163, 184, 0.08);
+  color: var(--text-secondary);
+}
+
+.mini-optometry-table .label-od {
+  color: var(--primary-color) !important;
+}
+
+.mini-optometry-table .label-os {
+  color: var(--el-color-success) !important;
+}
+
+.sales-product-glance {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+  margin-top: 8px;
+}
+
+.product-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  background: var(--surface-muted);
+  border: 1px solid var(--border-color);
+  border-radius: 14px;
+  min-width: 0;
+}
+
+.product-item .p-icon {
+  width: 32px;
+  height: 32px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--primary-soft);
+  color: var(--primary-color);
+  font-size: 15px;
+  flex-shrink: 0;
+}
+
+.timeline-detail-card.is-sales .product-item .p-icon {
+  background: rgba(56, 189, 248, 0.1);
+  color: #38bdf8;
+}
+
+.product-item .p-info {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  flex: 1;
+}
+
+.product-item .p-label {
+  font-size: 11px;
+  color: var(--text-muted);
+}
+
+.product-item .p-val {
+  font-size: 13px;
+  color: var(--text-primary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.product-item .p-val small {
+  font-size: 11px;
+  color: var(--text-muted);
+  font-weight: normal;
+  margin-left: 4px;
+}
+
+.sales-footer, .optometry-footer {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
+  margin-top: 12px;
+  padding-top: 10px;
+  border-top: 1px dashed var(--border-color);
+  font-size: 12px;
+  color: var(--text-secondary);
+}
+
+.optometrist-tag, .pd-tag, .add-tag, .sales-no-tag, .operator-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.sales-no {
+  font-family: Consolas, Monaco, monospace;
+  background: var(--surface-muted);
+  padding: 2px 6px;
+  border-radius: 6px;
+  color: var(--primary-color);
+  font-size: 11px;
+  border: 1px solid var(--border-color);
+}
+
 .action-bar {
   display: flex;
   justify-content: flex-end;
@@ -1261,11 +1532,17 @@ const fmtInput = (val) => {
     align-items: stretch;
   }
 
+  .hero-actions {
+    margin-top: 16px;
+  }
+
   .eye-card-grid,
-  .sales-card-grid,
-  .extra-grid,
-  .record-glance {
+  .sales-card-grid {
     grid-template-columns: 1fr;
+  }
+
+  .extra-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
   .record-amount,
@@ -1278,15 +1555,55 @@ const fmtInput = (val) => {
 @media (max-width: 640px) {
   .info-card,
   .timeline-card {
-    padding: 18px;
+    padding: 14px;
+  }
+
+  .timeline-detail-card {
+    padding: 14px 12px;
+    max-width: 100%;
+    box-sizing: border-box;
   }
 
   .customer-summary {
     grid-template-columns: 1fr;
   }
 
+  .hero-actions {
+    display: grid !important;
+    grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)) !important;
+    gap: 10px !important;
+    width: 100% !important;
+    margin-top: 16px !important;
+  }
+
+  .hero-actions .el-button {
+    margin: 0 !important;
+    width: 100% !important;
+    padding: 10px 8px !important;
+    font-size: 13px !important;
+    justify-content: center;
+  }
+
+  .custom-timeline {
+    padding-left: 2px !important;
+  }
+
+  .custom-timeline :deep(.el-timeline-item__wrapper) {
+    padding-left: 14px !important;
+  }
+
   .action-bar {
     justify-content: flex-start;
+    flex-wrap: nowrap !important;
+    gap: 8px !important;
+    overflow-x: auto;
+  }
+
+  .action-bar .el-button {
+    padding: 6px 10px !important;
+    font-size: 11px !important;
+    margin: 0 !important;
+    height: 28px !important;
   }
 }
 </style>

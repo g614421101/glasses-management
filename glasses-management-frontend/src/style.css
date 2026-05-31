@@ -672,9 +672,13 @@ a {
     letter-spacing: 0.14em;
   }
 
-  .table-toolbar,
-  .pagination-shell {
+  .table-toolbar {
     align-items: stretch;
+  }
+
+  .pagination-shell {
+    align-items: center;
+    justify-content: center;
   }
 
   .search-shell {
