@@ -240,6 +240,7 @@ Windows 平台上，即便给 Java 启动参数指定了 `-Dfile.encoding=UTF-8`
 - `src/App.vue`：根组件。
 - `src/router/index.ts`：路由和登录守卫。
 - `src/layout/BasicLayout.vue`：登录后的基础布局。
+- `src/components/MobileCardList.vue`：移动端通用卡片列表展示组件。
 - `src/store/auth.ts`：认证状态。
 - `src/utils/request.ts`：Axios 实例，`baseURL` 为 `/api`，从 `localStorage` 读取 `token` 写入 `Authorization` 请求头。
 - `src/utils/theme.ts`：主题相关工具。

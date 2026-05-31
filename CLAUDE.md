@@ -54,7 +54,7 @@ glasses-management-electron/     Electron 壳，启动 H2 后端 JAR + 内置 JR
 - **软删除**：所有业务实体使用 `deleted`、`deleted_time`、`deleted_by` 字段，不要改为物理删除。
 - **路由守卫**：`router/index.ts` 中检查 token 并验证，`SysUser` 和 `RecycleBin` 仅 admin 可访问。
 - **功能开关**：`src/config/features.ts` 控制导航菜单和路由注册。
-- **前端断点**：640px 为移动端断点，表格在手机端通过 `MobileCardList` 组件切换为卡片列表。
+- **前端断点**：640px 为通用移动端表格卡片化断点；900px 为侧边栏收回/抽屉导航及顾客档案页分流断点；760px 为回收站移动端分流与排版断点。
 - **配置链**：`application.yml` → `application-local.yml`（多个候选路径，全部 optional），本地配置不提交。
 
 ## 版本号位置（发版时需同步更新）
