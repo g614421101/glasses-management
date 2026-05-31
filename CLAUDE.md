@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## 项目概述
 
-眼镜店视光档案管理系统，前后端分离架构，提供两种后端变体（MySQL / H2）和 Electron 桌面版。全项目统一版本号 **2.1.1**。UI、文档、commit 均使用中文。平台目标为 Windows。
+眼镜店视光档案管理系统，前后端分离架构，提供两种后端变体（MySQL / H2）和 Electron 桌面版。全项目统一版本号 **3.0.0**。UI、文档、commit 均使用中文。平台目标为 Windows。
 
 ## 常用命令
 
