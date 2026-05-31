@@ -20,5 +20,5 @@ export const FEATURES = {
   /** 回收站（仅超管可见） */
   RECYCLE_BIN: true,
   /** 账号管理 / 超管功能 */
-  SYS_USER: false,
+  SYS_USER: true,
 } as const;
