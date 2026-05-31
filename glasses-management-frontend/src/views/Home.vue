@@ -49,19 +49,60 @@
         <p>浏览顾客列表并开单</p>
       </div>
     </div>
+
+    <div v-if="lanUrl" class="lan-card glass-card">
+      <div class="lan-header">
+        <el-icon :size="20"><Link /></el-icon>
+        <span>局域网连接</span>
+      </div>
+      <p class="lan-tip">同一网络下的设备可通过以下地址访问本系统</p>
+      <canvas ref="qrCanvas" class="lan-qr"></canvas>
+      <div class="lan-url-row">
+        <code class="lan-url">{{ lanUrl }}</code>
+        <el-button size="small" class="lan-copy-btn" @click="copyLanUrl">复制链接</el-button>
+      </div>
+    </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue';
+import { ref, onMounted, nextTick } from 'vue';
 import { useRouter } from 'vue-router';
 import request from '../utils/request';
 import { ElMessage } from 'element-plus';
-import { Search, ArrowRight, UserFilled, Grid } from '@element-plus/icons-vue';
+import { Search, ArrowRight, UserFilled, Grid, Link } from '@element-plus/icons-vue';
+import QRCode from 'qrcode';
 
 const router = useRouter();
 const searchQuery = ref('');
 const searchResults = ref<any>([]);
+
+const lanUrl = ref('');
+const qrCanvas = ref<HTMLCanvasElement | null>(null);
+
+onMounted(async () => {
+  try {
+    const res: any = await request.get('/system/lan-info');
+    if (res.ip && res.port) {
+      lanUrl.value = `http://${res.ip}:${res.port}`;
+      await nextTick();
+      if (qrCanvas.value) {
+        await QRCode.toCanvas(qrCanvas.value, lanUrl.value, { width: 160, margin: 2 });
+      }
+    }
+  } catch {
+    // 未检测到局域网，静默隐藏
+  }
+});
+
+const copyLanUrl = async () => {
+  try {
+    await navigator.clipboard.writeText(lanUrl.value);
+    ElMessage.success('链接已复制');
+  } catch {
+    ElMessage.warning('复制失败，请手动复制');
+  }
+};
 
 const handleSearch = async () => {
   if (!searchQuery.value) {
@@ -263,5 +304,57 @@ const goCustomer = () => {
   .shortcut-card {
     width: 100%;
   }
+}
+
+/* ── 局域网连接卡片 ── */
+.lan-card {
+  width: 100%;
+  max-width: 400px;
+  padding: 28px;
+  margin-top: 8px;
+  text-align: center;
+}
+
+.lan-header {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: 6px;
+}
+
+.lan-tip {
+  font-size: 13px;
+  color: var(--text-muted);
+  margin: 0 0 18px;
+}
+
+.lan-qr {
+  display: block;
+  margin: 0 auto 16px;
+}
+
+.lan-url-row {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.lan-url {
+  font-size: 13px;
+  padding: 6px 12px;
+  background: var(--bg-color);
+  border-radius: 8px;
+  color: var(--primary-color);
+  word-break: break-all;
+}
+
+.lan-copy-btn {
+  flex-shrink: 0;
 }
 </style>

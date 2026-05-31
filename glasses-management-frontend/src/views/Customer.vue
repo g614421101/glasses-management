@@ -45,7 +45,7 @@
         </div>
       </div>
       
-      <el-table :data="tableData" v-loading="loading" row-key="id" class="main-table">
+      <el-table v-if="!isMobile" :data="tableData" v-loading="loading" row-key="id" class="main-table">
         <el-table-column prop="name" label="姓名" min-width="140" />
         <el-table-column prop="phone" label="手机号" min-width="160" />
         <el-table-column label="性别" width="110">
@@ -77,6 +77,33 @@
           </template>
         </el-table-column>
       </el-table>
+
+      <MobileCardList
+        v-else
+        :data="tableData"
+        title-field="name"
+      >
+        <template #default="{ row }">
+          {{ row.gender === 1 ? '♂ 男' : row.gender === 2 ? '♀ 女' : '性别未知' }}
+          &nbsp;·&nbsp; 📱 {{ row.phone }}
+          <template v-if="row.birthday">&nbsp;·&nbsp; 🎂 {{ row.birthday }}</template>
+        </template>
+        <template #actions="{ row }">
+          <el-button class="action-pill" @click="goArchive(row.id)">
+            <el-icon><View /></el-icon>档案
+          </el-button>
+          <el-button class="action-pill" @click="openEditDialog(row)">
+            <el-icon><Edit /></el-icon>编辑
+          </el-button>
+          <el-popconfirm title="确定删除该顾客？将会级联清除其记录!" @confirm="handleDelete(row.id)">
+            <template #reference>
+              <el-button class="action-pill action-pill--danger">
+                <el-icon><Delete /></el-icon>删除
+              </el-button>
+            </template>
+          </el-popconfirm>
+        </template>
+      </MobileCardList>
 
       <div class="pagination-shell">
         <el-pagination
@@ -132,11 +159,12 @@
 </template>
 
 <script setup lang="ts">
-import { ref, reactive, onMounted } from 'vue';
+import { ref, reactive, onMounted, onUnmounted } from 'vue';
 import { useRouter } from 'vue-router';
 import request from '../utils/request';
 import { ElMessage, ElMessageBox } from 'element-plus';
 import { Plus, Search, View, Edit, Delete } from '@element-plus/icons-vue';
+import MobileCardList from '../components/MobileCardList.vue';
 
 const router = useRouter();
 const tableData = ref([]);
@@ -144,6 +172,9 @@ const loading = ref(false);
 const total = ref(0);
 const keyword = ref('');
 const pageParams = reactive({ current: 1, size: 10 });
+const isMobile = ref(window.matchMedia('(max-width: 640px)').matches);
+let mediaQuery: MediaQueryList | null = null;
+let mediaHandler: ((e: MediaQueryListEvent) => void) | null = null;
 
 const dialogVisible = ref(false);
 const dialogTitle = ref('新建顾客');
@@ -167,6 +198,15 @@ const rules = {
 
 onMounted(() => {
   loadData();
+  mediaQuery = window.matchMedia('(max-width: 640px)');
+  mediaHandler = (e: MediaQueryListEvent) => { isMobile.value = e.matches; };
+  mediaQuery.addEventListener('change', mediaHandler);
+});
+
+onUnmounted(() => {
+  if (mediaQuery && mediaHandler) {
+    mediaQuery.removeEventListener('change', mediaHandler);
+  }
 });
 
 const handleQuery = () => {

@@ -70,7 +70,7 @@
         </div>
       </div>
 
-      <el-table :data="statsData.records" style="width: 100%" v-loading="loading" class="stats-table">
+      <el-table v-if="!isMobile" :data="statsData.records" style="width: 100%" v-loading="loading" class="stats-table">
         <el-table-column prop="salesDate" label="日期" min-width="160" />
         <el-table-column prop="recordNo" label="单号" min-width="180" />
         <el-table-column prop="customerName" label="顾客姓名" min-width="100" />
@@ -98,6 +98,24 @@
         </el-table-column>
       </el-table>
 
+      <MobileCardList
+        v-else
+        :data="statsData.records"
+        title-field="customerName"
+        empty-text="暂无流水记录"
+      >
+        <template #default="{ row }">
+          🕐 {{ row.salesDate }} · 📋 {{ row.recordNo }}<br>
+          🕶 {{ row.frameBrand }} {{ row.frameModel }}
+          <template v-if="row.lensBrand"> · 🔍 {{ row.lensBrand }}</template>
+          <br>
+          <span style="color: var(--primary-color); font-weight: 700;">￥{{ row.totalAmount }}</span>
+        </template>
+        <template #actions="{ row }">
+          <el-button class="action-pill" @click="goToArchive(row.customerId)">查看详情</el-button>
+        </template>
+      </MobileCardList>
+
       <div class="pagination-shell">
         <el-pagination
           v-model:current-page="pageParams.current"
@@ -116,11 +134,12 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted, reactive } from 'vue';
+import { ref, computed, onMounted, onUnmounted, reactive } from 'vue';
 import { useRouter } from 'vue-router';
 import request, { downloadBlob } from '../utils/request';
 import { ElMessage } from 'element-plus';
 import { Money, Ticket, DataLine, Download } from '@element-plus/icons-vue';
+import MobileCardList from '../components/MobileCardList.vue';
 import dayjs from 'dayjs';
 
 const router = useRouter();
@@ -143,6 +162,10 @@ const statsData = ref({
   records: []
 });
 
+const isMobile = ref(window.matchMedia('(max-width: 640px)').matches);
+let mediaQuery: MediaQueryList | null = null;
+let mediaHandler: ((e: MediaQueryListEvent) => void) | null = null;
+
 const avgOrderValue = computed(() => {
   if (!statsData.value.orderCount) return '0.00';
   return (statsData.value.totalRevenue / statsData.value.orderCount).toFixed(2);
@@ -150,6 +173,15 @@ const avgOrderValue = computed(() => {
 
 onMounted(() => {
   fetchStats();
+  mediaQuery = window.matchMedia('(max-width: 640px)');
+  mediaHandler = (e: MediaQueryListEvent) => { isMobile.value = e.matches; };
+  mediaQuery.addEventListener('change', mediaHandler);
+});
+
+onUnmounted(() => {
+  if (mediaQuery && mediaHandler) {
+    mediaQuery.removeEventListener('change', mediaHandler);
+  }
 });
 
 const handleDateChange = () => {

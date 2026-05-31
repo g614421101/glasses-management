@@ -23,7 +23,7 @@
         <h3>已删除顾客</h3>
         <span>{{ customers.length }} 条</span>
       </div>
-      <el-table :data="customers" v-loading="loading" row-key="id" class="recycle-table">
+      <el-table v-if="!isMobile" :data="customers" v-loading="loading" row-key="id" class="recycle-table">
         <el-table-column prop="name" label="姓名" min-width="120" />
         <el-table-column prop="phone" label="手机号" min-width="140" />
         <el-table-column prop="deletedTime" label="删除时间" min-width="180" />
@@ -36,6 +36,20 @@
           </template>
         </el-table-column>
       </el-table>
+      <MobileCardList
+        v-else
+        :data="customers"
+        title-field="name"
+        empty-text="暂无已删除顾客"
+      >
+        <template #default="{ row }">
+          📱 {{ row.phone || '-' }} · 🗑 {{ row.deletedTime || '-' }}
+        </template>
+        <template #actions="{ row }">
+          <el-button class="action-pill" size="small" @click="restore('customer', row.id)">恢复</el-button>
+          <el-button class="action-pill action-pill--danger" size="small" @click="purge('customer', row.id)">彻底删除</el-button>
+        </template>
+      </MobileCardList>
     </section>
 
     <section v-if="showOptometry" class="glass-card recycle-card">
@@ -43,7 +57,7 @@
         <h3>已删除验光记录</h3>
         <span>{{ optometryRecords.length }} 条</span>
       </div>
-      <el-table :data="optometryRecords" v-loading="loading" row-key="id" class="recycle-table">
+      <el-table v-if="!isMobile" :data="optometryRecords" v-loading="loading" row-key="id" class="recycle-table">
         <el-table-column prop="customerName" label="顾客姓名" min-width="120" />
         <el-table-column prop="optometristName" label="验光师" min-width="140" />
         <el-table-column prop="examDate" label="验光时间" min-width="180" />
@@ -57,6 +71,21 @@
           </template>
         </el-table-column>
       </el-table>
+      <MobileCardList
+        v-else
+        :data="optometryRecords"
+        title-field="customerName"
+        empty-text="暂无已删除验光记录"
+      >
+        <template #default="{ row }">
+          👨‍⚕️ {{ row.optometristName || '-' }} · 📅 {{ row.examDate || '-' }}<br>
+          🗑 {{ row.deletedTime || '-' }}
+        </template>
+        <template #actions="{ row }">
+          <el-button class="action-pill" size="small" @click="restore('optometry', row.id)">恢复</el-button>
+          <el-button class="action-pill action-pill--danger" size="small" @click="purge('optometry', row.id)">彻底删除</el-button>
+        </template>
+      </MobileCardList>
     </section>
 
     <section v-if="showSales" class="glass-card recycle-card">
@@ -64,7 +93,7 @@
         <h3>已删除配镜记录</h3>
         <span>{{ salesRecords.length }} 条</span>
       </div>
-      <el-table :data="salesRecords" v-loading="loading" row-key="id" class="recycle-table">
+      <el-table v-if="!isMobile" :data="salesRecords" v-loading="loading" row-key="id" class="recycle-table">
         <el-table-column prop="recordNo" label="单号" min-width="180" />
         <el-table-column prop="customerName" label="顾客姓名" min-width="120" />
         <el-table-column prop="totalAmount" label="金额" width="120" />
@@ -78,20 +107,39 @@
           </template>
         </el-table-column>
       </el-table>
+      <MobileCardList
+        v-else
+        :data="salesRecords"
+        title-field="customerName"
+        empty-text="暂无已删除配镜记录"
+      >
+        <template #default="{ row }">
+          📋 {{ row.recordNo || '-' }} · 💰 ￥{{ row.totalAmount || '0.00' }}<br>
+          🗑 {{ row.deletedTime || '-' }}
+        </template>
+        <template #actions="{ row }">
+          <el-button class="action-pill" size="small" @click="restore('sales', row.id)">恢复</el-button>
+          <el-button class="action-pill action-pill--danger" size="small" @click="purge('sales', row.id)">彻底删除</el-button>
+        </template>
+      </MobileCardList>
     </section>
   </div>
 </template>
 
 <script setup lang="ts">
-import { computed, onMounted, ref } from 'vue';
+import { computed, onMounted, onUnmounted, ref } from 'vue';
 import { ElMessage, ElMessageBox } from 'element-plus';
 import request from '../utils/request';
+import MobileCardList from '../components/MobileCardList.vue';
 
 const activeType = ref('all');
 const loading = ref(false);
 const customers = ref<any[]>([]);
 const optometryRecords = ref<any[]>([]);
 const salesRecords = ref<any[]>([]);
+const isMobile = ref(window.matchMedia('(max-width: 640px)').matches);
+let mediaQuery: MediaQueryList | null = null;
+let mediaHandler: ((e: MediaQueryListEvent) => void) | null = null;
 
 const showCustomers = computed(() => activeType.value === 'all' || activeType.value === 'customer');
 const showOptometry = computed(() => activeType.value === 'all' || activeType.value === 'optometry');
@@ -148,7 +196,18 @@ const emptyBin = async () => {
   loadData();
 };
 
-onMounted(loadData);
+onMounted(() => {
+  loadData();
+  mediaQuery = window.matchMedia('(max-width: 640px)');
+  mediaHandler = (e: MediaQueryListEvent) => { isMobile.value = e.matches; };
+  mediaQuery.addEventListener('change', mediaHandler);
+});
+
+onUnmounted(() => {
+  if (mediaQuery && mediaHandler) {
+    mediaQuery.removeEventListener('change', mediaHandler);
+  }
+});
 </script>
 
 <style scoped>

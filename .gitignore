@@ -77,3 +77,5 @@ glasses-management-electron/package-lock.json
 *.key
 
 /changelog
+/docs
+/.superpowers

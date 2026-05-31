@@ -437,6 +437,10 @@ a {
   overflow: hidden;
 }
 
+.el-table__wrapper {
+  overflow-x: auto;
+}
+
 .el-table .cell {
   color: var(--text-primary);
 }

@@ -12,7 +12,7 @@
     </div>
 
     <el-card class="glass-card table-card" shadow="never">
-      <el-table :data="users" style="width: 100%" v-loading="loading" class="sys-user-table">
+      <el-table v-if="!isMobile" :data="users" style="width: 100%" v-loading="loading" class="sys-user-table">
         <el-table-column prop="id" label="账号ID" width="90" />
         <el-table-column prop="username" label="用户名" min-width="140" />
         <el-table-column prop="phone" label="手机号" min-width="140" />
@@ -42,19 +42,48 @@
           </template>
         </el-table-column>
       </el-table>
+      <MobileCardList
+        v-else
+        :data="users"
+        title-field="username"
+      >
+        <template #default="{ row }">
+          📱 {{ row.phone || '-' }} · 🕐 {{ row.createTime || '-' }}
+          <span v-if="row.deleted" style="color: #94a3b8;"> · 已删除</span>
+          <span v-else-if="row.disabled" style="color: #eab308;"> · 已封禁</span>
+          <span v-else style="color: #22c55e;"> · 正常</span>
+        </template>
+        <template #actions="{ row }">
+          <template v-if="row.deleted">
+            <el-button class="action-pill" size="small" @click="restoreUser(row)">恢复</el-button>
+            <el-button class="action-pill action-pill--danger" size="small" @click="purgeUser(row)">彻底删除</el-button>
+          </template>
+          <template v-else>
+            <el-button class="action-pill" size="small" @click="resetPwd(row)">重置密码</el-button>
+            <el-button class="action-pill" size="small" @click="toggleDisabled(row)">
+              {{ row.disabled ? '解除封禁' : '封禁' }}
+            </el-button>
+            <el-button class="action-pill action-pill--danger" size="small" @click="deleteUser(row)">删除</el-button>
+          </template>
+        </template>
+      </MobileCardList>
     </el-card>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue';
+import { ref, onMounted, onUnmounted } from 'vue';
 import { Refresh } from '@element-plus/icons-vue';
 import request from '../utils/request';
 import { ElMessage, ElMessageBox } from 'element-plus';
+import MobileCardList from '../components/MobileCardList.vue';
 
 const users = ref<any[]>([]);
 const loading = ref(false);
 const includeDeleted = ref(false);
+const isMobile = ref(window.matchMedia('(max-width: 640px)').matches);
+let mediaQuery: MediaQueryList | null = null;
+let mediaHandler: ((e: MediaQueryListEvent) => void) | null = null;
 
 const fetchUsers = async () => {
   loading.value = true;
@@ -106,7 +135,18 @@ const purgeUser = async (row: any) => {
   fetchUsers();
 };
 
-onMounted(fetchUsers);
+onMounted(() => {
+  fetchUsers();
+  mediaQuery = window.matchMedia('(max-width: 640px)');
+  mediaHandler = (e: MediaQueryListEvent) => { isMobile.value = e.matches; };
+  mediaQuery.addEventListener('change', mediaHandler);
+});
+
+onUnmounted(() => {
+  if (mediaQuery && mediaHandler) {
+    mediaQuery.removeEventListener('change', mediaHandler);
+  }
+});
 </script>
 
 <style scoped>
