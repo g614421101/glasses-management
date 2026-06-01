@@ -317,7 +317,7 @@
           <div class="total-bubble">
             <small>
               <del v-if="currentDetail.data.totalRetailPrice > 0" style="margin-right:4px; opacity:0.7;">￥{{ currentDetail.data.totalRetailPrice }}</del>
-              总计收讫
+              实收总价
             </small>
             <strong>￥{{ currentDetail.data.totalAmount }}</strong>
             <span v-if="currentDetail.data.totalRetailPrice > 0" style="display:block; font-size:12px; margin-top:2px; text-align:right; font-weight:normal; opacity:0.9;">
