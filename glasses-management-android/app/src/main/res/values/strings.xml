@@ -1,0 +1,13 @@
+<resources>
+    <string name="app_name">视光档案</string>
+    <string name="searching">正在搜索桌面端服务…</string>
+    <string name="manual_input">手动输入地址</string>
+    <string name="ip_hint">IP 地址</string>
+    <string name="port_hint">端口号</string>
+    <string name="connect">连接</string>
+    <string name="retry">重试</string>
+    <string name="error_no_wifi">请连接到与桌面端相同的 WiFi 网络</string>
+    <string name="error_not_found">未找到桌面端服务，请确认已启动</string>
+    <string name="error_connection_failed">连接失败，请检查地址是否正确</string>
+    <string name="default_port">8080</string>
+</resources>
