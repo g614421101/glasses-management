@@ -10,6 +10,9 @@ glasses:
     password: ${GLASSES_ADMIN_PASSWORD}
     real-name: ${GLASSES_ADMIN_REAL_NAME:系统管理员}
     enabled: ${GLASSES_ADMIN_ENABLED:true}
+  mdns:
+    enabled: true
+    service-name: GlassesManagement
 
 spring:
   config:
