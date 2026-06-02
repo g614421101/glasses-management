@@ -45,7 +45,7 @@ class AuthRepository @Inject constructor(
         return try {
             val response = apiService.login(LoginRequest(username, password))
             if (response.isSuccessful && response.body()?.code == 200) {
-                val data = response.body()?.data ?: return Result.failure(Exception("服务器返回数据为�?))
+                val data = response.body()?.data ?: return Result.failure(Exception("服务器返回数据为空"))
                 val token = data["token"] as? String ?: return Result.failure(Exception("未获取到 Token"))
                 saveToken(token)
                 AuthInterceptor.token = token
@@ -85,7 +85,7 @@ class AuthRepository @Inject constructor(
         return try {
             val response = apiService.getUserInfo()
             if (response.isSuccessful && response.body()?.code == 200) {
-                val user = response.body()?.data ?: return Result.failure(Exception("服务器返回数据为�?))
+                val user = response.body()?.data ?: return Result.failure(Exception("服务器返回数据为空"))
                 Result.success(user)
             } else {
                 Result.failure(Exception(response.body()?.msg ?: "获取用户信息失败"))
