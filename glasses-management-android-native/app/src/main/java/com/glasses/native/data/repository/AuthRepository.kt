@@ -4,13 +4,17 @@ import android.content.Context
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.stringPreferencesKey
 import com.glasses.native.data.api.ApiService
+import com.glasses.native.data.api.AuthInterceptor
 import com.glasses.native.data.model.LoginRequest
 import com.glasses.native.data.model.RegisterRequest
 import com.glasses.native.data.model.User
 import com.glasses.native.di.dataStore
 import dagger.hilt.android.qualifiers.ApplicationContext
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.launch
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -29,15 +33,24 @@ class AuthRepository @Inject constructor(
     val username: Flow<String?> = context.dataStore.data.map { it[USERNAME_KEY] }
     val role: Flow<String?> = context.dataStore.data.map { it[ROLE_KEY] }
 
+    init {
+        CoroutineScope(Dispatchers.IO).launch {
+            token.collect { cached ->
+                AuthInterceptor.token = cached
+            }
+        }
+    }
+
     suspend fun login(username: String, password: String): Result<Map<String, Any>> {
         return try {
             val response = apiService.login(LoginRequest(username, password))
             if (response.isSuccessful && response.body()?.code == 200) {
-                val data = response.body()!!.data!!
-                val token = data["token"] as String
+                val data = response.body()?.data ?: return Result.failure(Exception("服务器返回数据为空"))
+                val token = data["token"] as? String ?: return Result.failure(Exception("未获取到 Token"))
                 saveToken(token)
-                saveUsername(data["username"] as String)
-                saveRole(data["role"] as String)
+                AuthInterceptor.token = token
+                (data["username"] as? String)?.let { saveUsername(it) }
+                (data["role"] as? String)?.let { saveRole(it) }
                 Result.success(data)
             } else {
                 Result.failure(Exception(response.body()?.msg ?: "登录失败"))
@@ -59,7 +72,7 @@ class AuthRepository @Inject constructor(
                 RegisterRequest(inviteCode, username, phone, password, confirmPassword)
             )
             if (response.isSuccessful && response.body()?.code == 200) {
-                Result.success(response.body()!!.data ?: "注册成功")
+                Result.success(response.body()?.data ?: "注册成功")
             } else {
                 Result.failure(Exception(response.body()?.msg ?: "注册失败"))
             }
@@ -72,7 +85,8 @@ class AuthRepository @Inject constructor(
         return try {
             val response = apiService.getUserInfo()
             if (response.isSuccessful && response.body()?.code == 200) {
-                Result.success(response.body()!!.data!!)
+                val user = response.body()?.data ?: return Result.failure(Exception("服务器返回数据为空"))
+                Result.success(user)
             } else {
                 Result.failure(Exception(response.body()?.msg ?: "获取用户信息失败"))
             }
@@ -82,6 +96,7 @@ class AuthRepository @Inject constructor(
     }
 
     suspend fun logout() {
+        AuthInterceptor.token = null
         context.dataStore.edit {
             it.remove(TOKEN_KEY)
             it.remove(USERNAME_KEY)
