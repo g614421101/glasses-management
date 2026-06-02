@@ -1,12 +1,18 @@
 package com.glasses.native.data.api
 
+import com.glasses.native.data.model.Customer
+import com.glasses.native.data.model.CustomerPageResponse
 import com.glasses.native.data.model.LoginRequest
 import com.glasses.native.data.model.RegisterRequest
 import com.glasses.native.data.model.User
 import retrofit2.Response
 import retrofit2.http.Body
+import retrofit2.http.DELETE
 import retrofit2.http.GET
 import retrofit2.http.POST
+import retrofit2.http.PUT
+import retrofit2.http.Path
+import retrofit2.http.Query
 
 interface ApiService {
 
@@ -21,4 +27,23 @@ interface ApiService {
 
     @GET("/api/system/lan-info")
     suspend fun getLanInfo(): Response<ApiResult<Map<String, Any>>>
+
+    @GET("/api/customer/page")
+    suspend fun getCustomerPage(
+        @Query("keyword") keyword: String? = null,
+        @Query("current") current: Int = 1,
+        @Query("size") size: Int = 10
+    ): Response<ApiResult<CustomerPageResponse>>
+
+    @POST("/api/customer/add")
+    suspend fun addCustomer(@Body customer: Customer): Response<ApiResult<Any>>
+
+    @PUT("/api/customer/update")
+    suspend fun updateCustomer(@Body customer: Customer): Response<ApiResult<Boolean>>
+
+    @DELETE("/api/customer/{id}")
+    suspend fun deleteCustomer(@Path("id") id: Long): Response<ApiResult<Boolean>>
+
+    @GET("/api/customer/{id}")
+    suspend fun getCustomer(@Path("id") id: Long): Response<ApiResult<Customer>>
 }
