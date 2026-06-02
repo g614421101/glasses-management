@@ -10,6 +10,8 @@
 - `glasses-management-backend-h2`：Spring Boot 后端，使用 H2 文件数据库，适合本地单机、Electron 桌面版和安装包交付。
 - `glasses-management-frontend`：Vue 3 前端，Vite 构建。
 - `glasses-management-electron`：Electron 桌面壳，启动内置 Java 后端并加载本地 Web 应用。
+- `glasses-management-android`：Android WebView 版（方案 A），自动通过 mDNS 发现局域网后端。
+- `glasses-management-android-native`：Android 原生 Compose 版（方案 B），直接调用后端 API。
 - `build-desktop.ps1`：一键构建 H2 桌面版安装包。
 - `sync-frontend.ps1`：构建前端并同步 `dist` 到目标后端的静态资源目录。
 - `PACKAGING_TUTORIAL.md`：打包流程说明。
@@ -45,6 +47,21 @@
 - Electron 30
 - electron-builder
 - 打包时会把 H2 后端 JAR、`application-local.yml` 和 jlink 生成的 Java runtime 放进 Electron 资源目录。
+
+### Android（WebView 版）
+
+- Kotlin + WebView
+- jmdns 3.5.12（mDNS 服务发现）
+- 自动发现后端服务，缓存连接地址，IP 变化时自动重连
+
+### Android（原生版）
+
+- Kotlin + Jetpack Compose + Material 3
+- Hilt 依赖注入
+- Retrofit + OkHttp 网络层
+- Navigation Compose 导航
+- DataStore Token 持久化
+- 包名：`com.glasses.app`（注意：`native` 是 Java 关键字，不能用作包名）
 
 ## 本地启动
 
@@ -233,6 +250,7 @@ Windows 平台上，即便给 Java 启动参数指定了 `-Dfile.encoding=UTF-8`
 - `/api/recycle-bin`：回收站查询、恢复、彻底删除、清理过期数据。
 - `/api/data`：数据导出、导入（合并/替换）、重置。
 - `/api/sys-user`：系统用户列表、启用/禁用、删除/恢复/彻底删除、重置密码。
+- `/api/system/lan-info`：返回局域网 IP 和端口（无需认证），用于 QR 码和连接验证。
 
 ## 前端结构
 
@@ -279,7 +297,7 @@ Windows 平台上，即便给 Java 启动参数指定了 `-Dfile.encoding=UTF-8`
 - 角色主要区分 `admin` 和 `merchant`。
 - 前端页面和后端接口路径已经耦合，改接口时需要同步检查对应 Vue 页面。
 - 打包桌面版主要依赖 H2 后端，不要只改 MySQL 后端后就认为桌面版已更新。
-- 版本号位置不同：Electron 安装包版本在 `glasses-management-electron/package.json`，前端版本在 `glasses-management-frontend/package.json`，后端版本在各自的 `pom.xml`。后端原生安装包版本另在 `jpackage.cfg`。当前全项目统一版本为 **3.0.0**。
+- 版本号位置不同：Electron 安装包版本在 `glasses-management-electron/package.json`，前端版本在 `glasses-management-frontend/package.json`，后端版本在各自的 `pom.xml`。后端原生安装包版本另在 `jpackage.cfg`。当前全项目统一版本为 **3.1.0**（Android 独立版本 1.0.0）。
 
 ## 验证建议
 
@@ -298,3 +316,12 @@ Windows 平台上，即便给 Java 启动参数指定了 `-Dfile.encoding=UTF-8`
 - 新增后端接口时同步考虑权限、统一返回结构、软删除规则和两个后端模块的一致性。
 - 新增前端页面或功能时优先使用已有的 Element Plus、路由、Pinia 和 Axios 封装。
 - 不提交 `application-local.yml`、构建产物、数据库文件、日志和本地 IDE 配置。
+
+## Android 项目注意事项
+
+- Android 原生项目包名是 `com.glasses.app`，不是 `com.glasses.native`（`native` 是 Java 关键字）。
+- 后端 mDNS 广播服务类型为 `_glasses._tcp.local.`，Android 端和后端使用相同的 jmdns 库。
+- 后端同时向 MySQL 版和 H2 版添加了 `MdnsAdvertiser.java` 和 `MdnsProperties.java`，改动时需同步。
+- Android 项目的 `build.gradle.kts` 需要 `buildFeatures { buildConfig = true }` 才能使用 `BuildConfig.DEBUG`。
+- Kotlin 文件中的中文字符串如果被 `git filter-branch` 等工具损坏，会出现 `�?` 乱码导致编译报错。遇到 `Expecting '"'` 或 `Unresolved reference` 等莫名错误时，先检查文件编码。
+- `.gradle/`、`build/`、`local.properties` 已在 `.gitignore` 中排除，不要手动提交。
