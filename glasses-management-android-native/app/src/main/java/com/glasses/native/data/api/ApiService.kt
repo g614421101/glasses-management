@@ -6,6 +6,7 @@ import com.glasses.native.data.model.LoginRequest
 import com.glasses.native.data.model.OptometryRecord
 import com.glasses.native.data.model.RegisterRequest
 import com.glasses.native.data.model.SalesRecord
+import com.glasses.native.data.model.SalesStatsResponse
 import com.glasses.native.data.model.TimelineItem
 import com.glasses.native.data.model.User
 import retrofit2.Response
@@ -74,10 +75,27 @@ interface ApiService {
     @DELETE("/api/sales/{id}")
     suspend fun deleteSales(@Path("id") id: Long): Response<ApiResult<Boolean>>
 
+    // Stats
+    @GET("/api/sales/stats")
+    suspend fun getSalesStats(
+        @Query("startDate") startDate: String? = null,
+        @Query("endDate") endDate: String? = null,
+        @Query("current") current: Int = 1,
+        @Query("size") size: Int = 10,
+        @Query("showAll") showAll: Boolean = false
+    ): Response<ApiResult<SalesStatsResponse>>
+
     // Print
     @GET("/api/print/prescription/{recordId}")
     suspend fun getPrescriptionPdf(@Path("recordId") recordId: Long): okhttp3.ResponseBody
 
     @GET("/api/print/export/customer/{customerId}")
     suspend fun exportCustomerExcel(@Path("customerId") customerId: Long): okhttp3.ResponseBody
+
+    @GET("/api/print/export/revenue")
+    suspend fun exportRevenueExcel(
+        @Query("startDate") startDate: String? = null,
+        @Query("endDate") endDate: String? = null,
+        @Query("showAll") showAll: Boolean = false
+    ): okhttp3.ResponseBody
 }
