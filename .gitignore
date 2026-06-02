@@ -43,6 +43,9 @@ pnpm-debug.log*
 **/dependency-reduced-pom.xml
 **/buildNumber.properties
 
+# Android build output
+**/build/
+
 # Node / frontend / Electron build output
 **/node_modules/
 **/dist/
