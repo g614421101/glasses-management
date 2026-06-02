@@ -3,7 +3,10 @@ package com.glasses.native.data.api
 import com.glasses.native.data.model.Customer
 import com.glasses.native.data.model.CustomerPageResponse
 import com.glasses.native.data.model.LoginRequest
+import com.glasses.native.data.model.OptometryRecord
 import com.glasses.native.data.model.RegisterRequest
+import com.glasses.native.data.model.SalesRecord
+import com.glasses.native.data.model.TimelineItem
 import com.glasses.native.data.model.User
 import retrofit2.Response
 import retrofit2.http.Body
@@ -46,4 +49,35 @@ interface ApiService {
 
     @GET("/api/customer/{id}")
     suspend fun getCustomer(@Path("id") id: Long): Response<ApiResult<Customer>>
+
+    // Archive
+    @GET("/api/archive/{customerId}")
+    suspend fun getArchiveTimeline(@Path("customerId") customerId: Long): Response<ApiResult<List<TimelineItem>>>
+
+    // Optometry
+    @POST("/api/optometry/add")
+    suspend fun addOptometry(@Body record: OptometryRecord): Response<ApiResult<Boolean>>
+
+    @PUT("/api/optometry/update")
+    suspend fun updateOptometry(@Body record: OptometryRecord): Response<ApiResult<Boolean>>
+
+    @DELETE("/api/optometry/{id}")
+    suspend fun deleteOptometry(@Path("id") id: Long): Response<ApiResult<Boolean>>
+
+    // Sales
+    @POST("/api/sales/add")
+    suspend fun addSales(@Body record: SalesRecord): Response<ApiResult<Boolean>>
+
+    @PUT("/api/sales/update")
+    suspend fun updateSales(@Body record: SalesRecord): Response<ApiResult<Boolean>>
+
+    @DELETE("/api/sales/{id}")
+    suspend fun deleteSales(@Path("id") id: Long): Response<ApiResult<Boolean>>
+
+    // Print
+    @GET("/api/print/prescription/{recordId}")
+    suspend fun getPrescriptionPdf(@Path("recordId") recordId: Long): okhttp3.ResponseBody
+
+    @GET("/api/print/export/customer/{customerId}")
+    suspend fun exportCustomerExcel(@Path("customerId") customerId: Long): okhttp3.ResponseBody
 }
