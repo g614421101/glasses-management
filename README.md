@@ -1,6 +1,6 @@
 # 眼镜店视光档案管理系统
 
-面向眼镜店的轻量视光档案系统，用于录入顾客、验光、配镜和营收数据，并集中查看顾客历史档案。支持多端响应式适配与桌面单机一键打包。
+面向眼镜店的轻量视光档案系统，用于录入顾客、验光、配镜和营收数据，并集中查看顾客历史档案。支持多端响应式适配与桌面单机一键打包。当前版本 **3.1.0**。
 
 ## 主要特性
 
@@ -24,6 +24,8 @@
 - `glasses-management-android`: Android WebView 客户端版，全屏 WebView 套壳并支持 mDNS 自动配对。
 - `glasses-management-android-native`: Android 原生 Compose 客户端版，直接对接接口，包含极致蓝白配色与丰富的动效体验。
 - `build-desktop.ps1`: 一键构建桌面版，默认使用 H2 后端。
+- `sync-frontend.ps1`: 构建前端并同步 `dist` 到后端静态资源目录。
+- `PACKAGING_TUTORIAL.md`: 打包流程详细说明。
 
 ## 本地私密配置
 
@@ -99,6 +101,18 @@ cd glasses-management-backend
 cd glasses-management-backend-h2
 .\build-package.ps1
 ```
+
+打包流程详细说明见 `PACKAGING_TUTORIAL.md`。
+
+## 测试
+
+```powershell
+cd glasses-management-backend-h2 && mvn test                # H2 后端测试
+cd glasses-management-backend && mvn test                    # MySQL 后端测试
+cd glasses-management-backend-h2 && mvn test -Dtest=SystemIntegrationTest  # 单个测试类
+```
+
+前端无测试框架，验证以 `npm run build` 为准。
 
 ## 上传 GitHub 前
 

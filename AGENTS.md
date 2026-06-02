@@ -15,6 +15,7 @@
 - `build-desktop.ps1`：一键构建 H2 桌面版安装包。
 - `sync-frontend.ps1`：构建前端并同步 `dist` 到目标后端的静态资源目录。
 - `PACKAGING_TUTORIAL.md`：打包流程说明。
+- `CLAUDE.md`：Claude Code 开发指引。
 
 ## 技术栈
 
@@ -158,6 +159,18 @@ Copy-Item glasses-management-backend-h2\application-local.example.yml glasses-ma
 
 两个后端默认端口都是 `8080`。Jackson 时区配置为 `Asia/Shanghai`。
 
+## 测试
+
+后端使用 JUnit 5 + MockMvc 进行集成测试。H2 后端测试内嵌数据库自动隔离，MySQL 后端测试使用 `@Transactional` 自动回滚。
+
+```powershell
+cd glasses-management-backend-h2 && mvn test                # 运行全部测试
+cd glasses-management-backend-h2 && mvn test -Dtest=SystemIntegrationTest  # 运行单个测试类
+cd glasses-management-backend-h2 && mvn test -Dtest=SystemIntegrationTest#testMethod  # 运行单个测试方法
+```
+
+前端无测试框架，验证以 `npm run build`（vue-tsc 类型检查 + vite 构建）为准。
+
 ## 日志与数据存储
 
 ### 数据库位置
@@ -290,10 +303,10 @@ Windows 平台上，即便给 Java 启动参数指定了 `-Dfile.encoding=UTF-8`
 
 ## 重要实现约定
 
-- 业务删除多为软删除，表中有 `deleted`、`deleted_time`、`deleted_by` 字段；不要随意改成物理删除。
-- 两个后端模块高度相似。改动后端业务时，要判断是否需要同步修改 MySQL 版和 H2 版，避免桌面版与服务端版行为不一致。
-- 前端请求期望后端返回 `Result` 包装结构，成功码为 `200`，`request.ts` 会直接返回 `res.data`。
-- 登录 token 存在 `localStorage` 的 `token`，请求头名为 `Authorization`。
+- 业务删除多为软删除，表中有 `deleted`、`deleted_time`、`deleted_by` 字段；不要随意改成物理删除。MyBatis Plus `@TableLogic` 自动过滤已删除记录，自定义 Mapper 方法（`selectAnyById` 等）可绕过逻辑删除。删除顾客时级联软删除关联的验光和销售记录。
+- 两个后端模块高度相似，唯一代码级差异是 `MybatisPlusConfig.java` 中的 `DbType`（MYSQL vs H2）。改动后端业务时，要判断是否需要同步修改 MySQL 版和 H2 版，避免桌面版与服务端版行为不一致。
+- 前端请求期望后端返回 `Result` 包装结构，成功码为 `200`，`request.ts` 会直接返回 `res.data`。错误码 409 在前端静默处理（用于手机号重复冲突）。
+- 登录 token 存在 `localStorage` 的 `token`，请求头名为 `Authorization`（无 Bearer 前缀）。`/api/auth/login`、`/api/auth/register`、`/api/system/lan-info` 无需认证。
 - 角色主要区分 `admin` 和 `merchant`。
 - 前端页面和后端接口路径已经耦合，改接口时需要同步检查对应 Vue 页面。
 - 打包桌面版主要依赖 H2 后端，不要只改 MySQL 后端后就认为桌面版已更新。
@@ -307,6 +320,12 @@ Windows 平台上，即便给 Java 启动参数指定了 `-Dfile.encoding=UTF-8`
 - 后端改动：在对应后端模块运行 `mvn test` 或至少 `mvn clean package -DskipTests`。
 - 涉及桌面版交付：在根目录运行 `.\build-desktop.ps1`。
 - 涉及静态资源交付：运行 `.\sync-frontend.ps1` 后再构建后端或桌面版。
+
+## 数据库架构演进
+
+- H2 后端通过 `schema.sql` 在启动时建表（`spring.sql.init.mode: always`）。
+- 两个后端均使用 `SchemaCompatibilityInitializer`（`ApplicationRunner`，`@Order(0)`）在启动时自动检测并添加缺失的列和索引（ALTER TABLE ADD COLUMN IF NOT EXISTS），无需 Flyway/Liquibase。
+- 新增字段时，在 `schema.sql`（H2）中添加列定义，并在 `SchemaCompatibilityInitializer` 中添加对应的 ALTER TABLE 语句以兼容已有数据库。
 
 ## 代码修改原则
 
