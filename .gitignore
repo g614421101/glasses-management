@@ -63,6 +63,7 @@ glasses-management-electron/package-lock.json
 # Local H2 data and exported runtime data
 /data/
 **/data/
+!glasses-management-android-native/app/src/main/**/data/
 *.mv.db
 *.trace.db
 
