@@ -10,10 +10,14 @@ import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
 import com.glasses.native.ui.archive.ArchiveScreen
 import com.glasses.native.ui.customer.CustomerScreen
+import com.glasses.native.ui.datamanage.DataManageScreen
 import com.glasses.native.ui.home.HomeScreen
 import com.glasses.native.ui.login.LoginScreen
+import com.glasses.native.ui.profile.ProfileScreen
+import com.glasses.native.ui.recyclebin.RecycleBinScreen
 import com.glasses.native.ui.register.RegisterScreen
 import com.glasses.native.ui.stats.StatsScreen
+import com.glasses.native.ui.sysuser.SysUserScreen
 import com.glasses.native.viewmodel.AuthViewModel
 import com.glasses.native.viewmodel.ConnectionViewModel
 
@@ -25,6 +29,10 @@ object Routes {
     const val CUSTOMER = "customer"
     const val STATS = "stats"
     const val ARCHIVE = "archive/{customerId}"
+    const val SYS_USER = "sys-user"
+    const val RECYCLE_BIN = "recycle-bin"
+    const val DATA_MANAGE = "data-manage"
+    const val PROFILE = "profile"
 }
 
 @Composable
@@ -88,6 +96,19 @@ fun AppNavGraph(
                 customerId = customerId,
                 onBack = { navController.popBackStack() }
             )
+        }
+
+        composable(Routes.SYS_USER) {
+            SysUserScreen(onBack = { navController.popBackStack() })
+        }
+        composable(Routes.RECYCLE_BIN) {
+            RecycleBinScreen(onBack = { navController.popBackStack() })
+        }
+        composable(Routes.DATA_MANAGE) {
+            DataManageScreen(onBack = { navController.popBackStack() })
+        }
+        composable(Routes.PROFILE) {
+            ProfileScreen(onBack = { navController.popBackStack() })
         }
     }
 }

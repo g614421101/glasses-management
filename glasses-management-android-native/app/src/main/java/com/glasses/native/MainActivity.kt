@@ -75,6 +75,7 @@ class MainActivity : ComponentActivity() {
                             MoreSheet(
                                 onDismiss = { showMoreSheet = false },
                                 onNavigate = { route ->
+                                    navController.navigate(route)
                                     showMoreSheet = false
                                 },
                                 onLogout = {
