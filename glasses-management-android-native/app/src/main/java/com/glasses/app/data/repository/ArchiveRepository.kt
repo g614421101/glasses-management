@@ -69,7 +69,7 @@ class ArchiveRepository @Inject constructor(
             if (response.isSuccessful && response.body()?.code == 200) {
                 Result.success(true)
             } else {
-                Result.failure(Exception(response.body()?.msg ?: "添加销售记录失�?))
+                Result.failure(Exception(response.body()?.msg ?: "添加销售记录失败"))
             }
         } catch (e: Exception) {
             Result.failure(e)
@@ -82,7 +82,7 @@ class ArchiveRepository @Inject constructor(
             if (response.isSuccessful && response.body()?.code == 200) {
                 Result.success(true)
             } else {
-                Result.failure(Exception(response.body()?.msg ?: "更新销售记录失�?))
+                Result.failure(Exception(response.body()?.msg ?: "更新销售记录失败"))
             }
         } catch (e: Exception) {
             Result.failure(e)
@@ -95,7 +95,7 @@ class ArchiveRepository @Inject constructor(
             if (response.isSuccessful && response.body()?.code == 200) {
                 Result.success(true)
             } else {
-                Result.failure(Exception(response.body()?.msg ?: "删除销售记录失�?))
+                Result.failure(Exception(response.body()?.msg ?: "删除销售记录失败"))
             }
         } catch (e: Exception) {
             Result.failure(e)
