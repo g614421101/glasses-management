@@ -4,8 +4,11 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.navigation.NavHostController
+import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import androidx.navigation.navArgument
+import com.glasses.native.ui.archive.ArchiveScreen
 import com.glasses.native.ui.customer.CustomerScreen
 import com.glasses.native.ui.home.HomeScreen
 import com.glasses.native.ui.login.LoginScreen
@@ -21,6 +24,7 @@ object Routes {
     const val HOME = "home"
     const val CUSTOMER = "customer"
     const val STATS = "stats"
+    const val ARCHIVE = "archive/{customerId}"
 }
 
 @Composable
@@ -64,11 +68,26 @@ fun AppNavGraph(
         }
 
         composable(Routes.CUSTOMER) {
-            CustomerScreen()
+            CustomerScreen(
+                onNavigateToArchive = { customerId ->
+                    navController.navigate("archive/$customerId")
+                }
+            )
         }
 
         composable(Routes.STATS) {
             StatsScreen()
+        }
+
+        composable(
+            route = Routes.ARCHIVE,
+            arguments = listOf(navArgument("customerId") { type = NavType.LongType })
+        ) { backStackEntry ->
+            val customerId = backStackEntry.arguments?.getLong("customerId") ?: return@composable
+            ArchiveScreen(
+                customerId = customerId,
+                onBack = { navController.popBackStack() }
+            )
         }
     }
 }
