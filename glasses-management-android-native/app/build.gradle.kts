@@ -6,11 +6,11 @@ plugins {
 }
 
 android {
-    namespace = "com.glasses.native"
+    namespace = "com.glasses.app"
     compileSdk = 34
 
     defaultConfig {
-        applicationId = "com.glasses.native"
+        applicationId = "com.glasses.app"
         minSdk = 26
         targetSdk = 34
         versionCode = 1
