@@ -7,6 +7,7 @@ import android.webkit.WebSettings
 import android.webkit.WebView
 import android.webkit.WebChromeClient
 import android.widget.FrameLayout
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
 import com.glasses.app.ui.SplashFragment
@@ -53,6 +54,11 @@ class MainActivity : AppCompatActivity() {
         )
 
         webView.webChromeClient = WebChromeClient()
+
+        webView.setOnLongClickListener {
+            showReconnectDialog()
+            true
+        }
     }
 
     private fun showSplash() {
@@ -70,6 +76,28 @@ class MainActivity : AppCompatActivity() {
         fragmentContainer.visibility = View.GONE
         webView.visibility = View.VISIBLE
         webView.loadUrl(url)
+    }
+
+    private fun showReconnectDialog() {
+        AlertDialog.Builder(this)
+            .setTitle("连接管理")
+            .setItems(arrayOf("重新连接")) { _, _ ->
+                reconnect()
+            }
+            .setNegativeButton("取消", null)
+            .show()
+    }
+
+    private fun reconnect() {
+        webView.stopLoading()
+        webView.visibility = View.GONE
+        webView.loadUrl("about:blank")
+        fragmentContainer.visibility = View.VISIBLE
+
+        val prefs = getSharedPreferences("glasses_connection", MODE_PRIVATE)
+        prefs.edit().clear().apply()
+
+        showSplash()
     }
 
     private fun handleWebViewError() {

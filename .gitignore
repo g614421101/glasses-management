@@ -13,6 +13,7 @@ Thumbs.db
 # IDE directories
 **/.idea/
 **/.vscode/
+**/.gradle/
 **/.settings/
 **/out/
 **/bin/
@@ -64,6 +65,18 @@ glasses-management-electron/package-lock.json
 **/data/
 *.mv.db
 *.trace.db
+
+# Android local properties
+**/local.properties
+
+# Android build output
+glasses-management-android/app/build/
+glasses-management-android/app/release/
+glasses-management-android/build/
+glasses-management-android/.gradle/
+
+# Codegraph tool output
+.codegraph/
 
 # Local environment and sensitive files
 .env

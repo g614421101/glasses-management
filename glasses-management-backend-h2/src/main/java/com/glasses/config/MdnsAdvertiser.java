@@ -7,15 +7,11 @@ import org.springframework.boot.web.context.WebServerInitializedEvent;
 import org.springframework.context.ApplicationListener;
 import org.springframework.stereotype.Component;
 
+import com.glasses.util.LanIpUtil;
+
 import javax.jmdns.JmDNS;
 import javax.jmdns.ServiceInfo;
-import java.net.Inet4Address;
 import java.net.InetAddress;
-import java.net.NetworkInterface;
-import java.net.SocketException;
-import java.util.ArrayList;
-import java.util.Enumeration;
-import java.util.List;
 
 @Component
 public class MdnsAdvertiser implements ApplicationListener<WebServerInitializedEvent> {
@@ -38,7 +34,7 @@ public class MdnsAdvertiser implements ApplicationListener<WebServerInitializedE
         }
 
         int port = event.getWebServer().getPort();
-        String ip = findLanIp();
+        String ip = LanIpUtil.findLanIp();
         if (ip == null) {
             log.warn("未检测到局域网 IP，mDNS 广播未启动");
             return;
@@ -66,50 +62,5 @@ public class MdnsAdvertiser implements ApplicationListener<WebServerInitializedE
             }
             log.info("mDNS 广播已停止");
         }
-    }
-
-    private String findLanIp() {
-        try {
-            List<InetAddress> candidates = new ArrayList<>();
-            Enumeration<NetworkInterface> interfaces = NetworkInterface.getNetworkInterfaces();
-            while (interfaces.hasMoreElements()) {
-                NetworkInterface ni = interfaces.nextElement();
-                if (ni.isLoopback() || !ni.isUp() || ni.isVirtual()) {
-                    continue;
-                }
-                Enumeration<InetAddress> addresses = ni.getInetAddresses();
-                while (addresses.hasMoreElements()) {
-                    InetAddress addr = addresses.nextElement();
-                    if (addr instanceof Inet4Address && !addr.isLoopbackAddress()) {
-                        candidates.add(addr);
-                    }
-                }
-            }
-            for (InetAddress addr : candidates) {
-                if (addr.getHostAddress().startsWith("192.168.")) {
-                    return addr.getHostAddress();
-                }
-            }
-            for (InetAddress addr : candidates) {
-                if (addr.getHostAddress().startsWith("10.")) {
-                    return addr.getHostAddress();
-                }
-            }
-            for (InetAddress addr : candidates) {
-                String h = addr.getHostAddress();
-                if (h.startsWith("172.")) {
-                    int second = Integer.parseInt(h.split("\\.")[1]);
-                    if (second >= 16 && second <= 31) {
-                        return h;
-                    }
-                }
-            }
-            if (!candidates.isEmpty()) {
-                return candidates.get(0).getHostAddress();
-            }
-        } catch (SocketException e) {
-            // ignore
-        }
-        return null;
     }
 }

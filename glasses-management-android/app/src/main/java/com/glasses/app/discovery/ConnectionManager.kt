@@ -51,7 +51,7 @@ class ConnectionManager(private val context: Context) {
 
         // 2. mDNS 发现
         _state.value = ConnectionState.Searching
-        val discovered = MdnsDiscovery.discover()
+        val discovered = MdnsDiscovery.discover(context)
         if (discovered != null) {
             saveConnection(discovered.ip, discovered.port)
             val url = "http://${discovered.ip}:${discovered.port}/"
