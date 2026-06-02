@@ -356,11 +356,16 @@ private fun DatePickerField(
 ) {
     var showDialog by remember { mutableStateOf(false) }
 
-    Box(modifier = modifier) {
+    Box(
+        modifier = modifier
+            .bounceClick {
+                showDialog = true
+            }
+    ) {
         OutlinedTextField(
             value = date,
             onValueChange = {},
-            readOnly = true,
+            enabled = false,
             label = { Text(label) },
             trailingIcon = {
                 Icon(
@@ -373,18 +378,19 @@ private fun DatePickerField(
             colors = OutlinedTextFieldDefaults.colors(
                 focusedTextColor = TextPrimary,
                 unfocusedTextColor = TextPrimary,
+                disabledTextColor = TextPrimary,
                 focusedBorderColor = Primary,
                 unfocusedBorderColor = BorderColor,
+                disabledBorderColor = BorderColor,
                 focusedContainerColor = Color.White,
                 unfocusedContainerColor = Color.White,
+                disabledContainerColor = Color.White,
                 focusedLabelColor = Primary,
-                unfocusedLabelColor = TextSecondary
+                unfocusedLabelColor = TextSecondary,
+                disabledLabelColor = TextSecondary,
+                disabledTrailingIconColor = Primary
             ),
-            modifier = Modifier
-                .fillMaxWidth()
-                .bounceClick {
-                    showDialog = true
-                }
+            modifier = Modifier.fillMaxWidth()
         )
     }
 
