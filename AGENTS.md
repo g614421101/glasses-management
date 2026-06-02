@@ -304,7 +304,7 @@ Windows 平台上，即便给 Java 启动参数指定了 `-Dfile.encoding=UTF-8`
 ## 重要实现约定
 
 - 业务删除多为软删除，表中有 `deleted`、`deleted_time`、`deleted_by` 字段；不要随意改成物理删除。MyBatis Plus `@TableLogic` 自动过滤已删除记录，自定义 Mapper 方法（`selectAnyById` 等）可绕过逻辑删除。删除顾客时级联软删除关联的验光和销售记录。
-- 两个后端模块高度相似，唯一代码级差异是 `MybatisPlusConfig.java` 中的 `DbType`（MYSQL vs H2）。改动后端业务时，要判断是否需要同步修改 MySQL 版和 H2 版，避免桌面版与服务端版行为不一致。
+- 两个后端模块高度相似，主要代码级差异是 `MybatisPlusConfig.java` 中的 `DbType`（MYSQL vs H2）和 `SchemaCompatibilityInitializer.java` 中的 SQL 方言适配（大小写、数据类型、索引语法等）。改动后端业务时，要判断是否需要同步修改 MySQL 版和 H2 版，避免桌面版与服务端版行为不一致。
 - 前端请求期望后端返回 `Result` 包装结构，成功码为 `200`，`request.ts` 会直接返回 `res.data`。错误码 409 在前端静默处理（用于手机号重复冲突）。
 - 登录 token 存在 `localStorage` 的 `token`，请求头名为 `Authorization`（无 Bearer 前缀）。`/api/auth/login`、`/api/auth/register`、`/api/system/lan-info` 无需认证。
 - 角色主要区分 `admin` 和 `merchant`。
