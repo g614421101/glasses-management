@@ -357,7 +357,6 @@ private fun DatePickerField(
     var showDialog by remember { mutableStateOf(false) }
 
     Box(modifier = modifier) {
-        val clickInteractionSource = remember { MutableInteractionSource() }
         OutlinedTextField(
             value = date,
             onValueChange = {},
@@ -383,7 +382,7 @@ private fun DatePickerField(
             ),
             modifier = Modifier
                 .fillMaxWidth()
-                .bounceClick(clickInteractionSource) {
+                .bounceClick {
                     showDialog = true
                 }
         )
