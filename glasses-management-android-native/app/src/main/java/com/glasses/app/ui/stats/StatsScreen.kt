@@ -27,6 +27,10 @@ import com.glasses.app.ui.common.staggeredEntrance
 import com.glasses.app.viewmodel.StatsViewModel
 import java.math.BigDecimal
 import java.math.RoundingMode
+import java.time.LocalDate
+import java.time.format.DateTimeFormatter
+import java.time.Instant
+import java.time.ZoneId
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -36,17 +40,6 @@ fun StatsScreen(
     modifier: Modifier = Modifier
 ) {
     val state by viewModel.uiState.collectAsState()
-
-    val dateFieldColors = OutlinedTextFieldDefaults.colors(
-        focusedTextColor = TextPrimary,
-        unfocusedTextColor = TextPrimary,
-        focusedBorderColor = Primary,
-        unfocusedBorderColor = BorderColor,
-        focusedContainerColor = Color.White,
-        unfocusedContainerColor = Color.White,
-        focusedLabelColor = Primary,
-        unfocusedLabelColor = TextSecondary
-    )
 
     Column(
         modifier = modifier
@@ -74,48 +67,52 @@ fun StatsScreen(
         )
 
         // Filters
-        Row(
+        Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 16.dp, vertical = 10.dp),
-            verticalAlignment = Alignment.CenterVertically
+                .padding(horizontal = 16.dp, vertical = 10.dp)
         ) {
-            Switch(
-                checked = state.showAll,
-                onCheckedChange = { viewModel.onShowAllChange(it) },
-                colors = SwitchDefaults.colors(
-                    checkedThumbColor = Color.White,
-                    checkedTrackColor = Primary,
-                    uncheckedThumbColor = TextSecondary,
-                    uncheckedTrackColor = BorderColor
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Switch(
+                    checked = state.showAll,
+                    onCheckedChange = { viewModel.onShowAllChange(it) },
+                    colors = SwitchDefaults.colors(
+                        checkedThumbColor = Color.White,
+                        checkedTrackColor = Primary,
+                        uncheckedThumbColor = TextSecondary,
+                        uncheckedTrackColor = BorderColor
+                    )
                 )
-            )
-            Spacer(modifier = Modifier.width(8.dp))
-            Text("查看全部", fontWeight = FontWeight.SemiBold, color = TextPrimary, style = MaterialTheme.typography.bodyMedium)
+                Spacer(modifier = Modifier.width(8.dp))
+                Text("查看全部", fontWeight = FontWeight.SemiBold, color = TextPrimary, style = MaterialTheme.typography.bodyMedium)
+            }
 
             if (!state.showAll) {
-                Spacer(modifier = Modifier.weight(1f))
-                OutlinedTextField(
-                    value = state.startDate,
-                    onValueChange = { viewModel.onDateChange(it, state.endDate) },
-                    label = { Text("起始") },
-                    singleLine = true,
-                    colors = dateFieldColors,
-                    shape = RoundedCornerShape(10.dp),
-                    modifier = Modifier.width(105.dp),
-                    textStyle = MaterialTheme.typography.bodySmall.copy(fontSize = 11.sp)
-                )
-                Spacer(modifier = Modifier.width(6.dp))
-                OutlinedTextField(
-                    value = state.endDate,
-                    onValueChange = { viewModel.onDateChange(state.startDate, it) },
-                    label = { Text("截止") },
-                    singleLine = true,
-                    colors = dateFieldColors,
-                    shape = RoundedCornerShape(10.dp),
-                    modifier = Modifier.width(105.dp),
-                    textStyle = MaterialTheme.typography.bodySmall.copy(fontSize = 11.sp)
-                )
+                Spacer(modifier = Modifier.height(10.dp))
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    DatePickerField(
+                        label = "起始日期",
+                        date = state.startDate,
+                        onDateSelected = { dateString ->
+                            viewModel.onDateChange(dateString, state.endDate)
+                        },
+                        modifier = Modifier.weight(1f)
+                    )
+                    DatePickerField(
+                        label = "截止日期",
+                        date = state.endDate,
+                        onDateSelected = { dateString ->
+                            viewModel.onDateChange(state.startDate, dateString)
+                        },
+                        modifier = Modifier.weight(1f)
+                    )
+                }
             }
         }
 
@@ -344,6 +341,120 @@ private fun SummaryCard(title: String, value: String, isHighlight: Boolean, modi
                 fontSize = 15.sp,
                 fontWeight = FontWeight.ExtraBold,
                 color = if (isHighlight) Color.White else TextPrimary
+            )
+        }
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun DatePickerField(
+    label: String,
+    date: String,
+    onDateSelected: (String) -> Unit,
+    modifier: Modifier = Modifier
+) {
+    var showDialog by remember { mutableStateOf(false) }
+
+    Box(modifier = modifier) {
+        val clickInteractionSource = remember { MutableInteractionSource() }
+        OutlinedTextField(
+            value = date,
+            onValueChange = {},
+            readOnly = true,
+            label = { Text(label) },
+            trailingIcon = {
+                Icon(
+                    imageVector = Icons.Default.DateRange,
+                    contentDescription = "选择日期",
+                    tint = Primary
+                )
+            },
+            shape = RoundedCornerShape(14.dp),
+            colors = OutlinedTextFieldDefaults.colors(
+                focusedTextColor = TextPrimary,
+                unfocusedTextColor = TextPrimary,
+                focusedBorderColor = Primary,
+                unfocusedBorderColor = BorderColor,
+                focusedContainerColor = Color.White,
+                unfocusedContainerColor = Color.White,
+                focusedLabelColor = Primary,
+                unfocusedLabelColor = TextSecondary
+            ),
+            modifier = Modifier
+                .fillMaxWidth()
+                .bounceClick(clickInteractionSource) {
+                    showDialog = true
+                }
+        )
+    }
+
+    if (showDialog) {
+        val initialEpochMillis = remember(date) {
+            try {
+                val localDate = LocalDate.parse(date, DateTimeFormatter.ISO_LOCAL_DATE)
+                localDate.atStartOfDay(ZoneId.of("UTC")).toInstant().toEpochMilli()
+            } catch (e: Exception) {
+                System.currentTimeMillis()
+            }
+        }
+        val datePickerState = rememberDatePickerState(
+            initialSelectedDateMillis = initialEpochMillis
+        )
+
+        DatePickerDialog(
+            onDismissRequest = { showDialog = false },
+            confirmButton = {
+                val confirmInteractionSource = remember { MutableInteractionSource() }
+                TextButton(
+                    onClick = {
+                        datePickerState.selectedDateMillis?.let { millis ->
+                            val selectedLocalDate = Instant.ofEpochMilli(millis)
+                                .atZone(ZoneId.of("UTC"))
+                                .toLocalDate()
+                            val formattedDate = selectedLocalDate.format(DateTimeFormatter.ISO_LOCAL_DATE)
+                            onDateSelected(formattedDate)
+                        }
+                        showDialog = false
+                    },
+                    interactionSource = confirmInteractionSource,
+                    modifier = Modifier.bounceClick(confirmInteractionSource)
+                ) {
+                    Text("确定", color = Primary, fontWeight = FontWeight.Bold)
+                }
+            },
+            dismissButton = {
+                val cancelInteractionSource = remember { MutableInteractionSource() }
+                TextButton(
+                    onClick = { showDialog = false },
+                    interactionSource = cancelInteractionSource,
+                    modifier = Modifier.bounceClick(cancelInteractionSource)
+                ) {
+                    Text("取消", color = TextSecondary)
+                }
+            },
+            colors = DatePickerDefaults.colors(
+                containerColor = Color.White
+            )
+        ) {
+            DatePicker(
+                state = datePickerState,
+                colors = DatePickerDefaults.colors(
+                    containerColor = Color.White,
+                    titleContentColor = TextPrimary,
+                    headlineContentColor = TextPrimary,
+                    weekdayContentColor = TextSecondary,
+                    subheadContentColor = TextSecondary,
+                    navigationContentColor = Primary,
+                    yearContentColor = TextPrimary,
+                    selectedYearContentColor = Color.White,
+                    selectedYearContainerColor = Primary,
+                    dayContentColor = TextPrimary,
+                    selectedDayContentColor = Color.White,
+                    selectedDayContainerColor = Primary,
+                    todayContentColor = Primary,
+                    todayDateBorderColor = Primary
+                )
             )
         }
     }

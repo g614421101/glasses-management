@@ -10,7 +10,7 @@
   - 顾客档案与回收站按钮进行窄屏下的响应式与 CSS Grid 布局重构，彻底解决手机小屏下的多按钮折行挤压、横向溢出问题。
 - **Android 原生客户端与极速连接**：
   - 提供 **Android 原生 Compose 版** 和 **Android WebView 版** 两套手机客户端 App。
-  - 原生端基于 Jetpack Compose 构建，全面采用精美的蓝白配色风格，全页面融入了卡片立体式物理阴影，且为所有按钮、选项和切换添加了弹性动效（Bounce Animation）、列表加载骨架屏（Shimmer）及入场滑动渐变（Staggered Entrance）。
+  - 原生端基于 Jetpack Compose 构建，全面采用精美的蓝白配色风格，全页面融入了卡片立体式物理阴影，且为所有按钮、选项和切换添加了弹性动效（Bounce Animation）、列表加载骨架屏（Shimmer）及入场滑动渐变（Staggered Entrance）。同时，深度适配了窄屏折叠防遮挡设计（如统计日期过滤区），全面采用 Material 3 原生 DatePicker 选择器，并对个人信息编辑、修改密码弹窗输入框（集成 Leading/Trailing 图标与明文/密文切换）进行了与系统主题色一致的安全体验优化。
   - 支持局域网内 **mDNS 协议自动发现**，手机启动时可自动搜寻局域网内的 Spring Boot 视光管理后端服务并直接配对连通，免去手动配置 IP 困扰。
 - **局域网连接与扫码访问**：网页端首页自动检测服务器局域网 IP 并生成二维码，移动设备扫码即可轻松接入系统。
 - **灵活的部署形态**：支持轻量级 H2 单机版后端与 MySQL 多人协作版后端，可通过 Electron 壳一键打包生成 Windows 桌面应用。

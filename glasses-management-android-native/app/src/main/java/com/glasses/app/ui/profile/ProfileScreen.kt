@@ -17,6 +17,10 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.input.PasswordVisualTransformation
+import androidx.compose.ui.text.input.VisualTransformation
 import com.glasses.app.theme.*
 import com.glasses.app.ui.common.bounceClick
 import com.glasses.app.viewmodel.ProfileViewModel
@@ -105,6 +109,7 @@ fun ProfileScreen(
                             value = state.realName,
                             onValueChange = { viewModel.onRealNameChange(it) },
                             label = { Text("显示名称") },
+                            leadingIcon = { Icon(Icons.Default.Person, null, tint = Primary) },
                             singleLine = true,
                             colors = fieldColors,
                             shape = RoundedCornerShape(12.dp),
@@ -115,6 +120,7 @@ fun ProfileScreen(
                             value = state.username,
                             onValueChange = { viewModel.onUsernameChange(it) },
                             label = { Text("用户名") },
+                            leadingIcon = { Icon(Icons.Default.AccountCircle, null, tint = Primary) },
                             singleLine = true,
                             colors = fieldColors,
                             shape = RoundedCornerShape(12.dp),
@@ -125,9 +131,11 @@ fun ProfileScreen(
                             value = state.phone,
                             onValueChange = { viewModel.onPhoneChange(it) },
                             label = { Text("手机号") },
+                            leadingIcon = { Icon(Icons.Default.Phone, null, tint = Primary) },
                             singleLine = true,
                             colors = fieldColors,
                             shape = RoundedCornerShape(12.dp),
+                            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Phone),
                             modifier = Modifier.fillMaxWidth()
                         )
                         Spacer(Modifier.height(16.dp))
@@ -263,6 +271,10 @@ private fun ChangePasswordDialog(
     var new by remember { mutableStateOf("") }
     var confirm by remember { mutableStateOf("") }
 
+    var oldVisible by remember { mutableStateOf(false) }
+    var newVisible by remember { mutableStateOf(false) }
+    var confirmVisible by remember { mutableStateOf(false) }
+
     val fieldColors = OutlinedTextFieldDefaults.colors(
         focusedTextColor = TextPrimary,
         unfocusedTextColor = TextPrimary,
@@ -291,11 +303,71 @@ private fun ChangePasswordDialog(
         },
         text = {
             Column(modifier = Modifier.fillMaxWidth()) {
-                OutlinedTextField(value = old, onValueChange = { old = it }, label = { Text("当前密码") }, singleLine = true, colors = fieldColors, shape = RoundedCornerShape(14.dp), modifier = Modifier.fillMaxWidth())
+                OutlinedTextField(
+                    value = old,
+                    onValueChange = { old = it },
+                    label = { Text("当前密码") },
+                    leadingIcon = { Icon(Icons.Default.Lock, null, tint = Primary) },
+                    trailingIcon = {
+                        IconButton(onClick = { oldVisible = !oldVisible }) {
+                            Icon(
+                                imageVector = if (oldVisible) Icons.Default.Visibility else Icons.Default.VisibilityOff,
+                                contentDescription = if (oldVisible) "隐藏密码" else "显示密码",
+                                tint = TextSecondary
+                            )
+                        }
+                    },
+                    visualTransformation = if (oldVisible) VisualTransformation.None else PasswordVisualTransformation(),
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
+                    singleLine = true,
+                    colors = fieldColors,
+                    shape = RoundedCornerShape(14.dp),
+                    modifier = Modifier.fillMaxWidth()
+                )
                 Spacer(Modifier.height(8.dp))
-                OutlinedTextField(value = new, onValueChange = { new = it }, label = { Text("新密码") }, singleLine = true, colors = fieldColors, shape = RoundedCornerShape(14.dp), modifier = Modifier.fillMaxWidth())
+                OutlinedTextField(
+                    value = new,
+                    onValueChange = { new = it },
+                    label = { Text("新密码") },
+                    leadingIcon = { Icon(Icons.Default.Lock, null, tint = Primary) },
+                    trailingIcon = {
+                        IconButton(onClick = { newVisible = !newVisible }) {
+                            Icon(
+                                imageVector = if (newVisible) Icons.Default.Visibility else Icons.Default.VisibilityOff,
+                                contentDescription = if (newVisible) "隐藏密码" else "显示密码",
+                                tint = TextSecondary
+                            )
+                        }
+                    },
+                    visualTransformation = if (newVisible) VisualTransformation.None else PasswordVisualTransformation(),
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
+                    singleLine = true,
+                    colors = fieldColors,
+                    shape = RoundedCornerShape(14.dp),
+                    modifier = Modifier.fillMaxWidth()
+                )
                 Spacer(Modifier.height(8.dp))
-                OutlinedTextField(value = confirm, onValueChange = { confirm = it }, label = { Text("确认新密码") }, singleLine = true, colors = fieldColors, shape = RoundedCornerShape(14.dp), modifier = Modifier.fillMaxWidth())
+                OutlinedTextField(
+                    value = confirm,
+                    onValueChange = { confirm = it },
+                    label = { Text("确认新密码") },
+                    leadingIcon = { Icon(Icons.Default.Lock, null, tint = Primary) },
+                    trailingIcon = {
+                        IconButton(onClick = { confirmVisible = !confirmVisible }) {
+                            Icon(
+                                imageVector = if (confirmVisible) Icons.Default.Visibility else Icons.Default.VisibilityOff,
+                                contentDescription = if (confirmVisible) "隐藏密码" else "显示密码",
+                                tint = TextSecondary
+                            )
+                        }
+                    },
+                    visualTransformation = if (confirmVisible) VisualTransformation.None else PasswordVisualTransformation(),
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
+                    singleLine = true,
+                    colors = fieldColors,
+                    shape = RoundedCornerShape(14.dp),
+                    modifier = Modifier.fillMaxWidth()
+                )
             }
         },
         confirmButton = {
