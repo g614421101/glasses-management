@@ -33,7 +33,7 @@ fun SplashScreen(
                 CircularProgressIndicator()
                 Spacer(modifier = Modifier.height(16.dp))
                 Text(
-                    text = "正在搜索桌面端服务�?,
+                    text = "正在搜索桌面端服务…",
                     style = MaterialTheme.typography.bodyLarge,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
@@ -61,7 +61,7 @@ private fun ManualInputSection(onConnect: (String, Int) -> Unit) {
     var port by remember { mutableStateOf("8080") }
 
     Text(
-        text = "未找到桌面端服务，请确认已启�?,
+        text = "未找到桌面端服务，请确认已启动",
         style = MaterialTheme.typography.bodyMedium,
         color = MaterialTheme.colorScheme.onSurfaceVariant
     )
@@ -81,7 +81,7 @@ private fun ManualInputSection(onConnect: (String, Int) -> Unit) {
     OutlinedTextField(
         value = port,
         onValueChange = { port = it },
-        label = { Text("端口�?) },
+        label = { Text("端口号") },
         singleLine = true,
         modifier = Modifier.fillMaxWidth()
     )

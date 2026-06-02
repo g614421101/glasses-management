@@ -10,7 +10,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.vector.ImageVector
 
 enum class BottomNavItem(val route: String, val label: String, val icon: ImageVector) {
-    Home("home", "工作�?, Icons.Default.Home),
+    Home("home", "工作台", Icons.Default.Home),
     Customer("customer", "顾客", Icons.Default.People),
     Stats("stats", "统计", Icons.Default.BarChart)
 }

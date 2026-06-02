@@ -54,9 +54,9 @@ object MdnsDiscovery {
                     try {
                         jmdns = JmDNS.create("glasses-native-app")
                         jmdns!!.addServiceListener(SERVICE_TYPE, listener)
-                        Log.d(TAG, "开始监�?mDNS 服务: $SERVICE_TYPE")
+                        Log.d(TAG, "开始监听 mDNS 服务: $SERVICE_TYPE")
                     } catch (e: Exception) {
-                        Log.e(TAG, "mDNS 初始化失�?, e)
+                        Log.e(TAG, "mDNS 初始化失败", e)
                         if (cont.isActive) cont.resume(null)
                     }
                 }

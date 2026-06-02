@@ -46,9 +46,9 @@ fun ProfileScreen(
                     if (state.isEditing) {
                         OutlinedTextField(value = state.realName, onValueChange = { viewModel.onRealNameChange(it) }, label = { Text("显示名称") }, singleLine = true, modifier = Modifier.fillMaxWidth())
                         Spacer(Modifier.height(8.dp))
-                        OutlinedTextField(value = state.username, onValueChange = { viewModel.onUsernameChange(it) }, label = { Text("用户�?) }, singleLine = true, modifier = Modifier.fillMaxWidth())
+                        OutlinedTextField(value = state.username, onValueChange = { viewModel.onUsernameChange(it) }, label = { Text("用户名") }, singleLine = true, modifier = Modifier.fillMaxWidth())
                         Spacer(Modifier.height(8.dp))
-                        OutlinedTextField(value = state.phone, onValueChange = { viewModel.onPhoneChange(it) }, label = { Text("手机�?) }, singleLine = true, modifier = Modifier.fillMaxWidth())
+                        OutlinedTextField(value = state.phone, onValueChange = { viewModel.onPhoneChange(it) }, label = { Text("手机号") }, singleLine = true, modifier = Modifier.fillMaxWidth())
                         Spacer(Modifier.height(12.dp))
                         Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End) {
                             TextButton(onClick = { viewModel.cancelEditing() }) { Text("取消") }
@@ -57,8 +57,8 @@ fun ProfileScreen(
                         }
                     } else {
                         ProfileRow("显示名称", state.realName.ifBlank { "-" })
-                        ProfileRow("用户�?, state.username)
-                        ProfileRow("手机�?, state.phone.ifBlank { "-" })
+                        ProfileRow("用户名", state.username)
+                        ProfileRow("手机号", state.phone.ifBlank { "-" })
                         ProfileRow("角色", state.role)
                     }
                 }
@@ -120,9 +120,9 @@ private fun ChangePasswordDialog(onDismiss: () -> Unit, onConfirm: (String, Stri
             Column {
                 OutlinedTextField(value = old, onValueChange = { old = it }, label = { Text("当前密码") }, singleLine = true, modifier = Modifier.fillMaxWidth())
                 Spacer(Modifier.height(8.dp))
-                OutlinedTextField(value = new, onValueChange = { new = it }, label = { Text("新密�?) }, singleLine = true, modifier = Modifier.fillMaxWidth())
+                OutlinedTextField(value = new, onValueChange = { new = it }, label = { Text("新密码") }, singleLine = true, modifier = Modifier.fillMaxWidth())
                 Spacer(Modifier.height(8.dp))
-                OutlinedTextField(value = confirm, onValueChange = { confirm = it }, label = { Text("确认新密�?) }, singleLine = true, modifier = Modifier.fillMaxWidth())
+                OutlinedTextField(value = confirm, onValueChange = { confirm = it }, label = { Text("确认新密码") }, singleLine = true, modifier = Modifier.fillMaxWidth())
             }
         },
         confirmButton = { TextButton(onClick = { onConfirm(old, new, confirm) }, enabled = !isLoading && old.isNotBlank() && new.length >= 6 && new == confirm) { Text("确定") } },

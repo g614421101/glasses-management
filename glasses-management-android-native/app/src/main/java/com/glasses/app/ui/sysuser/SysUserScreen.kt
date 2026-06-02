@@ -41,7 +41,7 @@ fun SysUserScreen(
             ) {
                 Switch(checked = state.includeDeleted, onCheckedChange = { viewModel.toggleIncludeDeleted() })
                 Spacer(Modifier.width(8.dp))
-                Text("显示已删�?)
+                Text("显示已删除")
             }
 
             when {
@@ -77,7 +77,7 @@ fun SysUserScreen(
         AlertDialog(
             onDismissRequest = { viewModel.hideDeleteConfirm() },
             title = { Text("确认删除") },
-            text = { Text("确定要删除用户�?{state.deletingUser!!.username}」吗�?) },
+            text = { Text("确定要删除用户「${state.deletingUser!!.username}」吗？") },
             confirmButton = { TextButton(onClick = { viewModel.deleteUser() }) { Text("删除", color = MaterialTheme.colorScheme.error) } },
             dismissButton = { TextButton(onClick = { viewModel.hideDeleteConfirm() }) { Text("取消") } }
         )
@@ -87,7 +87,7 @@ fun SysUserScreen(
         AlertDialog(
             onDismissRequest = { viewModel.hidePurgeConfirm() },
             title = { Text("彻底删除") },
-            text = { Text("此操作不可恢复，确定要彻底删除用户�?{state.purgingUser!!.username}」吗�?) },
+            text = { Text("此操作不可恢复，确定要彻底删除用户「${state.purgingUser!!.username}」吗？") },
             confirmButton = { TextButton(onClick = { viewModel.purgeUser() }) { Text("彻底删除", color = MaterialTheme.colorScheme.error) } },
             dismissButton = { TextButton(onClick = { viewModel.hidePurgeConfirm() }) { Text("取消") } }
         )
@@ -96,8 +96,8 @@ fun SysUserScreen(
     if (state.showResetPasswordDialog && state.resetPasswordResult != null) {
         AlertDialog(
             onDismissRequest = { viewModel.hideResetPasswordDialog() },
-            title = { Text("密码已重�?) },
-            text = { Text("临时密码: ${state.resetPasswordResult}\n请告知用户登录后立即修改密码�?) },
+            title = { Text("密码已重置") },
+            text = { Text("临时密码: ${state.resetPasswordResult}\n请告知用户登录后立即修改密码。") },
             confirmButton = { TextButton(onClick = { viewModel.hideResetPasswordDialog() }) { Text("确定") } }
         )
     }
@@ -118,9 +118,9 @@ private fun UserCard(
                 }
                 Row {
                     if (user.deleted == true) {
-                        AssistChip(onClick = {}, label = { Text("已删�?) }, colors = AssistChipDefaults.assistChipColors(containerColor = MaterialTheme.colorScheme.errorContainer))
+                        AssistChip(onClick = {}, label = { Text("已删除") }, colors = AssistChipDefaults.assistChipColors(containerColor = MaterialTheme.colorScheme.errorContainer))
                     } else if (user.disabled == true) {
-                        AssistChip(onClick = {}, label = { Text("已禁�?) }, colors = AssistChipDefaults.assistChipColors(containerColor = MaterialTheme.colorScheme.errorContainer))
+                        AssistChip(onClick = {}, label = { Text("已禁用") }, colors = AssistChipDefaults.assistChipColors(containerColor = MaterialTheme.colorScheme.errorContainer))
                     } else {
                         AssistChip(onClick = {}, label = { Text(user.role ?: "merchant") })
                     }

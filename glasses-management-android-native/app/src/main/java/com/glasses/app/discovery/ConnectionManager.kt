@@ -61,7 +61,7 @@ class ConnectionManager @Inject constructor(
                 _state.value = ConnectionState.Connected(url, cachedIp, cachedPort)
                 return
             }
-            Log.d(TAG, "缓存连接失败，开�?mDNS 发现")
+            Log.d(TAG, "缓存连接失败，开始 mDNS 发现")
         }
 
         _state.value = ConnectionState.Searching
@@ -74,7 +74,7 @@ class ConnectionManager @Inject constructor(
             return
         }
 
-        Log.d(TAG, "mDNS 超时，切换手动输�?)
+        Log.d(TAG, "mDNS 超时，切换手动输入")
         _state.value = ConnectionState.ManualInput
     }
 

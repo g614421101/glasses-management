@@ -64,7 +64,7 @@ class ProfileViewModel @Inject constructor(
             val s = _uiState.value
             systemRepository.updateProfile(s.username, s.phone, s.realName).fold(
                 onSuccess = {
-                    _uiState.value = _uiState.value.copy(isEditing = false, isLoading = false, success = "个人资料已更�?)
+                    _uiState.value = _uiState.value.copy(isEditing = false, isLoading = false, success = "个人资料已更新")
                     loadProfile()
                 },
                 onFailure = { _uiState.value = _uiState.value.copy(isLoading = false, error = it.message) }
@@ -80,7 +80,7 @@ class ProfileViewModel @Inject constructor(
             _uiState.value = _uiState.value.copy(isLoading = true)
             systemRepository.changePassword(old, new, confirm).fold(
                 onSuccess = {
-                    _uiState.value = _uiState.value.copy(showChangePassword = false, isLoading = false, success = "密码已修�?)
+                    _uiState.value = _uiState.value.copy(showChangePassword = false, isLoading = false, success = "密码已修改")
                 },
                 onFailure = { _uiState.value = _uiState.value.copy(isLoading = false, error = it.message) }
             )

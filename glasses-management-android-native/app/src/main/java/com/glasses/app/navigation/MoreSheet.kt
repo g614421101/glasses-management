@@ -24,7 +24,7 @@ fun MoreSheet(
     onLogout: () -> Unit
 ) {
     val items = listOf(
-        MoreMenuItem("回收�?, Icons.Default.Delete, "recycle-bin"),
+        MoreMenuItem("回收站", Icons.Default.Delete, "recycle-bin"),
         MoreMenuItem("用户管理", Icons.Default.AdminPanelSettings, "sys-user"),
         MoreMenuItem("数据管理", Icons.Default.Storage, "data-manage"),
         MoreMenuItem("个人资料", Icons.Default.Person, "profile")
@@ -53,7 +53,7 @@ fun MoreSheet(
 
             ListItem(
                 headlineContent = {
-                    Text("退出登�?, color = MaterialTheme.colorScheme.error)
+                    Text("退出登录", color = MaterialTheme.colorScheme.error)
                 },
                 leadingContent = {
                     Icon(Icons.Default.Logout, contentDescription = null, tint = MaterialTheme.colorScheme.error)

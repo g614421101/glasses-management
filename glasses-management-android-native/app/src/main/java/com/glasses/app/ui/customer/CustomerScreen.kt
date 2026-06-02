@@ -70,7 +70,7 @@ fun CustomerScreen(
         }
 
         Text(
-            text = "�?${state.totalRecords} 位顾�?,
+            text = "共 ${state.totalRecords} 位顾客",
             style = MaterialTheme.typography.bodySmall,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
             modifier = Modifier.padding(horizontal = 16.dp, vertical = 4.dp)
@@ -114,7 +114,7 @@ fun CustomerScreen(
                         onClick = { viewModel.onPrevPage() },
                         enabled = state.currentPage > 1
                     ) {
-                        Text("上一�?)
+                        Text("上一页")
                     }
                     Text(
                         text = "${state.currentPage} / ${state.totalPages}",
@@ -124,7 +124,7 @@ fun CustomerScreen(
                         onClick = { viewModel.onNextPage() },
                         enabled = state.currentPage < state.totalPages
                     ) {
-                        Text("下一�?)
+                        Text("下一页")
                     }
                 }
             }
@@ -165,7 +165,7 @@ fun CustomerScreen(
         AlertDialog(
             onDismissRequest = { viewModel.hideDeleteConfirm() },
             title = { Text("确认删除") },
-            text = { Text("确定要删除顾客�?{state.deletingCustomer!!.name}」吗？删除后可前往回收站恢复�?) },
+            text = { Text("确定要删除顾客「${state.deletingCustomer!!.name}」吗？删除后可前往回收站恢复。") },
             confirmButton = {
                 TextButton(onClick = { viewModel.deleteCustomer() }) {
                     Text("删除", color = MaterialTheme.colorScheme.error)
@@ -213,8 +213,8 @@ private fun CustomerCard(
                 }
                 Row {
                     val genderText = when (customer.gender) {
-                        1 -> "�?
-                        2 -> "�?
+                        1 -> "男"
+                        2 -> "女"
                         else -> ""
                     }
                     if (genderText.isNotEmpty()) {
@@ -295,7 +295,7 @@ private fun CustomerDialog(
                 OutlinedTextField(
                     value = phone,
                     onValueChange = { phone = it },
-                    label = { Text("手机�?) },
+                    label = { Text("手机号") },
                     singleLine = true,
                     modifier = Modifier.fillMaxWidth()
                 )
@@ -312,13 +312,13 @@ private fun CustomerDialog(
                     FilterChip(
                         selected = gender == 1,
                         onClick = { gender = 1 },
-                        label = { Text("�?) }
+                        label = { Text("男") }
                     )
                     Spacer(modifier = Modifier.width(8.dp))
                     FilterChip(
                         selected = gender == 2,
                         onClick = { gender = 2 },
-                        label = { Text("�?) }
+                        label = { Text("女") }
                     )
                 }
 
@@ -326,7 +326,7 @@ private fun CustomerDialog(
                 OutlinedTextField(
                     value = birthday,
                     onValueChange = { birthday = it },
-                    label = { Text("生日（yyyy-MM-dd�?) },
+                    label = { Text("生日（yyyy-MM-dd）") },
                     singleLine = true,
                     modifier = Modifier.fillMaxWidth()
                 )

@@ -14,7 +14,7 @@ fun HomeScreen(modifier: Modifier = Modifier) {
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {
-        Text("工作�?, style = MaterialTheme.typography.headlineLarge)
+        Text("工作台", style = MaterialTheme.typography.headlineLarge)
         Spacer(modifier = Modifier.height(16.dp))
         Text("即将在第二批实现", color = MaterialTheme.colorScheme.onSurfaceVariant)
     }

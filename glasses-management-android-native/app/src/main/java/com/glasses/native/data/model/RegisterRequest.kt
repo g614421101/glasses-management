@@ -1,0 +1,9 @@
+package com.glasses.native.data.model
+
+data class RegisterRequest(
+    val inviteCode: String,
+    val username: String,
+    val phone: String,
+    val password: String,
+    val confirmPassword: String
+)

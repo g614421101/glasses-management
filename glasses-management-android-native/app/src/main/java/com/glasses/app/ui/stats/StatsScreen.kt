@@ -78,17 +78,17 @@ fun StatsScreen(
             horizontalArrangement = Arrangement.spacedBy(12.dp)
         ) {
             SummaryCard(
-                title = "总营�?,
+                title = "总营收",
                 value = "¥${state.totalRevenue.setScale(2, RoundingMode.HALF_UP)}",
                 modifier = Modifier.weight(1f)
             )
             SummaryCard(
-                title = "订单�?,
+                title = "订单数",
                 value = "${state.orderCount}",
                 modifier = Modifier.weight(1f)
             )
             SummaryCard(
-                title = "客单�?,
+                title = "客单价",
                 value = if (state.orderCount > 0) {
                     "¥${state.totalRevenue.divide(BigDecimal.valueOf(state.orderCount), 2, RoundingMode.HALF_UP)}"
                 } else "¥0.00",
@@ -107,7 +107,7 @@ fun StatsScreen(
             }
             state.records.isEmpty() -> {
                 Box(modifier = Modifier.weight(1f), contentAlignment = Alignment.Center) {
-                    Text("暂无销售记�?, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                    Text("暂无销售记录", color = MaterialTheme.colorScheme.onSurfaceVariant)
                 }
             }
             else -> {
@@ -179,11 +179,11 @@ fun StatsScreen(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     TextButton(onClick = { viewModel.onPrevPage() }, enabled = state.currentPage > 1) {
-                        Text("上一�?)
+                        Text("上一页")
                     }
                     Text("${state.currentPage} / ${state.totalPages}", modifier = Modifier.padding(horizontal = 16.dp))
                     TextButton(onClick = { viewModel.onNextPage() }, enabled = state.currentPage < state.totalPages) {
-                        Text("下一�?)
+                        Text("下一页")
                     }
                 }
             }

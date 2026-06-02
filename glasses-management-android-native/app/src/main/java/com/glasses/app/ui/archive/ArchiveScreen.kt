@@ -53,13 +53,13 @@ fun ArchiveScreen(
                     onClick = { viewModel.showAddSales() },
                     containerColor = MaterialTheme.colorScheme.secondary
                 ) {
-                    Icon(Icons.Default.ShoppingCart, contentDescription = "添加配镜�?, tint = MaterialTheme.colorScheme.onSecondary)
+                    Icon(Icons.Default.ShoppingCart, contentDescription = "添加配镜单", tint = MaterialTheme.colorScheme.onSecondary)
                 }
                 Spacer(modifier = Modifier.height(8.dp))
                 SmallFloatingActionButton(
                     onClick = { viewModel.showAddOptometry() }
                 ) {
-                    Icon(Icons.Default.Visibility, contentDescription = "添加验光�?)
+                    Icon(Icons.Default.Visibility, contentDescription = "添加验光单")
                 }
             }
         }
@@ -95,7 +95,7 @@ fun ArchiveScreen(
                                         Text(c.phone, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
                                     }
                                     Row(modifier = Modifier.padding(top = 8.dp)) {
-                                        val gender = when (c.gender) { 1 -> "�?; 2 -> "�?; else -> "未知" }
+                                        val gender = when (c.gender) { 1 -> "男"; 2 -> "女"; else -> "未知" }
                                         AssistChip(onClick = {}, label = { Text(gender) }, modifier = Modifier.height(28.dp))
                                         if (!c.birthday.isNullOrBlank()) {
                                             Spacer(modifier = Modifier.width(8.dp))
@@ -103,7 +103,7 @@ fun ArchiveScreen(
                                         }
                                     }
                                     Text(
-                                        "�?${state.timeline.size} 条记�?,
+                                        "共 ${state.timeline.size} 条记录",
                                         style = MaterialTheme.typography.bodySmall,
                                         color = MaterialTheme.colorScheme.outline,
                                         modifier = Modifier.padding(top = 8.dp)
@@ -117,7 +117,7 @@ fun ArchiveScreen(
                     if (state.timeline.isEmpty()) {
                         item {
                             Box(modifier = Modifier.fillMaxWidth().padding(32.dp), contentAlignment = Alignment.Center) {
-                                Text("暂无验光或配镜记�?, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                                Text("暂无验光或配镜记录", color = MaterialTheme.colorScheme.onSurfaceVariant)
                             }
                         }
                     }
@@ -151,7 +151,7 @@ fun ArchiveScreen(
     // Dialogs
     if (state.showAddOptometry) {
         OptometryDialog(
-            title = "录入验光�?,
+            title = "录入验光单",
             onDismiss = { viewModel.hideAddOptometry() },
             onConfirm = { viewModel.addOptometry(it) }
         )
@@ -159,7 +159,7 @@ fun ArchiveScreen(
 
     if (state.showEditOptometry && state.editingOptometry != null) {
         OptometryDialog(
-            title = "编辑验光�?,
+            title = "编辑验光单",
             record = state.editingOptometry,
             onDismiss = { viewModel.hideEditOptometry() },
             onConfirm = { viewModel.updateOptometry(it) }
@@ -168,7 +168,7 @@ fun ArchiveScreen(
 
     if (state.showAddSales) {
         SalesDialog(
-            title = "新增配镜�?,
+            title = "新增配镜单",
             onDismiss = { viewModel.hideAddSales() },
             onConfirm = { viewModel.addSales(it) }
         )
@@ -176,7 +176,7 @@ fun ArchiveScreen(
 
     if (state.showEditSales && state.editingSales != null) {
         SalesDialog(
-            title = "编辑配镜�?,
+            title = "编辑配镜单",
             record = state.editingSales,
             onDismiss = { viewModel.hideEditSales() },
             onConfirm = { viewModel.updateSales(it) }
@@ -187,7 +187,7 @@ fun ArchiveScreen(
         AlertDialog(
             onDismissRequest = { viewModel.hideDeleteConfirm() },
             title = { Text("确认删除") },
-            text = { Text("确定要删除这条记录吗�?) },
+            text = { Text("确定要删除这条记录吗？") },
             confirmButton = {
                 TextButton(onClick = { viewModel.deleteRecord() }) {
                     Text("删除", color = MaterialTheme.colorScheme.error)
@@ -226,7 +226,7 @@ private fun TimelineCard(
                     )
                     Spacer(modifier = Modifier.width(8.dp))
                     Text(
-                        text = item.title ?: if (isOptometry) "验光�? else "配镜�?,
+                        text = item.title ?: if (isOptometry) "验光单" else "配镜单",
                         style = MaterialTheme.typography.titleMedium
                     )
                 }
@@ -371,9 +371,9 @@ private fun OptometryDialog(
                 Row {
                     OutlinedTextField(value = pdFar, onValueChange = { pdFar = it }, label = { Text("瞳距") }, singleLine = true, modifier = Modifier.weight(1f))
                     Spacer(modifier = Modifier.width(4.dp))
-                    OutlinedTextField(value = addPower, onValueChange = { addPower = it }, label = { Text("下加�?) }, singleLine = true, modifier = Modifier.weight(1f))
+                    OutlinedTextField(value = addPower, onValueChange = { addPower = it }, label = { Text("下加光") }, singleLine = true, modifier = Modifier.weight(1f))
                 }
-                OutlinedTextField(value = optometrist, onValueChange = { optometrist = it }, label = { Text("验光�?) }, singleLine = true, modifier = Modifier.fillMaxWidth())
+                OutlinedTextField(value = optometrist, onValueChange = { optometrist = it }, label = { Text("验光师") }, singleLine = true, modifier = Modifier.fillMaxWidth())
                 OutlinedTextField(value = remark, onValueChange = { remark = it }, label = { Text("备注") }, modifier = Modifier.fillMaxWidth(), minLines = 2)
             }
         },
@@ -430,13 +430,13 @@ private fun SalesDialog(
                 Text("镜架", style = MaterialTheme.typography.labelLarge, color = MaterialTheme.colorScheme.primary)
                 OutlinedTextField(value = frameBrand, onValueChange = { frameBrand = it }, label = { Text("品牌") }, singleLine = true, modifier = Modifier.fillMaxWidth())
                 OutlinedTextField(value = frameModel, onValueChange = { frameModel = it }, label = { Text("型号") }, singleLine = true, modifier = Modifier.fillMaxWidth())
-                OutlinedTextField(value = framePrice, onValueChange = { framePrice = it }, label = { Text("售价(�?") }, singleLine = true, modifier = Modifier.fillMaxWidth())
+                OutlinedTextField(value = framePrice, onValueChange = { framePrice = it }, label = { Text("售价(元)") }, singleLine = true, modifier = Modifier.fillMaxWidth())
 
                 Spacer(modifier = Modifier.height(8.dp))
                 Text("镜片", style = MaterialTheme.typography.labelLarge, color = MaterialTheme.colorScheme.secondary)
                 OutlinedTextField(value = lensBrand, onValueChange = { lensBrand = it }, label = { Text("品牌") }, singleLine = true, modifier = Modifier.fillMaxWidth())
                 OutlinedTextField(value = lensParams, onValueChange = { lensParams = it }, label = { Text("参数") }, singleLine = true, modifier = Modifier.fillMaxWidth())
-                OutlinedTextField(value = lensPrice, onValueChange = { lensPrice = it }, label = { Text("售价(�?") }, singleLine = true, modifier = Modifier.fillMaxWidth())
+                OutlinedTextField(value = lensPrice, onValueChange = { lensPrice = it }, label = { Text("售价(元)") }, singleLine = true, modifier = Modifier.fillMaxWidth())
 
                 Spacer(modifier = Modifier.height(8.dp))
                 OutlinedTextField(value = remark, onValueChange = { remark = it }, label = { Text("备注") }, modifier = Modifier.fillMaxWidth(), minLines = 2)

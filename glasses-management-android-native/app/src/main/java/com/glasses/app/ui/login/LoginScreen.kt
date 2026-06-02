@@ -54,7 +54,7 @@ fun LoginScreen(
         OutlinedTextField(
             value = username,
             onValueChange = { username = it; onClearError() },
-            label = { Text("用户�?) },
+            label = { Text("用户名") },
             leadingIcon = { Icon(Icons.Default.Person, contentDescription = null) },
             singleLine = true,
             modifier = Modifier.fillMaxWidth()
