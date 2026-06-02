@@ -7,8 +7,10 @@ import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.dp
+import com.glasses.app.theme.*
 
 data class MoreMenuItem(
     val label: String,
@@ -30,18 +32,24 @@ fun MoreSheet(
         MoreMenuItem("个人资料", Icons.Default.Person, "profile")
     )
 
-    ModalBottomSheet(onDismissRequest = onDismiss) {
-        Column(modifier = Modifier.padding(16.dp)) {
+    ModalBottomSheet(
+        onDismissRequest = onDismiss,
+        containerColor = Color.White,
+        dragHandle = { BottomSheetDefaults.DragHandle(color = BorderColor) }
+    ) {
+        Column(modifier = Modifier.padding(horizontal = 20.dp, vertical = 8.dp)) {
             Text(
                 text = "更多功能",
                 style = MaterialTheme.typography.titleLarge,
+                color = TextPrimary,
                 modifier = Modifier.padding(bottom = 16.dp)
             )
 
             items.forEach { item ->
                 ListItem(
-                    headlineContent = { Text(item.label) },
-                    leadingContent = { Icon(item.icon, contentDescription = null) },
+                    headlineContent = { Text(item.label, color = TextPrimary) },
+                    leadingContent = { Icon(item.icon, contentDescription = null, tint = Primary) },
+                    colors = ListItemDefaults.colors(containerColor = Color.Transparent),
                     modifier = Modifier.clickable {
                         onDismiss()
                         if (item.route != null) onNavigate(item.route)
@@ -49,22 +57,23 @@ fun MoreSheet(
                 )
             }
 
-            HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))
+            HorizontalDivider(modifier = Modifier.padding(vertical = 12.dp), color = BorderColor)
 
             ListItem(
                 headlineContent = {
-                    Text("退出登录", color = MaterialTheme.colorScheme.error)
+                    Text("退出登录", color = Error)
                 },
                 leadingContent = {
-                    Icon(Icons.Default.Logout, contentDescription = null, tint = MaterialTheme.colorScheme.error)
+                    Icon(Icons.Default.Logout, contentDescription = null, tint = Error)
                 },
+                colors = ListItemDefaults.colors(containerColor = Color.Transparent),
                 modifier = Modifier.clickable {
                     onDismiss()
                     onLogout()
                 }
             )
 
-            Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.height(24.dp))
         }
     }
 }

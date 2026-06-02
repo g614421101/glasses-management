@@ -27,4 +27,10 @@ class ConnectionViewModel @Inject constructor(
             connectionManager.connectManual(ip, port)
         }
     }
+
+    fun disconnect() {
+        viewModelScope.launch {
+            connectionManager.disconnect()
+        }
+    }
 }

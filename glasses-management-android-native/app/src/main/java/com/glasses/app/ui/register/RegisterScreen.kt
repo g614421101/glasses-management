@@ -1,18 +1,39 @@
 package com.glasses.app.ui.register
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowForward
+import androidx.compose.material.icons.filled.Lock
+import androidx.compose.material.icons.filled.Person
+import androidx.compose.material.icons.filled.Phone
+import androidx.compose.material.icons.filled.VpnKey
 import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import com.glasses.app.theme.*
+import com.glasses.app.ui.common.bounceClick
+import com.glasses.app.ui.splash.ErrorAlert
+import com.glasses.app.ui.splash.GlassCard
+import com.glasses.app.ui.splash.GlassesLogo
+import com.glasses.app.ui.splash.GradientBackground
 
 @Composable
 fun RegisterScreen(
@@ -29,113 +50,267 @@ fun RegisterScreen(
     var confirmPassword by remember { mutableStateOf("") }
     var inviteCode by remember { mutableStateOf("") }
     var passwordVisible by remember { mutableStateOf(false) }
+    val scrollState = rememberScrollState()
 
-    Column(
-        modifier = modifier
-            .fillMaxSize()
-            .padding(32.dp),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center
-    ) {
-        Text(
-            text = "注册账号",
-            style = MaterialTheme.typography.headlineLarge
-        )
-
-        Spacer(modifier = Modifier.height(48.dp))
-
-        OutlinedTextField(
-            value = username,
-            onValueChange = { username = it; onClearError() },
-            label = { Text("用户名（3-30字符）") },
-            singleLine = true,
-            modifier = Modifier.fillMaxWidth()
-        )
-
-        Spacer(modifier = Modifier.height(12.dp))
-
-        OutlinedTextField(
-            value = phone,
-            onValueChange = { phone = it; onClearError() },
-            label = { Text("手机号") },
-            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Phone),
-            singleLine = true,
-            modifier = Modifier.fillMaxWidth()
-        )
-
-        Spacer(modifier = Modifier.height(12.dp))
-
-        OutlinedTextField(
-            value = password,
-            onValueChange = { password = it; onClearError() },
-            label = { Text("密码（≥6字符）") },
-            trailingIcon = {
-                IconButton(onClick = { passwordVisible = !passwordVisible }) {
-                    Icon(
-                        if (passwordVisible) Icons.Default.VisibilityOff else Icons.Default.Visibility,
-                        contentDescription = null
-                    )
-                }
-            },
-            visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
-            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
-            singleLine = true,
-            modifier = Modifier.fillMaxWidth()
-        )
-
-        Spacer(modifier = Modifier.height(12.dp))
-
-        OutlinedTextField(
-            value = confirmPassword,
-            onValueChange = { confirmPassword = it; onClearError() },
-            label = { Text("确认密码") },
-            visualTransformation = PasswordVisualTransformation(),
-            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
-            singleLine = true,
-            modifier = Modifier.fillMaxWidth()
-        )
-
-        Spacer(modifier = Modifier.height(12.dp))
-
-        OutlinedTextField(
-            value = inviteCode,
-            onValueChange = { inviteCode = it; onClearError() },
-            label = { Text("邀请码") },
-            singleLine = true,
-            modifier = Modifier.fillMaxWidth()
-        )
-
-        if (error != null) {
-            Spacer(modifier = Modifier.height(16.dp))
-            Text(
-                text = error,
-                color = MaterialTheme.colorScheme.error,
-                style = MaterialTheme.typography.bodyMedium
-            )
-        }
-
-        Spacer(modifier = Modifier.height(32.dp))
-
-        Button(
-            onClick = { onRegister(inviteCode, username, phone, password, confirmPassword) },
-            enabled = !isLoading,
-            modifier = Modifier.fillMaxWidth()
+    GradientBackground {
+        Column(
+            modifier = modifier
+                .fillMaxSize()
+                .padding(28.dp)
+                .verticalScroll(scrollState),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center
         ) {
-            if (isLoading) {
-                CircularProgressIndicator(
-                    modifier = Modifier.size(20.dp),
-                    strokeWidth = 2.dp,
-                    color = MaterialTheme.colorScheme.onPrimary
+            Spacer(modifier = Modifier.height(40.dp))
+
+            // Logo & Title
+            GlassesLogo()
+            Spacer(modifier = Modifier.height(24.dp))
+            Text(
+                text = "注册新账号",
+                fontSize = 28.sp,
+                fontWeight = FontWeight.ExtraBold,
+                color = TextPrimary,
+                letterSpacing = 0.5.sp
+            )
+            Spacer(modifier = Modifier.height(4.dp))
+            Text(
+                text = "请填写以下信息完成注册",
+                fontSize = 14.sp,
+                color = TextSecondary
+            )
+
+            Spacer(modifier = Modifier.height(30.dp))
+
+            // Register Card
+            GlassCard {
+                Text(
+                    text = "账户注册",
+                    fontSize = 18.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = TextPrimary
                 )
-                Spacer(modifier = Modifier.width(8.dp))
+                Spacer(modifier = Modifier.height(18.dp))
+
+                // Invite Code field
+                OutlinedTextField(
+                    value = inviteCode,
+                    onValueChange = { inviteCode = it; onClearError() },
+                    label = { Text("邀请码", color = TextSecondary) },
+                    leadingIcon = { Icon(Icons.Default.VpnKey, contentDescription = null, tint = TextSecondary) },
+                    singleLine = true,
+                    colors = OutlinedTextFieldDefaults.colors(
+                        focusedTextColor = TextPrimary,
+                        unfocusedTextColor = TextPrimary,
+                        focusedBorderColor = Primary,
+                        unfocusedBorderColor = BorderColor,
+                        focusedLabelColor = Primary,
+                        unfocusedLabelColor = TextSecondary,
+                        cursorColor = Primary,
+                        focusedLeadingIconColor = Primary,
+                        unfocusedLeadingIconColor = TextSecondary
+                    ),
+                    shape = RoundedCornerShape(14.dp),
+                    modifier = Modifier.fillMaxWidth()
+                )
+
+                Spacer(modifier = Modifier.height(12.dp))
+
+                // Username field
+                OutlinedTextField(
+                    value = username,
+                    onValueChange = { username = it; onClearError() },
+                    label = { Text("用户名（3-30字符）", color = TextSecondary) },
+                    leadingIcon = { Icon(Icons.Default.Person, contentDescription = null, tint = TextSecondary) },
+                    singleLine = true,
+                    colors = OutlinedTextFieldDefaults.colors(
+                        focusedTextColor = TextPrimary,
+                        unfocusedTextColor = TextPrimary,
+                        focusedBorderColor = Primary,
+                        unfocusedBorderColor = BorderColor,
+                        focusedLabelColor = Primary,
+                        unfocusedLabelColor = TextSecondary,
+                        cursorColor = Primary,
+                        focusedLeadingIconColor = Primary,
+                        unfocusedLeadingIconColor = TextSecondary
+                    ),
+                    shape = RoundedCornerShape(14.dp),
+                    modifier = Modifier.fillMaxWidth()
+                )
+
+                Spacer(modifier = Modifier.height(12.dp))
+
+                // Phone field
+                OutlinedTextField(
+                    value = phone,
+                    onValueChange = { phone = it; onClearError() },
+                    label = { Text("手机号", color = TextSecondary) },
+                    leadingIcon = { Icon(Icons.Default.Phone, contentDescription = null, tint = TextSecondary) },
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Phone),
+                    singleLine = true,
+                    colors = OutlinedTextFieldDefaults.colors(
+                        focusedTextColor = TextPrimary,
+                        unfocusedTextColor = TextPrimary,
+                        focusedBorderColor = Primary,
+                        unfocusedBorderColor = BorderColor,
+                        focusedLabelColor = Primary,
+                        unfocusedLabelColor = TextSecondary,
+                        cursorColor = Primary,
+                        focusedLeadingIconColor = Primary,
+                        unfocusedLeadingIconColor = TextSecondary
+                    ),
+                    shape = RoundedCornerShape(14.dp),
+                    modifier = Modifier.fillMaxWidth()
+                )
+
+                Spacer(modifier = Modifier.height(12.dp))
+
+                // Password field
+                OutlinedTextField(
+                    value = password,
+                    onValueChange = { password = it; onClearError() },
+                    label = { Text("密码（≥6字符）", color = TextSecondary) },
+                    leadingIcon = { Icon(Icons.Default.Lock, contentDescription = null, tint = TextSecondary) },
+                    trailingIcon = {
+                        IconButton(onClick = { passwordVisible = !passwordVisible }) {
+                            Icon(
+                                imageVector = if (passwordVisible) Icons.Default.VisibilityOff else Icons.Default.Visibility,
+                                contentDescription = null,
+                                tint = TextSecondary
+                            )
+                        }
+                    },
+                    visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
+                    singleLine = true,
+                    colors = OutlinedTextFieldDefaults.colors(
+                        focusedTextColor = TextPrimary,
+                        unfocusedTextColor = TextPrimary,
+                        focusedBorderColor = Primary,
+                        unfocusedBorderColor = BorderColor,
+                        focusedLabelColor = Primary,
+                        unfocusedLabelColor = TextSecondary,
+                        cursorColor = Primary,
+                        focusedLeadingIconColor = Primary,
+                        unfocusedLeadingIconColor = TextSecondary
+                    ),
+                    shape = RoundedCornerShape(14.dp),
+                    modifier = Modifier.fillMaxWidth()
+                )
+
+                Spacer(modifier = Modifier.height(12.dp))
+
+                // Confirm Password field
+                OutlinedTextField(
+                    value = confirmPassword,
+                    onValueChange = { confirmPassword = it; onClearError() },
+                    label = { Text("确认密码", color = TextSecondary) },
+                    leadingIcon = { Icon(Icons.Default.Lock, contentDescription = null, tint = TextSecondary) },
+                    visualTransformation = PasswordVisualTransformation(),
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
+                    singleLine = true,
+                    colors = OutlinedTextFieldDefaults.colors(
+                        focusedTextColor = TextPrimary,
+                        unfocusedTextColor = TextPrimary,
+                        focusedBorderColor = Primary,
+                        unfocusedBorderColor = BorderColor,
+                        focusedLabelColor = Primary,
+                        unfocusedLabelColor = TextSecondary,
+                        cursorColor = Primary,
+                        focusedLeadingIconColor = Primary,
+                        unfocusedLeadingIconColor = TextSecondary
+                    ),
+                    shape = RoundedCornerShape(14.dp),
+                    modifier = Modifier.fillMaxWidth()
+                )
+
+                if (error != null) {
+                    Spacer(modifier = Modifier.height(16.dp))
+                    ErrorAlert(message = error)
+                }
+
+                Spacer(modifier = Modifier.height(24.dp))
+
+                // Register Button
+                val enabled = !isLoading && inviteCode.isNotBlank() && username.isNotBlank() && phone.isNotBlank() && password.isNotBlank() && confirmPassword.isNotBlank()
+                val registerInteractionSource = remember { MutableInteractionSource() }
+                Button(
+                    onClick = { onRegister(inviteCode.trim(), username.trim(), phone.trim(), password, confirmPassword) },
+                    enabled = enabled,
+                    interactionSource = registerInteractionSource,
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = Color.Transparent,
+                        disabledContainerColor = Color.Transparent
+                    ),
+                    contentPadding = PaddingValues(),
+                    shape = RoundedCornerShape(14.dp),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(50.dp)
+                        .then(if (enabled) Modifier.bounceClick(registerInteractionSource) else Modifier)
+                        .shadow(12.dp, RoundedCornerShape(14.dp), spotColor = Primary.copy(alpha = 0.4f))
+                ) {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .background(
+                                brush = if (enabled) {
+                                    Brush.linearGradient(colors = listOf(Primary, SkyBlue))
+                                } else {
+                                    Brush.linearGradient(colors = listOf(Primary.copy(alpha = 0.3f), SkyBlue.copy(alpha = 0.3f)))
+                                }
+                            ),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.Center
+                        ) {
+                            if (isLoading) {
+                                CircularProgressIndicator(
+                                    modifier = Modifier.size(20.dp),
+                                    strokeWidth = 2.dp,
+                                    color = Color.White
+                                )
+                                Spacer(modifier = Modifier.width(8.dp))
+                            }
+                            Text(
+                                text = "注册账号",
+                                fontSize = 15.sp,
+                                fontWeight = FontWeight.Bold,
+                                color = if (enabled) Color.White else Color.White.copy(alpha = 0.6f)
+                            )
+                            if (!isLoading) {
+                                Spacer(modifier = Modifier.width(6.dp))
+                                Icon(
+                                    imageVector = Icons.Default.ArrowForward,
+                                    contentDescription = null,
+                                    tint = if (enabled) Color.White else Color.White.copy(alpha = 0.6f),
+                                    modifier = Modifier.size(16.dp)
+                                )
+                            }
+                        }
+                    }
+                }
             }
-            Text("注册")
-        }
 
-        Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.height(20.dp))
 
-        TextButton(onClick = onNavigateToLogin) {
-            Text("返回登录")
+            val loginRedirectInteractionSource = remember { MutableInteractionSource() }
+            TextButton(
+                onClick = onNavigateToLogin,
+                interactionSource = loginRedirectInteractionSource,
+                colors = ButtonDefaults.textButtonColors(contentColor = Primary),
+                modifier = Modifier.bounceClick(loginRedirectInteractionSource)
+            ) {
+                Text(
+                    "已有账号？返回登录",
+                    fontWeight = FontWeight.SemiBold,
+                    fontSize = 14.sp
+                )
+            }
+
+            Spacer(modifier = Modifier.height(40.dp))
         }
     }
 }

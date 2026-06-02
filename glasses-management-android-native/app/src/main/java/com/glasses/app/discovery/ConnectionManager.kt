@@ -65,7 +65,7 @@ class ConnectionManager @Inject constructor(
         }
 
         _state.value = ConnectionState.Searching
-        val discovered = MdnsDiscovery.discover()
+        val discovered = MdnsDiscovery.discover(context)
         if (discovered != null) {
             saveConnection(discovered.ip, discovered.port)
             val url = "http://${discovered.ip}:${discovered.port}"
@@ -112,5 +112,12 @@ class ConnectionManager @Inject constructor(
             it[KEY_IP] = ip
             it[KEY_PORT] = port
         }
+    }
+
+    suspend fun disconnect() {
+        context.dataStore.edit {
+            it.remove(KEY_IP)
+        }
+        _state.value = ConnectionState.ManualInput
     }
 }

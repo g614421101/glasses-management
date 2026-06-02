@@ -1,5 +1,7 @@
 package com.glasses.app.navigation
 
+import androidx.compose.animation.*
+import androidx.compose.animation.core.tween
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -44,7 +46,14 @@ fun AppNavGraph(
 ) {
     val startRoute = if (isAuthenticated) Routes.HOME else Routes.LOGIN
 
-    NavHost(navController = navController, startDestination = startRoute) {
+    NavHost(
+        navController = navController,
+        startDestination = startRoute,
+        enterTransition = { slideInHorizontally(initialOffsetX = { it }) + fadeIn(animationSpec = tween(300)) },
+        exitTransition = { slideOutHorizontally(targetOffsetX = { -it }) + fadeOut(animationSpec = tween(300)) },
+        popEnterTransition = { slideInHorizontally(initialOffsetX = { -it }) + fadeIn(animationSpec = tween(300)) },
+        popExitTransition = { slideOutHorizontally(targetOffsetX = { it }) + fadeOut(animationSpec = tween(300)) }
+    ) {
         composable(Routes.LOGIN) {
             val authState by authViewModel.uiState.collectAsState()
             LoginScreen(
@@ -72,7 +81,7 @@ fun AppNavGraph(
         }
 
         composable(Routes.HOME) {
-            HomeScreen()
+            HomeScreen(navController = navController)
         }
 
         composable(Routes.CUSTOMER) {

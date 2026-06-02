@@ -9,6 +9,7 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.lifecycleScope
+import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.glasses.app.discovery.ConnectionState
@@ -51,7 +52,9 @@ class MainActivity : ComponentActivity() {
                                         currentRoute = currentRoute,
                                         onNavigate = { route ->
                                             navController.navigate(route) {
-                                                popUpTo(Routes.HOME) { saveState = true }
+                                                popUpTo(navController.graph.findStartDestination().id) {
+                                                    saveState = true
+                                                }
                                                 launchSingleTop = true
                                                 restoreState = true
                                             }

@@ -8,7 +8,11 @@
   - 针对桌面端（> 900px）设计了可折叠侧边栏，支持在极简图标模式（`76px`）与完整菜单模式（`220px`）间平滑切换。
   - 针对移动端（<= 900px）自动隐藏侧边栏并改用侧滑抽屉导航，表格自动转换为专为移动端定制的卡片列表（`MobileCardList`），防出界与溢出。
   - 顾客档案与回收站按钮进行窄屏下的响应式与 CSS Grid 布局重构，彻底解决手机小屏下的多按钮折行挤压、横向溢出问题。
-- **局域网连接与扫码访问**：首页自动检测服务器局域网 IP 并生成二维码，移动设备扫码即可轻松接入系统。
+- **Android 原生客户端与极速连接**：
+  - 提供 **Android 原生 Compose 版** 和 **Android WebView 版** 两套手机客户端 App。
+  - 原生端基于 Jetpack Compose 构建，全面采用精美的蓝白配色风格，全页面融入了卡片立体式物理阴影，且为所有按钮、选项和切换添加了弹性动效（Bounce Animation）、列表加载骨架屏（Shimmer）及入场滑动渐变（Staggered Entrance）。
+  - 支持局域网内 **mDNS 协议自动发现**，手机启动时可自动搜寻局域网内的 Spring Boot 视光管理后端服务并直接配对连通，免去手动配置 IP 困扰。
+- **局域网连接与扫码访问**：网页端首页自动检测服务器局域网 IP 并生成二维码，移动设备扫码即可轻松接入系统。
 - **灵活的部署形态**：支持轻量级 H2 单机版后端与 MySQL 多人协作版后端，可通过 Electron 壳一键打包生成 Windows 桌面应用。
 
 ## 项目结构
@@ -17,6 +21,8 @@
 - `glasses-management-backend-h2`: H2 单机版后端，适合本地运行、原生安装包和 Electron 桌面版。
 - `glasses-management-frontend`: Vue 3 前端。
 - `glasses-management-electron`: Electron 桌面打包项目。
+- `glasses-management-android`: Android WebView 客户端版，全屏 WebView 套壳并支持 mDNS 自动配对。
+- `glasses-management-android-native`: Android 原生 Compose 客户端版，直接对接接口，包含极致蓝白配色与丰富的动效体验。
 - `build-desktop.ps1`: 一键构建桌面版，默认使用 H2 后端。
 
 ## 本地私密配置

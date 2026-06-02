@@ -1,19 +1,33 @@
 package com.glasses.app.ui.archive
 
+import androidx.compose.animation.animateContentSize
+import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.glasses.app.data.model.OptometryRecord
 import com.glasses.app.data.model.SalesRecord
 import com.glasses.app.data.model.TimelineItem
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import com.glasses.app.theme.*
+import com.glasses.app.ui.common.bounceClick
+import com.glasses.app.ui.common.staggeredEntrance
 import com.glasses.app.viewmodel.ArchiveViewModel
 import java.math.BigDecimal
 
@@ -32,34 +46,69 @@ fun ArchiveScreen(
     }
 
     Scaffold(
+        containerColor = Background,
         topBar = {
             TopAppBar(
-                title = { Text("顾客档案") },
+                title = { Text("顾客档案", fontWeight = FontWeight.Bold, color = TextPrimary) },
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = Color.White,
+                    titleContentColor = TextPrimary,
+                    navigationIconContentColor = TextSecondary,
+                    actionIconContentColor = TextSecondary
+                ),
                 navigationIcon = {
-                    IconButton(onClick = onBack) {
+                    val backInteractionSource = remember { MutableInteractionSource() }
+                    IconButton(
+                        onClick = onBack,
+                        interactionSource = backInteractionSource,
+                        modifier = Modifier.bounceClick(backInteractionSource)
+                    ) {
                         Icon(Icons.Default.ArrowBack, contentDescription = "返回")
                     }
                 },
                 actions = {
-                    IconButton(onClick = { viewModel.refresh() }) {
+                    val refreshInteractionSource = remember { MutableInteractionSource() }
+                    IconButton(
+                        onClick = { viewModel.refresh() },
+                        interactionSource = refreshInteractionSource,
+                        modifier = Modifier.bounceClick(refreshInteractionSource)
+                    ) {
                         Icon(Icons.Default.Refresh, contentDescription = "刷新")
                     }
-                }
+                },
+                modifier = Modifier.shadow(4.dp, spotColor = CardShadow)
             )
         },
         floatingActionButton = {
             Column {
-                SmallFloatingActionButton(
+                val addSalesInteractionSource = remember { MutableInteractionSource() }
+                FloatingActionButton(
                     onClick = { viewModel.showAddSales() },
-                    containerColor = MaterialTheme.colorScheme.secondary
+                    interactionSource = addSalesInteractionSource,
+                    containerColor = Primary,
+                    contentColor = Color.White,
+                    shape = CircleShape,
+                    modifier = Modifier
+                        .size(54.dp)
+                        .bounceClick(addSalesInteractionSource)
+                        .shadow(6.dp, CircleShape, spotColor = Primary.copy(alpha = 0.4f))
                 ) {
-                    Icon(Icons.Default.ShoppingCart, contentDescription = "添加配镜单", tint = MaterialTheme.colorScheme.onSecondary)
+                    Icon(Icons.Default.ShoppingCart, contentDescription = "添加配镜单", modifier = Modifier.size(24.dp))
                 }
-                Spacer(modifier = Modifier.height(8.dp))
-                SmallFloatingActionButton(
-                    onClick = { viewModel.showAddOptometry() }
+                Spacer(modifier = Modifier.height(12.dp))
+                val addOptometryInteractionSource = remember { MutableInteractionSource() }
+                FloatingActionButton(
+                    onClick = { viewModel.showAddOptometry() },
+                    interactionSource = addOptometryInteractionSource,
+                    containerColor = SkyBlue,
+                    contentColor = Color.White,
+                    shape = CircleShape,
+                    modifier = Modifier
+                        .size(54.dp)
+                        .bounceClick(addOptometryInteractionSource)
+                        .shadow(6.dp, CircleShape, spotColor = SkyBlue.copy(alpha = 0.4f))
                 ) {
-                    Icon(Icons.Default.Visibility, contentDescription = "添加验光单")
+                    Icon(Icons.Default.Visibility, contentDescription = "添加验光单", modifier = Modifier.size(24.dp))
                 }
             }
         }
@@ -67,15 +116,21 @@ fun ArchiveScreen(
         when {
             state.isLoading && state.timeline.isEmpty() -> {
                 Box(modifier = modifier.fillMaxSize().padding(padding), contentAlignment = Alignment.Center) {
-                    CircularProgressIndicator()
+                    CircularProgressIndicator(color = Primary)
                 }
             }
             state.error != null && state.timeline.isEmpty() -> {
                 Box(modifier = modifier.fillMaxSize().padding(padding), contentAlignment = Alignment.Center) {
                     Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                        Text("加载失败: ${state.error}", color = MaterialTheme.colorScheme.error)
+                        Text("加载失败: ${state.error}", color = Error, fontWeight = FontWeight.Bold)
                         Spacer(modifier = Modifier.height(16.dp))
-                        Button(onClick = { viewModel.refresh() }) { Text("重试") }
+                        Button(
+                            onClick = { viewModel.refresh() },
+                            colors = ButtonDefaults.buttonColors(containerColor = Primary),
+                            modifier = Modifier.bounceClick { viewModel.refresh() }
+                        ) {
+                            Text("重试")
+                        }
                     }
                 }
             }
@@ -88,25 +143,59 @@ fun ArchiveScreen(
                     // Customer info card
                     item {
                         state.customer?.let { c ->
-                            ElevatedCard(modifier = Modifier.fillMaxWidth()) {
-                                Column(modifier = Modifier.padding(16.dp)) {
-                                    Text(c.name, style = MaterialTheme.typography.titleLarge)
+                            Card(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .shadow(8.dp, RoundedCornerShape(18.dp), spotColor = CardShadow),
+                                shape = RoundedCornerShape(18.dp),
+                                colors = CardDefaults.cardColors(containerColor = Color.White),
+                                border = BorderStroke(1.dp, BorderColor)
+                            ) {
+                                Column(modifier = Modifier.padding(18.dp)) {
+                                    Text(
+                                        text = c.name,
+                                        style = MaterialTheme.typography.titleLarge,
+                                        fontWeight = FontWeight.Bold,
+                                        color = TextPrimary
+                                    )
                                     if (!c.phone.isNullOrBlank()) {
-                                        Text(c.phone, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                                        Spacer(modifier = Modifier.height(4.dp))
+                                        Text(
+                                            text = c.phone,
+                                            style = MaterialTheme.typography.bodyMedium,
+                                            color = TextSecondary
+                                        )
                                     }
-                                    Row(modifier = Modifier.padding(top = 8.dp)) {
+                                    Row(modifier = Modifier.padding(top = 10.dp)) {
                                         val gender = when (c.gender) { 1 -> "男"; 2 -> "女"; else -> "未知" }
-                                        AssistChip(onClick = {}, label = { Text(gender) }, modifier = Modifier.height(28.dp))
+                                        val chipBg = if (c.gender == 1) MaleBadgeBg else if (c.gender == 2) FemaleBadgeBg else BorderColor
+                                        val chipText = if (c.gender == 1) MaleBadge else if (c.gender == 2) FemaleBadge else TextSecondary
+                                        Box(
+                                            modifier = Modifier
+                                                .background(chipBg, RoundedCornerShape(8.dp))
+                                                .padding(horizontal = 10.dp, vertical = 5.dp)
+                                        ) {
+                                            Text(gender, fontSize = 12.sp, color = chipText, fontWeight = FontWeight.Bold)
+                                        }
+
                                         if (!c.birthday.isNullOrBlank()) {
                                             Spacer(modifier = Modifier.width(8.dp))
-                                            AssistChip(onClick = {}, label = { Text(c.birthday) }, modifier = Modifier.height(28.dp))
+                                            Box(
+                                                modifier = Modifier
+                                                    .background(PrimaryLight, RoundedCornerShape(8.dp))
+                                                    .padding(horizontal = 10.dp, vertical = 5.dp)
+                                            ) {
+                                                Text(c.birthday, fontSize = 12.sp, color = Primary, fontWeight = FontWeight.Bold)
+                                            }
                                         }
                                     }
+                                    Spacer(modifier = Modifier.height(10.dp))
+                                    HorizontalDivider(color = BorderColor)
+                                    Spacer(modifier = Modifier.height(8.dp))
                                     Text(
-                                        "共 ${state.timeline.size} 条记录",
+                                        text = "共 ${state.timeline.size} 条记录",
                                         style = MaterialTheme.typography.bodySmall,
-                                        color = MaterialTheme.colorScheme.outline,
-                                        modifier = Modifier.padding(top = 8.dp)
+                                        color = TextSecondary,
                                     )
                                 }
                             }
@@ -117,14 +206,15 @@ fun ArchiveScreen(
                     if (state.timeline.isEmpty()) {
                         item {
                             Box(modifier = Modifier.fillMaxWidth().padding(32.dp), contentAlignment = Alignment.Center) {
-                                Text("暂无验光或配镜记录", color = MaterialTheme.colorScheme.onSurfaceVariant)
+                                Text("暂无验光或配镜记录", color = TextSecondary)
                             }
                         }
                     }
 
-                    items(state.timeline, key = { "${it.type}_${it.date}_${it.hashCode()}" }) { item ->
+                    itemsIndexed(state.timeline, key = { _, item -> "${item.type}_${item.date}_${item.hashCode()}" }) { index, item ->
                         TimelineCard(
                             item = item,
+                            index = index,
                             onEditOptometry = { record ->
                                 viewModel.showEditOptometry(record)
                             },
@@ -142,9 +232,23 @@ fun ArchiveScreen(
 
         // Error snackbar
         if (state.error != null) {
-            Snackbar(modifier = Modifier.padding(16.dp), action = {
-                TextButton(onClick = { viewModel.clearError() }) { Text("关闭") }
-            }) { Text(state.error!!) }
+            Snackbar(
+                modifier = Modifier.padding(16.dp),
+                action = {
+                    val refreshErrInteractionSource = remember { MutableInteractionSource() }
+                    TextButton(
+                        onClick = { viewModel.clearError() },
+                        interactionSource = refreshErrInteractionSource,
+                        modifier = Modifier.bounceClick(refreshErrInteractionSource)
+                    ) {
+                        Text("关闭", color = Primary)
+                    }
+                },
+                containerColor = Color.White,
+                contentColor = TextPrimary
+            ) {
+                Text(state.error!!)
+            }
         }
     }
 
@@ -186,15 +290,42 @@ fun ArchiveScreen(
     if (state.showDeleteConfirm) {
         AlertDialog(
             onDismissRequest = { viewModel.hideDeleteConfirm() },
-            title = { Text("确认删除") },
-            text = { Text("确定要删除这条记录吗？") },
+            containerColor = Color.White,
+            shape = RoundedCornerShape(24.dp),
+            title = {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Icon(
+                        imageVector = Icons.Default.Warning,
+                        contentDescription = null,
+                        tint = Error,
+                        modifier = Modifier.size(24.dp)
+                    )
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Text("确认删除", color = TextPrimary, fontWeight = FontWeight.Bold, fontSize = 20.sp)
+                }
+            },
+            text = { Text("确定要删除这条记录吗？", color = TextSecondary) },
             confirmButton = {
-                TextButton(onClick = { viewModel.deleteRecord() }) {
-                    Text("删除", color = MaterialTheme.colorScheme.error)
+                val delConfirmInteractionSource = remember { MutableInteractionSource() }
+                Button(
+                    onClick = { viewModel.deleteRecord() },
+                    interactionSource = delConfirmInteractionSource,
+                    shape = RoundedCornerShape(12.dp),
+                    colors = ButtonDefaults.buttonColors(containerColor = Error),
+                    modifier = Modifier.bounceClick(delConfirmInteractionSource)
+                ) {
+                    Text("删除", color = Color.White, fontWeight = FontWeight.Bold)
                 }
             },
             dismissButton = {
-                TextButton(onClick = { viewModel.hideDeleteConfirm() }) { Text("取消") }
+                val delCancelInteractionSource = remember { MutableInteractionSource() }
+                TextButton(
+                    onClick = { viewModel.hideDeleteConfirm() },
+                    interactionSource = delCancelInteractionSource,
+                    modifier = Modifier.bounceClick(delCancelInteractionSource)
+                ) {
+                    Text("取消", color = TextSecondary, fontWeight = FontWeight.SemiBold)
+                }
             }
         )
     }
@@ -203,72 +334,193 @@ fun ArchiveScreen(
 @Composable
 private fun TimelineCard(
     item: TimelineItem,
+    index: Int,
     onEditOptometry: (OptometryRecord) -> Unit,
     onEditSales: (SalesRecord) -> Unit,
     onDelete: (String, Long) -> Unit
 ) {
     val isOptometry = item.type == "OPTOMETRY"
-    val cardColor = if (isOptometry) MaterialTheme.colorScheme.primaryContainer else MaterialTheme.colorScheme.secondaryContainer
+    var expanded by remember { mutableStateOf(false) }
 
-    ElevatedCard(modifier = Modifier.fillMaxWidth()) {
-        Column(modifier = Modifier.padding(16.dp)) {
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .staggeredEntrance(index = index)
+            .bounceClick { expanded = !expanded }
+            .shadow(6.dp, RoundedCornerShape(18.dp), spotColor = CardShadow),
+        shape = RoundedCornerShape(18.dp),
+        colors = CardDefaults.cardColors(containerColor = Color.White),
+        border = BorderStroke(1.dp, BorderColor)
+    ) {
+        Column(
+            modifier = Modifier
+                .padding(18.dp)
+                .animateContentSize()
+        ) {
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
-                    Icon(
-                        if (isOptometry) Icons.Default.Visibility else Icons.Default.ShoppingCart,
-                        contentDescription = null,
-                        tint = if (isOptometry) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.secondary,
-                        modifier = Modifier.size(20.dp)
-                    )
-                    Spacer(modifier = Modifier.width(8.dp))
+                    Box(
+                        modifier = Modifier
+                            .size(34.dp)
+                            .background(if (isOptometry) PrimaryLight else Color(0xFFF3E8FF), CircleShape),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Icon(
+                            if (isOptometry) Icons.Default.Visibility else Icons.Default.ShoppingCart,
+                            contentDescription = null,
+                            tint = if (isOptometry) Primary else Color(0xFF8B5CF6),
+                            modifier = Modifier.size(16.dp)
+                        )
+                    }
+                    Spacer(modifier = Modifier.width(10.dp))
                     Text(
                         text = item.title ?: if (isOptometry) "验光单" else "配镜单",
-                        style = MaterialTheme.typography.titleMedium
+                        fontWeight = FontWeight.Bold,
+                        color = TextPrimary,
+                        fontSize = 16.sp
                     )
                 }
                 Text(
                     text = item.date ?: "",
                     style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                    color = TextSecondary
                 )
             }
 
-            if (!item.subtitle.isNullOrBlank()) {
-                Text(
-                    text = item.subtitle,
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    modifier = Modifier.padding(top = 4.dp)
-                )
-            }
-
-            // Parse data for edit/delete actions
             val dataMap = item.data as? Map<*, *> ?: emptyMap<String, Any>()
             val recordId = (dataMap["id"] as? Double)?.toLong()
 
-            Row(
-                modifier = Modifier.fillMaxWidth().padding(top = 8.dp),
-                horizontalArrangement = Arrangement.End
-            ) {
-                if (recordId != null) {
-                    TextButton(onClick = {
-                        if (isOptometry) {
-                            onEditOptometry(parseOptometry(dataMap))
-                        } else {
-                            onEditSales(parseSales(dataMap))
+            if (expanded) {
+                Spacer(modifier = Modifier.height(12.dp))
+                HorizontalDivider(color = BorderColor)
+                Spacer(modifier = Modifier.height(10.dp))
+
+                if (isOptometry) {
+                    val opt = parseOptometry(dataMap)
+                    Column {
+                        Row(modifier = Modifier.fillMaxWidth().background(PrimaryLight, RoundedCornerShape(8.dp)).padding(8.dp)) {
+                            Text("眼别", modifier = Modifier.weight(1f), fontWeight = FontWeight.Bold, fontSize = 12.sp, color = TextPrimary)
+                            Text("球镜(SPH)", modifier = Modifier.weight(1.2f), fontWeight = FontWeight.Bold, fontSize = 12.sp, color = TextPrimary)
+                            Text("柱镜(CYL)", modifier = Modifier.weight(1.2f), fontWeight = FontWeight.Bold, fontSize = 12.sp, color = TextPrimary)
+                            Text("轴位(AXIS)", modifier = Modifier.weight(1.2f), fontWeight = FontWeight.Bold, fontSize = 12.sp, color = TextPrimary)
+                            Text("视力(VA)", modifier = Modifier.weight(1f), fontWeight = FontWeight.Bold, fontSize = 12.sp, color = TextPrimary)
                         }
-                    }) {
-                        Text("编辑")
+                        Spacer(modifier = Modifier.height(4.dp))
+                        Row(modifier = Modifier.fillMaxWidth().padding(horizontal = 8.dp, vertical = 6.dp)) {
+                            Text("右 OD", modifier = Modifier.weight(1f), fontWeight = FontWeight.Medium, fontSize = 13.sp, color = TextPrimary)
+                            Text(opt.odSph?.toString() ?: "-", modifier = Modifier.weight(1.2f), fontSize = 13.sp, color = TextSecondary)
+                            Text(opt.odCyl?.toString() ?: "-", modifier = Modifier.weight(1.2f), fontSize = 13.sp, color = TextSecondary)
+                            Text(opt.odAxis?.toString() ?: "-", modifier = Modifier.weight(1.2f), fontSize = 13.sp, color = TextSecondary)
+                            Text(opt.odVa ?: "-", modifier = Modifier.weight(1f), fontSize = 13.sp, color = TextSecondary)
+                        }
+                        HorizontalDivider(color = BorderColor, thickness = 0.5.dp, modifier = Modifier.padding(horizontal = 8.dp))
+                        Row(modifier = Modifier.fillMaxWidth().padding(horizontal = 8.dp, vertical = 6.dp)) {
+                            Text("左 OS", modifier = Modifier.weight(1f), fontWeight = FontWeight.Medium, fontSize = 13.sp, color = TextPrimary)
+                            Text(opt.osSph?.toString() ?: "-", modifier = Modifier.weight(1.2f), fontSize = 13.sp, color = TextSecondary)
+                            Text(opt.osCyl?.toString() ?: "-", modifier = Modifier.weight(1.2f), fontSize = 13.sp, color = TextSecondary)
+                            Text(opt.osAxis?.toString() ?: "-", modifier = Modifier.weight(1.2f), fontSize = 13.sp, color = TextSecondary)
+                            Text(opt.osVa ?: "-", modifier = Modifier.weight(1f), fontSize = 13.sp, color = TextSecondary)
+                        }
+
+                        if (opt.pdFar != null || opt.addPower != null || !opt.optometristName.isNullOrBlank() || !opt.remark.isNullOrBlank()) {
+                            Spacer(modifier = Modifier.height(8.dp))
+                            HorizontalDivider(color = BorderColor, thickness = 0.5.dp)
+                            Spacer(modifier = Modifier.height(8.dp))
+                            Row(modifier = Modifier.fillMaxWidth().padding(horizontal = 8.dp)) {
+                                if (opt.pdFar != null) {
+                                    Text("瞳距: ${opt.pdFar} mm", fontSize = 12.sp, color = TextSecondary, modifier = Modifier.padding(end = 16.dp))
+                                }
+                                if (opt.addPower != null) {
+                                    Text("下加光: +${opt.addPower}", fontSize = 12.sp, color = TextSecondary, modifier = Modifier.padding(end = 16.dp))
+                                }
+                                if (!opt.optometristName.isNullOrBlank()) {
+                                    Text("验光师: ${opt.optometristName}", fontSize = 12.sp, color = TextSecondary)
+                                }
+                            }
+                            if (!opt.remark.isNullOrBlank()) {
+                                Spacer(modifier = Modifier.height(4.dp))
+                                Text("备注: ${opt.remark}", fontSize = 12.sp, color = TextSecondary, modifier = Modifier.padding(horizontal = 8.dp))
+                            }
+                        }
                     }
-                    TextButton(onClick = {
-                        onDelete(item.type, recordId)
-                    }) {
-                        Text("删除", color = MaterialTheme.colorScheme.error)
+                } else {
+                    val sales = parseSales(dataMap)
+                    Column {
+                        if (!sales.frameBrand.isNullOrBlank() || !sales.frameModel.isNullOrBlank()) {
+                            Row(modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp, horizontal = 8.dp), horizontalArrangement = Arrangement.SpaceBetween) {
+                                Text("镜架: ${sales.frameBrand ?: ""} ${sales.frameModel ?: ""}", fontSize = 13.sp, color = TextPrimary)
+                                Text(if (sales.framePrice != null) "¥${sales.framePrice}" else "-", fontSize = 13.sp, fontWeight = FontWeight.Bold, color = TextSecondary)
+                            }
+                        }
+                        if (!sales.lensBrand.isNullOrBlank() || !sales.lensParams.isNullOrBlank()) {
+                            Row(modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp, horizontal = 8.dp), horizontalArrangement = Arrangement.SpaceBetween) {
+                                Text("镜片: ${sales.lensBrand ?: ""} ${sales.lensParams ?: ""}", fontSize = 13.sp, color = TextPrimary)
+                                Text(if (sales.lensPrice != null) "¥${sales.lensPrice}" else "-", fontSize = 13.sp, fontWeight = FontWeight.Bold, color = TextSecondary)
+                            }
+                        }
+                        if (!sales.remark.isNullOrBlank()) {
+                            Spacer(modifier = Modifier.height(4.dp))
+                            Text("备注: ${sales.remark}", fontSize = 12.sp, color = TextSecondary, modifier = Modifier.padding(horizontal = 8.dp))
+                        }
+                        if (sales.totalAmount != null) {
+                            HorizontalDivider(color = BorderColor, thickness = 0.5.dp, modifier = Modifier.padding(vertical = 8.dp))
+                            Row(modifier = Modifier.fillMaxWidth().padding(horizontal = 8.dp), horizontalArrangement = Arrangement.SpaceBetween) {
+                                Text("总计金额", fontSize = 14.sp, fontWeight = FontWeight.Bold, color = TextPrimary)
+                                Text("¥${sales.totalAmount}", fontSize = 17.sp, fontWeight = FontWeight.ExtraBold, color = Primary)
+                            }
+                        }
                     }
+                }
+
+                Row(
+                    modifier = Modifier.fillMaxWidth().padding(top = 12.dp),
+                    horizontalArrangement = Arrangement.End
+                ) {
+                    if (recordId != null) {
+                        val editInteractionSource = remember { MutableInteractionSource() }
+                        IconButton(
+                            onClick = {
+                                if (isOptometry) {
+                                    onEditOptometry(parseOptometry(dataMap))
+                                } else {
+                                    onEditSales(parseSales(dataMap))
+                                }
+                            },
+                            interactionSource = editInteractionSource,
+                            modifier = Modifier
+                                .size(34.dp)
+                                .background(PrimaryLight, CircleShape)
+                                .bounceClick(editInteractionSource)
+                        ) {
+                            Icon(Icons.Default.Edit, contentDescription = "编辑", tint = Primary, modifier = Modifier.size(16.dp))
+                        }
+                        Spacer(modifier = Modifier.width(8.dp))
+                        val deleteInteractionSource = remember { MutableInteractionSource() }
+                        IconButton(
+                            onClick = { onDelete(item.type, recordId) },
+                            interactionSource = deleteInteractionSource,
+                            modifier = Modifier
+                                .size(34.dp)
+                                .background(Color(0xFFFFF1F2), CircleShape)
+                                .bounceClick(deleteInteractionSource)
+                        ) {
+                            Icon(Icons.Default.Delete, contentDescription = "删除", tint = Error, modifier = Modifier.size(16.dp))
+                        }
+                    }
+                }
+            } else {
+                if (!item.subtitle.isNullOrBlank()) {
+                    Spacer(modifier = Modifier.height(6.dp))
+                    Text(
+                        text = item.subtitle,
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = TextSecondary,
+                        maxLines = 1
+                    )
                 }
             }
         }
@@ -321,6 +573,7 @@ private fun parseSales(map: Map<*, *>): SalesRecord {
     )
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun OptometryDialog(
     title: String,
@@ -341,44 +594,74 @@ private fun OptometryDialog(
     var optometrist by remember { mutableStateOf(record?.optometristName ?: "") }
     var remark by remember { mutableStateOf(record?.remark ?: "") }
 
+    val fieldColors = OutlinedTextFieldDefaults.colors(
+        focusedTextColor = TextPrimary,
+        unfocusedTextColor = TextPrimary,
+        focusedBorderColor = Primary,
+        unfocusedBorderColor = BorderColor,
+        focusedLabelColor = Primary,
+        unfocusedLabelColor = TextSecondary,
+        cursorColor = Primary
+    )
+
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text(title) },
+        containerColor = Color.White,
+        shape = RoundedCornerShape(24.dp),
+        title = {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Icon(
+                    imageVector = Icons.Default.Visibility,
+                    contentDescription = null,
+                    tint = Primary,
+                    modifier = Modifier.size(24.dp)
+                )
+                Spacer(modifier = Modifier.width(8.dp))
+                Text(title, color = TextPrimary, fontWeight = FontWeight.Bold, fontSize = 20.sp)
+            }
+        },
         text = {
-            Column {
-                Text("右眼 (OD)", style = MaterialTheme.typography.labelLarge, color = MaterialTheme.colorScheme.primary)
+            Column(modifier = Modifier.fillMaxWidth()) {
+                Text("右眼 (OD)", style = MaterialTheme.typography.labelLarge, color = Primary, fontWeight = FontWeight.Bold)
+                Spacer(modifier = Modifier.height(4.dp))
                 Row {
-                    OutlinedTextField(value = odSph, onValueChange = { odSph = it }, label = { Text("SPH") }, singleLine = true, modifier = Modifier.weight(1f))
+                    OutlinedTextField(value = odSph, onValueChange = { odSph = it }, label = { Text("SPH") }, singleLine = true, colors = fieldColors, shape = RoundedCornerShape(14.dp), modifier = Modifier.weight(1f))
                     Spacer(modifier = Modifier.width(4.dp))
-                    OutlinedTextField(value = odCyl, onValueChange = { odCyl = it }, label = { Text("CYL") }, singleLine = true, modifier = Modifier.weight(1f))
+                    OutlinedTextField(value = odCyl, onValueChange = { odCyl = it }, label = { Text("CYL") }, singleLine = true, colors = fieldColors, shape = RoundedCornerShape(14.dp), modifier = Modifier.weight(1f))
                     Spacer(modifier = Modifier.width(4.dp))
-                    OutlinedTextField(value = odAxis, onValueChange = { odAxis = it }, label = { Text("AXIS") }, singleLine = true, modifier = Modifier.weight(1f))
+                    OutlinedTextField(value = odAxis, onValueChange = { odAxis = it }, label = { Text("AXIS") }, singleLine = true, colors = fieldColors, shape = RoundedCornerShape(14.dp), modifier = Modifier.weight(1f))
                 }
-                OutlinedTextField(value = odVa, onValueChange = { odVa = it }, label = { Text("视力") }, singleLine = true, modifier = Modifier.fillMaxWidth())
+                Spacer(modifier = Modifier.height(4.dp))
+                OutlinedTextField(value = odVa, onValueChange = { odVa = it }, label = { Text("视力") }, singleLine = true, colors = fieldColors, shape = RoundedCornerShape(14.dp), modifier = Modifier.fillMaxWidth())
 
-                Spacer(modifier = Modifier.height(8.dp))
-                Text("左眼 (OS)", style = MaterialTheme.typography.labelLarge, color = MaterialTheme.colorScheme.secondary)
+                Spacer(modifier = Modifier.height(12.dp))
+                Text("左眼 (OS)", style = MaterialTheme.typography.labelLarge, color = Color(0xFF8B5CF6), fontWeight = FontWeight.Bold)
+                Spacer(modifier = Modifier.height(4.dp))
                 Row {
-                    OutlinedTextField(value = osSph, onValueChange = { osSph = it }, label = { Text("SPH") }, singleLine = true, modifier = Modifier.weight(1f))
+                    OutlinedTextField(value = osSph, onValueChange = { osSph = it }, label = { Text("SPH") }, singleLine = true, colors = fieldColors, shape = RoundedCornerShape(14.dp), modifier = Modifier.weight(1f))
                     Spacer(modifier = Modifier.width(4.dp))
-                    OutlinedTextField(value = osCyl, onValueChange = { osCyl = it }, label = { Text("CYL") }, singleLine = true, modifier = Modifier.weight(1f))
+                    OutlinedTextField(value = osCyl, onValueChange = { osCyl = it }, label = { Text("CYL") }, singleLine = true, colors = fieldColors, shape = RoundedCornerShape(14.dp), modifier = Modifier.weight(1f))
                     Spacer(modifier = Modifier.width(4.dp))
-                    OutlinedTextField(value = osAxis, onValueChange = { osAxis = it }, label = { Text("AXIS") }, singleLine = true, modifier = Modifier.weight(1f))
+                    OutlinedTextField(value = osAxis, onValueChange = { osAxis = it }, label = { Text("AXIS") }, singleLine = true, colors = fieldColors, shape = RoundedCornerShape(14.dp), modifier = Modifier.weight(1f))
                 }
-                OutlinedTextField(value = osVa, onValueChange = { osVa = it }, label = { Text("视力") }, singleLine = true, modifier = Modifier.fillMaxWidth())
+                Spacer(modifier = Modifier.height(4.dp))
+                OutlinedTextField(value = osVa, onValueChange = { osVa = it }, label = { Text("视力") }, singleLine = true, colors = fieldColors, shape = RoundedCornerShape(14.dp), modifier = Modifier.fillMaxWidth())
 
-                Spacer(modifier = Modifier.height(8.dp))
+                Spacer(modifier = Modifier.height(12.dp))
                 Row {
-                    OutlinedTextField(value = pdFar, onValueChange = { pdFar = it }, label = { Text("瞳距") }, singleLine = true, modifier = Modifier.weight(1f))
+                    OutlinedTextField(value = pdFar, onValueChange = { pdFar = it }, label = { Text("瞳距") }, singleLine = true, colors = fieldColors, shape = RoundedCornerShape(14.dp), modifier = Modifier.weight(1f))
                     Spacer(modifier = Modifier.width(4.dp))
-                    OutlinedTextField(value = addPower, onValueChange = { addPower = it }, label = { Text("下加光") }, singleLine = true, modifier = Modifier.weight(1f))
+                    OutlinedTextField(value = addPower, onValueChange = { addPower = it }, label = { Text("下加光") }, singleLine = true, colors = fieldColors, shape = RoundedCornerShape(14.dp), modifier = Modifier.weight(1f))
                 }
-                OutlinedTextField(value = optometrist, onValueChange = { optometrist = it }, label = { Text("验光师") }, singleLine = true, modifier = Modifier.fillMaxWidth())
-                OutlinedTextField(value = remark, onValueChange = { remark = it }, label = { Text("备注") }, modifier = Modifier.fillMaxWidth(), minLines = 2)
+                Spacer(modifier = Modifier.height(6.dp))
+                OutlinedTextField(value = optometrist, onValueChange = { optometrist = it }, label = { Text("验光师") }, singleLine = true, colors = fieldColors, shape = RoundedCornerShape(14.dp), modifier = Modifier.fillMaxWidth())
+                Spacer(modifier = Modifier.height(6.dp))
+                OutlinedTextField(value = remark, onValueChange = { remark = it }, label = { Text("备注") }, colors = fieldColors, shape = RoundedCornerShape(14.dp), modifier = Modifier.fillMaxWidth(), minLines = 2)
             }
         },
         confirmButton = {
-            TextButton(
+            val confirmInteractionSource = remember { MutableInteractionSource() }
+            Button(
                 onClick = {
                     onConfirm(
                         OptometryRecord(
@@ -398,11 +681,20 @@ private fun OptometryDialog(
                             remark = remark.ifBlank { null }
                         )
                     )
-                }
-            ) { Text("保存") }
+                },
+                shape = RoundedCornerShape(12.dp),
+                colors = ButtonDefaults.buttonColors(containerColor = Primary),
+                interactionSource = confirmInteractionSource,
+                modifier = Modifier.bounceClick(confirmInteractionSource)
+            ) { Text("保存", color = Color.White, fontWeight = FontWeight.Bold) }
         },
         dismissButton = {
-            TextButton(onClick = onDismiss) { Text("取消") }
+            val cancelInteractionSource = remember { MutableInteractionSource() }
+            TextButton(
+                onClick = onDismiss,
+                interactionSource = cancelInteractionSource,
+                modifier = Modifier.bounceClick(cancelInteractionSource)
+            ) { Text("取消", color = TextSecondary) }
         }
     )
 }
@@ -422,28 +714,58 @@ private fun SalesDialog(
     var lensPrice by remember { mutableStateOf(record?.lensPrice?.toString() ?: "") }
     var remark by remember { mutableStateOf(record?.remark ?: "") }
 
+    val fieldColors = OutlinedTextFieldDefaults.colors(
+        focusedTextColor = TextPrimary,
+        unfocusedTextColor = TextPrimary,
+        focusedBorderColor = Primary,
+        unfocusedBorderColor = BorderColor,
+        focusedLabelColor = Primary,
+        unfocusedLabelColor = TextSecondary,
+        cursorColor = Primary
+    )
+
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text(title) },
+        containerColor = Color.White,
+        shape = RoundedCornerShape(24.dp),
+        title = {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Icon(
+                    imageVector = Icons.Default.ShoppingCart,
+                    contentDescription = null,
+                    tint = Color(0xFF8B5CF6),
+                    modifier = Modifier.size(24.dp)
+                )
+                Spacer(modifier = Modifier.width(8.dp))
+                Text(title, color = TextPrimary, fontWeight = FontWeight.Bold, fontSize = 20.sp)
+            }
+        },
         text = {
-            Column {
-                Text("镜架", style = MaterialTheme.typography.labelLarge, color = MaterialTheme.colorScheme.primary)
-                OutlinedTextField(value = frameBrand, onValueChange = { frameBrand = it }, label = { Text("品牌") }, singleLine = true, modifier = Modifier.fillMaxWidth())
-                OutlinedTextField(value = frameModel, onValueChange = { frameModel = it }, label = { Text("型号") }, singleLine = true, modifier = Modifier.fillMaxWidth())
-                OutlinedTextField(value = framePrice, onValueChange = { framePrice = it }, label = { Text("售价(元)") }, singleLine = true, modifier = Modifier.fillMaxWidth())
+            Column(modifier = Modifier.fillMaxWidth()) {
+                Text("镜架", style = MaterialTheme.typography.labelLarge, color = Primary, fontWeight = FontWeight.Bold)
+                Spacer(modifier = Modifier.height(4.dp))
+                OutlinedTextField(value = frameBrand, onValueChange = { frameBrand = it }, label = { Text("品牌") }, singleLine = true, colors = fieldColors, shape = RoundedCornerShape(14.dp), modifier = Modifier.fillMaxWidth())
+                Spacer(modifier = Modifier.height(4.dp))
+                OutlinedTextField(value = frameModel, onValueChange = { frameModel = it }, label = { Text("型号") }, singleLine = true, colors = fieldColors, shape = RoundedCornerShape(14.dp), modifier = Modifier.fillMaxWidth())
+                Spacer(modifier = Modifier.height(4.dp))
+                OutlinedTextField(value = framePrice, onValueChange = { framePrice = it }, label = { Text("售价(元)") }, singleLine = true, colors = fieldColors, shape = RoundedCornerShape(14.dp), modifier = Modifier.fillMaxWidth())
+
+                Spacer(modifier = Modifier.height(12.dp))
+                Text("镜片", style = MaterialTheme.typography.labelLarge, color = Color(0xFF8B5CF6), fontWeight = FontWeight.Bold)
+                Spacer(modifier = Modifier.height(4.dp))
+                OutlinedTextField(value = lensBrand, onValueChange = { lensBrand = it }, label = { Text("品牌") }, singleLine = true, colors = fieldColors, shape = RoundedCornerShape(14.dp), modifier = Modifier.fillMaxWidth())
+                Spacer(modifier = Modifier.height(4.dp))
+                OutlinedTextField(value = lensParams, onValueChange = { lensParams = it }, label = { Text("参数") }, singleLine = true, colors = fieldColors, shape = RoundedCornerShape(14.dp), modifier = Modifier.fillMaxWidth())
+                Spacer(modifier = Modifier.height(4.dp))
+                OutlinedTextField(value = lensPrice, onValueChange = { lensPrice = it }, label = { Text("售价(元)") }, singleLine = true, colors = fieldColors, shape = RoundedCornerShape(14.dp), modifier = Modifier.fillMaxWidth())
 
                 Spacer(modifier = Modifier.height(8.dp))
-                Text("镜片", style = MaterialTheme.typography.labelLarge, color = MaterialTheme.colorScheme.secondary)
-                OutlinedTextField(value = lensBrand, onValueChange = { lensBrand = it }, label = { Text("品牌") }, singleLine = true, modifier = Modifier.fillMaxWidth())
-                OutlinedTextField(value = lensParams, onValueChange = { lensParams = it }, label = { Text("参数") }, singleLine = true, modifier = Modifier.fillMaxWidth())
-                OutlinedTextField(value = lensPrice, onValueChange = { lensPrice = it }, label = { Text("售价(元)") }, singleLine = true, modifier = Modifier.fillMaxWidth())
-
-                Spacer(modifier = Modifier.height(8.dp))
-                OutlinedTextField(value = remark, onValueChange = { remark = it }, label = { Text("备注") }, modifier = Modifier.fillMaxWidth(), minLines = 2)
+                OutlinedTextField(value = remark, onValueChange = { remark = it }, label = { Text("备注") }, colors = fieldColors, shape = RoundedCornerShape(14.dp), modifier = Modifier.fillMaxWidth(), minLines = 2)
             }
         },
         confirmButton = {
-            TextButton(
+            val confirmInteractionSource = remember { MutableInteractionSource() }
+            Button(
                 onClick = {
                     val fp = framePrice.toBigDecimalOrNull()
                     val lp = lensPrice.toBigDecimalOrNull()
@@ -464,11 +786,20 @@ private fun SalesDialog(
                             remark = remark.ifBlank { null }
                         )
                     )
-                }
-            ) { Text("保存") }
+                },
+                shape = RoundedCornerShape(12.dp),
+                colors = ButtonDefaults.buttonColors(containerColor = Primary),
+                interactionSource = confirmInteractionSource,
+                modifier = Modifier.bounceClick(confirmInteractionSource)
+            ) { Text("保存", color = Color.White, fontWeight = FontWeight.Bold) }
         },
         dismissButton = {
-            TextButton(onClick = onDismiss) { Text("取消") }
+            val cancelInteractionSource = remember { MutableInteractionSource() }
+            TextButton(
+                onClick = onDismiss,
+                interactionSource = cancelInteractionSource,
+                modifier = Modifier.bounceClick(cancelInteractionSource)
+            ) { Text("取消", color = TextSecondary, fontWeight = FontWeight.SemiBold) }
         }
     )
 }
