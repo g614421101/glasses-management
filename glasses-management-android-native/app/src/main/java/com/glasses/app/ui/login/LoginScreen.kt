@@ -167,48 +167,44 @@ fun LoginScreen(
                     modifier = Modifier
                         .fillMaxWidth()
                         .height(50.dp)
-                        .then(if (enabled) Modifier.bounceClick(loginInteractionSource) else Modifier)
                         .shadow(12.dp, RoundedCornerShape(14.dp), spotColor = Primary.copy(alpha = 0.4f))
+                        .background(
+                            brush = if (enabled) {
+                                Brush.linearGradient(colors = listOf(Primary, SkyBlue))
+                            } else {
+                                Brush.linearGradient(colors = listOf(Primary.copy(alpha = 0.3f), SkyBlue.copy(alpha = 0.3f)))
+                            },
+                            shape = RoundedCornerShape(14.dp)
+                        )
+                        .then(if (enabled) Modifier.bounceClick(loginInteractionSource) else Modifier)
                 ) {
-                    Box(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .background(
-                                brush = if (enabled) {
-                                    Brush.linearGradient(colors = listOf(Primary, SkyBlue))
-                                } else {
-                                    Brush.linearGradient(colors = listOf(Primary.copy(alpha = 0.3f), SkyBlue.copy(alpha = 0.3f)))
-                                }
-                            ),
-                        contentAlignment = Alignment.Center
+                    Row(
+                        modifier = Modifier.fillMaxSize(),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.Center
                     ) {
-                        Row(
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.Center
-                        ) {
-                            if (isLoading) {
-                                CircularProgressIndicator(
-                                    modifier = Modifier.size(20.dp),
-                                    strokeWidth = 2.dp,
-                                    color = Color.White
-                                )
-                                Spacer(modifier = Modifier.width(8.dp))
-                            }
-                            Text(
-                                text = "安全登录",
-                                fontSize = 15.sp,
-                                fontWeight = FontWeight.Bold,
-                                color = if (enabled) Color.White else Color.White.copy(alpha = 0.6f)
+                        if (isLoading) {
+                            CircularProgressIndicator(
+                                modifier = Modifier.size(20.dp),
+                                strokeWidth = 2.dp,
+                                color = Color.White
                             )
-                            if (!isLoading) {
-                                Spacer(modifier = Modifier.width(6.dp))
-                                Icon(
-                                    imageVector = Icons.Default.ArrowForward,
-                                    contentDescription = null,
-                                    tint = if (enabled) Color.White else Color.White.copy(alpha = 0.6f),
-                                    modifier = Modifier.size(16.dp)
-                                )
-                            }
+                            Spacer(modifier = Modifier.width(8.dp))
+                        }
+                        Text(
+                            text = "登录",
+                            fontSize = 15.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = if (enabled) Color.White else Color.White.copy(alpha = 0.6f)
+                        )
+                        if (!isLoading) {
+                            Spacer(modifier = Modifier.width(6.dp))
+                            Icon(
+                                imageVector = Icons.Default.ArrowForward,
+                                contentDescription = null,
+                                tint = if (enabled) Color.White else Color.White.copy(alpha = 0.6f),
+                                modifier = Modifier.size(16.dp)
+                            )
                         }
                     }
                 }
