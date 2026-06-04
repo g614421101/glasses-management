@@ -93,7 +93,11 @@ fun AppNavGraph(
         }
 
         composable(Routes.STATS) {
-            StatsScreen()
+            StatsScreen(
+                onNavigateToArchive = { customerId ->
+                    navController.navigate("archive/$customerId")
+                }
+            )
         }
 
         composable(

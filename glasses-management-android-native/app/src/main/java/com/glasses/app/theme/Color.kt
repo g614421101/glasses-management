@@ -15,6 +15,10 @@ val TextTertiary = Color(0xFF64748B) // Light slate
 val BorderColor = Color(0xFFE2E8F0) // Subtle border
 val CardShadow = Color(0x0F2563EB) // Blue-tinted shadow
 val Error = Color(0xFFE11D48) // Crimson Rose
+val ErrorLight = Color(0xFFFEE2E2) // Light red for error backgrounds
+
+val Purple = Color(0xFF8B5CF6) // Purple accent (lens, left eye)
+val PurpleLight = Color(0xFFF3E8FF) // Light purple for accent backgrounds
 
 // Badge Colors
 val MaleBadge = Color(0xFF3B82F6)

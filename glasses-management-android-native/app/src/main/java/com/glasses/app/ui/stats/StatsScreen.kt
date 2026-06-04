@@ -2,9 +2,11 @@ package com.glasses.app.ui.stats
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
@@ -17,6 +19,7 @@ import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.foundation.interaction.MutableInteractionSource
@@ -28,9 +31,8 @@ import com.glasses.app.viewmodel.StatsViewModel
 import java.math.BigDecimal
 import java.math.RoundingMode
 import java.time.LocalDate
+import java.time.YearMonth
 import java.time.format.DateTimeFormatter
-import java.time.Instant
-import java.time.ZoneId
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -170,6 +172,9 @@ fun StatsScreen(
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .staggeredEntrance(index = index)
+                                .bounceClick {
+                                    record.customerId?.let { onNavigateToArchive(it) }
+                                }
                                 .shadow(6.dp, RoundedCornerShape(16.dp), spotColor = CardShadow),
                             shape = RoundedCornerShape(16.dp),
                             colors = CardDefaults.cardColors(containerColor = Color.White),
@@ -346,7 +351,6 @@ private fun SummaryCard(title: String, value: String, isHighlight: Boolean, modi
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun DatePickerField(
     label: String,
@@ -358,9 +362,7 @@ private fun DatePickerField(
 
     Box(
         modifier = modifier
-            .bounceClick {
-                showDialog = true
-            }
+            .bounceClick { showDialog = true }
     ) {
         OutlinedTextField(
             value = date,
@@ -368,11 +370,7 @@ private fun DatePickerField(
             enabled = false,
             label = { Text(label) },
             trailingIcon = {
-                Icon(
-                    imageVector = Icons.Default.DateRange,
-                    contentDescription = "选择日期",
-                    tint = Primary
-                )
+                Icon(Icons.Default.DateRange, contentDescription = "选择日期", tint = Primary)
             },
             shape = RoundedCornerShape(14.dp),
             colors = OutlinedTextFieldDefaults.colors(
@@ -395,38 +393,135 @@ private fun DatePickerField(
     }
 
     if (showDialog) {
-        val initialEpochMillis = remember(date) {
-            try {
-                val localDate = LocalDate.parse(date, DateTimeFormatter.ISO_LOCAL_DATE)
-                localDate.atStartOfDay(ZoneId.of("UTC")).toInstant().toEpochMilli()
-            } catch (e: Exception) {
-                System.currentTimeMillis()
-            }
+        val initialDate = remember(date) {
+            try { LocalDate.parse(date, DateTimeFormatter.ISO_LOCAL_DATE) }
+            catch (e: Exception) { LocalDate.now() }
         }
-        val datePickerState = rememberDatePickerState(
-            initialSelectedDateMillis = initialEpochMillis
-        )
+        var currentMonth by remember { mutableStateOf(YearMonth.from(initialDate)) }
+        var selectedDate by remember { mutableStateOf(initialDate) }
 
-        DatePickerDialog(
+        AlertDialog(
             onDismissRequest = { showDialog = false },
+            containerColor = Color.White,
+            shape = RoundedCornerShape(20.dp),
+            title = null,
+            text = {
+                Column {
+                    // ── 年月导航 ──
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        val prevInteractionSource = remember { MutableInteractionSource() }
+                        IconButton(
+                            onClick = { currentMonth = currentMonth.minusMonths(1) },
+                            interactionSource = prevInteractionSource,
+                            modifier = Modifier.bounceClick(prevInteractionSource)
+                        ) { Icon(Icons.Default.ChevronLeft, "上月", tint = Primary) }
+
+                        Text(
+                            "${currentMonth.year}年${currentMonth.monthValue}月",
+                            fontWeight = FontWeight.Bold,
+                            color = TextPrimary,
+                            fontSize = 17.sp
+                        )
+
+                        val nextInteractionSource = remember { MutableInteractionSource() }
+                        IconButton(
+                            onClick = { currentMonth = currentMonth.plusMonths(1) },
+                            interactionSource = nextInteractionSource,
+                            modifier = Modifier.bounceClick(nextInteractionSource)
+                        ) { Icon(Icons.Default.ChevronRight, "下月", tint = Primary) }
+                    }
+
+                    Spacer(modifier = Modifier.height(8.dp))
+
+                    // ── 星期标题 ──
+                    val weekdays = listOf("日", "一", "二", "三", "四", "五", "六")
+                    Row(modifier = Modifier.fillMaxWidth()) {
+                        weekdays.forEach { day ->
+                            Text(
+                                text = day,
+                                modifier = Modifier.weight(1f),
+                                textAlign = TextAlign.Center,
+                                fontSize = 13.sp,
+                                fontWeight = FontWeight.SemiBold,
+                                color = if (day == "日" || day == "六") Error else TextSecondary
+                            )
+                        }
+                    }
+
+                    Spacer(modifier = Modifier.height(6.dp))
+                    HorizontalDivider(color = BorderColor, thickness = 0.5.dp)
+                    Spacer(modifier = Modifier.height(6.dp))
+
+                    // ── 日期网格 ──
+                    val firstDay = currentMonth.atDay(1)
+                    val daysInMonth = currentMonth.lengthOfMonth()
+                    val startDayOfWeek = firstDay.dayOfWeek.value % 7 // 0=周日
+                    val today = LocalDate.now()
+
+                    val totalCells = startDayOfWeek + daysInMonth
+                    val rows = (totalCells + 6) / 7
+
+                    for (row in 0 until rows) {
+                        Row(modifier = Modifier.fillMaxWidth()) {
+                            for (col in 0..6) {
+                                val cellIndex = row * 7 + col
+                                if (cellIndex < startDayOfWeek || cellIndex >= startDayOfWeek + daysInMonth) {
+                                    Spacer(modifier = Modifier.weight(1f))
+                                } else {
+                                    val day = cellIndex - startDayOfWeek + 1
+                                    val cellDate = currentMonth.atDay(day)
+                                    val isSelected = cellDate == selectedDate
+                                    val isToday = cellDate == today
+
+                                    Box(
+                                        modifier = Modifier
+                                            .weight(1f)
+                                            .padding(2.dp)
+                                            .clip(CircleShape)
+                                            .background(
+                                                when {
+                                                    isSelected -> Primary
+                                                    isToday -> PrimaryLight
+                                                    else -> Color.Transparent
+                                                }
+                                            )
+                                            .clickable { selectedDate = cellDate }
+                                            .padding(vertical = 6.dp),
+                                        contentAlignment = Alignment.Center
+                                    ) {
+                                        Text(
+                                            text = "$day",
+                                            fontSize = 14.sp,
+                                            fontWeight = if (isSelected || isToday) FontWeight.Bold else FontWeight.Normal,
+                                            color = when {
+                                                isSelected -> Color.White
+                                                isToday -> Primary
+                                                else -> TextPrimary
+                                            }
+                                        )
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            },
             confirmButton = {
                 val confirmInteractionSource = remember { MutableInteractionSource() }
-                TextButton(
+                Button(
                     onClick = {
-                        datePickerState.selectedDateMillis?.let { millis ->
-                            val selectedLocalDate = Instant.ofEpochMilli(millis)
-                                .atZone(ZoneId.of("UTC"))
-                                .toLocalDate()
-                            val formattedDate = selectedLocalDate.format(DateTimeFormatter.ISO_LOCAL_DATE)
-                            onDateSelected(formattedDate)
-                        }
+                        onDateSelected(selectedDate.format(DateTimeFormatter.ISO_LOCAL_DATE))
                         showDialog = false
                     },
                     interactionSource = confirmInteractionSource,
+                    shape = RoundedCornerShape(12.dp),
+                    colors = ButtonDefaults.buttonColors(containerColor = Primary),
                     modifier = Modifier.bounceClick(confirmInteractionSource)
-                ) {
-                    Text("确定", color = Primary, fontWeight = FontWeight.Bold)
-                }
+                ) { Text("确定", color = Color.White, fontWeight = FontWeight.Bold) }
             },
             dismissButton = {
                 val cancelInteractionSource = remember { MutableInteractionSource() }
@@ -434,33 +529,8 @@ private fun DatePickerField(
                     onClick = { showDialog = false },
                     interactionSource = cancelInteractionSource,
                     modifier = Modifier.bounceClick(cancelInteractionSource)
-                ) {
-                    Text("取消", color = TextSecondary)
-                }
-            },
-            colors = DatePickerDefaults.colors(
-                containerColor = Color.White
-            )
-        ) {
-            DatePicker(
-                state = datePickerState,
-                colors = DatePickerDefaults.colors(
-                    containerColor = Color.White,
-                    titleContentColor = TextPrimary,
-                    headlineContentColor = TextPrimary,
-                    weekdayContentColor = TextSecondary,
-                    subheadContentColor = TextSecondary,
-                    navigationContentColor = Primary,
-                    yearContentColor = TextPrimary,
-                    selectedYearContentColor = Color.White,
-                    selectedYearContainerColor = Primary,
-                    dayContentColor = TextPrimary,
-                    selectedDayContentColor = Color.White,
-                    selectedDayContainerColor = Primary,
-                    todayContentColor = Primary,
-                    todayDateBorderColor = Primary
-                )
-            )
-        }
+                ) { Text("取消", color = TextSecondary) }
+            }
+        )
     }
 }

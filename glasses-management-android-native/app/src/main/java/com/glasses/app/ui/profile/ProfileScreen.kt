@@ -166,7 +166,12 @@ fun ProfileScreen(
                         ProfileRow("显示名称", state.realName.ifBlank { "-" })
                         ProfileRow("用户名", state.username)
                         ProfileRow("手机号", state.phone.ifBlank { "-" })
-                        ProfileRow("角色", state.role)
+                        val roleLabel = when (state.role) {
+                            "admin" -> "管理员"
+                            "merchant" -> "商户"
+                            else -> "商户"
+                        }
+                        ProfileRow("角色", roleLabel)
                     }
                 }
             }

@@ -308,12 +308,17 @@ private fun UserCard(
                             Text("已禁用", fontSize = 11.sp, fontWeight = FontWeight.Bold, color = Error)
                         }
                     } else {
+                        val roleLabel = when (user.role) {
+                            "admin" -> "管理员"
+                            "merchant" -> "商户"
+                            else -> "商户"
+                        }
                         Box(
                             modifier = Modifier
                                 .background(PrimaryLight, RoundedCornerShape(8.dp))
                                 .padding(horizontal = 8.dp, vertical = 4.dp)
                         ) {
-                            Text(user.role ?: "merchant", fontSize = 11.sp, fontWeight = FontWeight.Bold, color = Primary)
+                            Text(roleLabel, fontSize = 11.sp, fontWeight = FontWeight.Bold, color = Primary)
                         }
                     }
                 }
