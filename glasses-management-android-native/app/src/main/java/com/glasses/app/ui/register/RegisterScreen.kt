@@ -1,13 +1,15 @@
 package com.glasses.app.ui.register
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowForward
+import androidx.compose.material.icons.automirrored.filled.ArrowForward
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Phone
@@ -18,7 +20,7 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
@@ -234,32 +236,29 @@ fun RegisterScreen(
                 // Register Button
                 val enabled = !isLoading && inviteCode.isNotBlank() && username.isNotBlank() && phone.isNotBlank() && password.isNotBlank() && confirmPassword.isNotBlank()
                 val registerInteractionSource = remember { MutableInteractionSource() }
-                Button(
-                    onClick = { onRegister(inviteCode.trim(), username.trim(), phone.trim(), password, confirmPassword) },
-                    enabled = enabled,
-                    interactionSource = registerInteractionSource,
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = Color.Transparent,
-                        disabledContainerColor = Color.Transparent
-                    ),
-                    contentPadding = PaddingValues(),
-                    shape = RoundedCornerShape(14.dp),
+                val registerButtonShape = RoundedCornerShape(14.dp)
+                val registerGradient = if (enabled) {
+                    Brush.linearGradient(colors = listOf(Primary, SkyBlue))
+                } else {
+                    Brush.linearGradient(colors = listOf(Primary.copy(alpha = 0.3f), SkyBlue.copy(alpha = 0.3f)))
+                }
+                Box(
                     modifier = Modifier
                         .fillMaxWidth()
                         .height(50.dp)
-                        .shadow(12.dp, RoundedCornerShape(14.dp), spotColor = Primary.copy(alpha = 0.4f))
-                        .background(
-                            brush = if (enabled) {
-                                Brush.linearGradient(colors = listOf(Primary, SkyBlue))
-                            } else {
-                                Brush.linearGradient(colors = listOf(Primary.copy(alpha = 0.3f), SkyBlue.copy(alpha = 0.3f)))
-                            },
-                            shape = RoundedCornerShape(14.dp)
-                        )
-                        .then(if (enabled) Modifier.bounceClick(registerInteractionSource) else Modifier)
+                        .clip(registerButtonShape)
+                        .background(brush = registerGradient)
+                        .border(1.dp, Color.White.copy(alpha = 0.3f), registerButtonShape)
+                        .bounceClick(registerInteractionSource)
+                        .clickable(
+                            enabled = enabled,
+                            interactionSource = registerInteractionSource,
+                            indication = null,
+                            onClick = { onRegister(inviteCode.trim(), username.trim(), phone.trim(), password, confirmPassword) }
+                        ),
+                    contentAlignment = Alignment.Center
                 ) {
                     Row(
-                        modifier = Modifier.fillMaxSize(),
                         verticalAlignment = Alignment.CenterVertically,
                         horizontalArrangement = Arrangement.Center
                     ) {
@@ -280,7 +279,7 @@ fun RegisterScreen(
                         if (!isLoading) {
                             Spacer(modifier = Modifier.width(6.dp))
                             Icon(
-                                imageVector = Icons.Default.ArrowForward,
+                                imageVector = Icons.AutoMirrored.Filled.ArrowForward,
                                 contentDescription = null,
                                 tint = if (enabled) Color.White else Color.White.copy(alpha = 0.6f),
                                 modifier = Modifier.size(16.dp)

@@ -1,13 +1,15 @@
 package com.glasses.app.ui.login
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowForward
+import androidx.compose.material.icons.automirrored.filled.ArrowForward
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Visibility
@@ -16,7 +18,7 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
@@ -154,32 +156,29 @@ fun LoginScreen(
                 // Login Button
                 val enabled = !isLoading && username.isNotBlank() && password.isNotBlank()
                 val loginInteractionSource = remember { MutableInteractionSource() }
-                Button(
-                    onClick = { onLogin(username.trim(), password) },
-                    enabled = enabled,
-                    interactionSource = loginInteractionSource,
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = Color.Transparent,
-                        disabledContainerColor = Color.Transparent
-                    ),
-                    contentPadding = PaddingValues(),
-                    shape = RoundedCornerShape(14.dp),
+                val loginButtonShape = RoundedCornerShape(14.dp)
+                val loginGradient = if (enabled) {
+                    Brush.linearGradient(colors = listOf(Primary, SkyBlue))
+                } else {
+                    Brush.linearGradient(colors = listOf(Primary.copy(alpha = 0.3f), SkyBlue.copy(alpha = 0.3f)))
+                }
+                Box(
                     modifier = Modifier
                         .fillMaxWidth()
                         .height(50.dp)
-                        .shadow(12.dp, RoundedCornerShape(14.dp), spotColor = Primary.copy(alpha = 0.4f))
-                        .background(
-                            brush = if (enabled) {
-                                Brush.linearGradient(colors = listOf(Primary, SkyBlue))
-                            } else {
-                                Brush.linearGradient(colors = listOf(Primary.copy(alpha = 0.3f), SkyBlue.copy(alpha = 0.3f)))
-                            },
-                            shape = RoundedCornerShape(14.dp)
-                        )
-                        .then(if (enabled) Modifier.bounceClick(loginInteractionSource) else Modifier)
+                        .clip(loginButtonShape)
+                        .background(brush = loginGradient)
+                        .border(1.dp, Color.White.copy(alpha = 0.3f), loginButtonShape)
+                        .bounceClick(loginInteractionSource)
+                        .clickable(
+                            enabled = enabled,
+                            interactionSource = loginInteractionSource,
+                            indication = null,
+                            onClick = { onLogin(username.trim(), password) }
+                        ),
+                    contentAlignment = Alignment.Center
                 ) {
                     Row(
-                        modifier = Modifier.fillMaxSize(),
                         verticalAlignment = Alignment.CenterVertically,
                         horizontalArrangement = Arrangement.Center
                     ) {
@@ -200,7 +199,7 @@ fun LoginScreen(
                         if (!isLoading) {
                             Spacer(modifier = Modifier.width(6.dp))
                             Icon(
-                                imageVector = Icons.Default.ArrowForward,
+                                imageVector = Icons.AutoMirrored.Filled.ArrowForward,
                                 contentDescription = null,
                                 tint = if (enabled) Color.White else Color.White.copy(alpha = 0.6f),
                                 modifier = Modifier.size(16.dp)
