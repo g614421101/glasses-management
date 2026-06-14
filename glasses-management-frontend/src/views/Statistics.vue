@@ -38,7 +38,7 @@
         </div>
         <div class="card-content">
           <p class="label">累计营收 (元)</p>
-          <h3 class="value">￥{{ statsData.totalRevenue || '0.00' }}</h3>
+          <h3 class="value" :class="{ 'value--pulse': pulsing }">￥{{ Number(displayRevenue).toFixed(2) }}</h3>
         </div>
       </div>
 
@@ -48,7 +48,7 @@
         </div>
         <div class="card-content">
           <p class="label">订单总量 (笔)</p>
-          <h3 class="value">{{ statsData.orderCount || 0 }}</h3>
+          <h3 class="value" :class="{ 'value--pulse': pulsing }">{{ Math.round(displayOrders) }}</h3>
         </div>
       </div>
 
@@ -58,7 +58,7 @@
         </div>
         <div class="card-content">
           <p class="label">平均客单价 (元)</p>
-          <h3 class="value">￥{{ avgOrderValue }}</h3>
+          <h3 class="value" :class="{ 'value--pulse': pulsing }">￥{{ Number(displayAvg).toFixed(2) }}</h3>
         </div>
       </div>
     </section>
@@ -70,7 +70,9 @@
         </div>
       </div>
 
-      <el-table v-if="!isMobile" :data="statsData.records" style="width: 100%" v-loading="loading" class="stats-table">
+      <transition name="table-swap" mode="out-in">
+        <div :key="dataVersion">
+          <el-table v-if="!isMobile" :data="statsData.records" style="width: 100%" v-loading="loading" class="stats-table">
         <el-table-column prop="salesDate" label="日期" min-width="160" />
         <el-table-column prop="recordNo" label="单号" min-width="180" />
         <el-table-column prop="customerName" label="顾客姓名" min-width="100" />
@@ -114,21 +116,23 @@
         <template #actions="{ row }">
           <el-button class="action-pill" @click="goToArchive(row.customerId)">查看详情</el-button>
         </template>
-      </MobileCardList>
+        </MobileCardList>
 
-      <div class="pagination-shell">
-        <el-pagination
-          v-model:current-page="pageParams.current"
-          v-model:page-size="pageParams.size"
-          :total="total"
-          :page-sizes="[10, 20, 50, 100]"
-          :layout="isMobile ? 'prev, pager, next' : 'total, sizes, prev, pager, next'"
-          prev-text="上一页"
-          next-text="下一页"
-          @size-change="fetchStats"
-          @current-change="fetchStats"
-        />
-      </div>
+          <div class="pagination-shell">
+            <el-pagination
+              v-model:current-page="pageParams.current"
+              v-model:page-size="pageParams.size"
+              :total="total"
+              :page-sizes="[10, 20, 50, 100]"
+              :layout="isMobile ? 'prev, pager, next' : 'total, sizes, prev, pager, next'"
+              prev-text="上一页"
+              next-text="下一页"
+              @size-change="fetchStats"
+              @current-change="fetchStats"
+            />
+          </div>
+        </div>
+      </transition>
     </section>
   </div>
 </template>
@@ -140,6 +144,7 @@ import request, { downloadBlob } from '../utils/request';
 import { ElMessage } from 'element-plus';
 import { Money, Ticket, DataLine, Download } from '@element-plus/icons-vue';
 import MobileCardList from '../components/MobileCardList.vue';
+import { useCountUp } from '../utils/anim';
 import dayjs from 'dayjs';
 
 const router = useRouter();
@@ -162,14 +167,31 @@ const statsData = ref({
   records: []
 });
 
+const revenueSource = computed(() => statsData.value.totalRevenue || 0);
+const ordersSource = computed(() => statsData.value.orderCount || 0);
+const avgSource = computed(() => {
+  if (!statsData.value.orderCount) return 0;
+  return statsData.value.totalRevenue / statsData.value.orderCount;
+});
+
+const displayRevenue = useCountUp(revenueSource);
+const displayOrders = useCountUp(ordersSource);
+const displayAvg = useCountUp(avgSource);
+
+const pulsing = ref(false);
+const dataVersion = ref(0);
+
+const triggerPulse = () => {
+  pulsing.value = false;
+  requestAnimationFrame(() => {
+    pulsing.value = true;
+    setTimeout(() => { pulsing.value = false; }, 400);
+  });
+};
+
 const isMobile = ref(window.matchMedia('(max-width: 640px)').matches);
 let mediaQuery: MediaQueryList | null = null;
 let mediaHandler: ((e: MediaQueryListEvent) => void) | null = null;
-
-const avgOrderValue = computed(() => {
-  if (!statsData.value.orderCount) return '0.00';
-  return (statsData.value.totalRevenue / statsData.value.orderCount).toFixed(2);
-});
 
 onMounted(() => {
   fetchStats();
@@ -214,6 +236,8 @@ const fetchStats = async () => {
       statsData.value.orderCount = res.orderCount;
       statsData.value.records = res.records.records;
       total.value = res.records.total;
+      triggerPulse();
+      dataVersion.value++;
     }
   } catch (e) {
     ElMessage.error('获取统计数据失败');
@@ -322,6 +346,35 @@ const exportExcel = async () => {
   font-weight: 800;
   line-height: 1.1;
   color: var(--text-primary);
+  display: inline-block;
+  transition: transform 0.2s var(--ease-emphasized, cubic-bezier(0.22, 1, 0.36, 1));
+}
+
+.value--pulse {
+  animation: value-pulse 0.35s var(--ease-emphasized, cubic-bezier(0.22, 1, 0.36, 1));
+}
+
+@keyframes value-pulse {
+  0% { transform: scale(1); }
+  40% { transform: scale(1.06); }
+  100% { transform: scale(1); }
+}
+
+.table-swap-enter-active {
+  animation: table-fade-in 0.3s var(--ease-emphasized, cubic-bezier(0.22, 1, 0.36, 1)) both;
+}
+.table-swap-leave-active {
+  animation: table-fade-out 0.15s var(--ease-exit, cubic-bezier(0.4, 0, 1, 1)) both;
+}
+
+@keyframes table-fade-in {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes table-fade-out {
+  from { opacity: 1; }
+  to { opacity: 0; }
 }
 
 .item-tags {
