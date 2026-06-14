@@ -19,8 +19,6 @@ spring:
     import:
       - optional:file:./application-local.yml
       - optional:file:./app/application-local.yml
-      - optional:file:${user.home}/.glasses_management/application-local.yml
-      - optional:file:${user.home}/.glasses_management_mysql/application-local.yml
   profiles:
     active: ${SPRING_PROFILES_ACTIVE:dev}
   datasource:
