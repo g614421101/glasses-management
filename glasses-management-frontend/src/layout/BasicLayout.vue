@@ -1,6 +1,6 @@
 <template>
   <el-container class="layout-container">
-    <el-header class="glass-header">
+    <el-header class="glass-header" :class="{ 'glass-header--scrolled': scrolled }">
       <div class="logo-box">
         <el-button link class="mobile-menu-toggle" v-if="isMobile" @click="drawerVisible = true" style="margin-right: 8px;">
           <el-icon :size="20"><MenuIcon /></el-icon>
@@ -193,21 +193,29 @@ const { isDark, toggleTheme } = useTheme();
 
 const drawerVisible = ref(false);
 const isCollapsed = ref(false);
+const scrolled = ref(false);
 
 const isMobile = ref(window.matchMedia('(max-width: 900px)').matches);
 let mediaQuery: MediaQueryList | null = null;
 let mediaHandler: ((e: MediaQueryListEvent) => void) | null = null;
 
+const handleScroll = () => {
+  scrolled.value = window.scrollY > 6;
+};
+
 onMounted(() => {
   mediaQuery = window.matchMedia('(max-width: 900px)');
   mediaHandler = (e: MediaQueryListEvent) => { isMobile.value = e.matches; };
   mediaQuery.addEventListener('change', mediaHandler);
+  window.addEventListener('scroll', handleScroll, { passive: true });
+  handleScroll();
 });
 
 onUnmounted(() => {
   if (mediaQuery && mediaHandler) {
     mediaQuery.removeEventListener('change', mediaHandler);
   }
+  window.removeEventListener('scroll', handleScroll);
 });
 
 const goHome = () => {
@@ -250,6 +258,12 @@ const handleCommand = (command: string) => {
   position: sticky;
   top: 0;
   z-index: 20;
+  transition: box-shadow var(--duration-base) var(--ease-standard),
+    background-color var(--duration-base) var(--ease-standard);
+}
+
+.glass-header--scrolled {
+  box-shadow: 0 22px 44px rgba(15, 23, 42, 0.12);
 }
 
 .logo-box {
@@ -274,6 +288,13 @@ const handleCommand = (command: string) => {
   justify-content: center;
   background: var(--gradient-main);
   box-shadow: 0 14px 28px rgba(37, 99, 235, 0.24);
+  transition: transform var(--duration-base) var(--ease-emphasized),
+    box-shadow var(--duration-base) var(--ease-standard);
+}
+
+.logo-box:hover .brand-orb {
+  transform: rotate(-6deg) scale(1.05);
+  box-shadow: 0 18px 36px rgba(37, 99, 235, 0.32);
 }
 
 .brand-copy {
@@ -413,6 +434,26 @@ const handleCommand = (command: string) => {
   border-radius: 16px;
   font-weight: 700;
   color: var(--text-secondary);
+  position: relative;
+  overflow: hidden;
+  transition: transform var(--duration-base) var(--ease-emphasized),
+    background-color var(--duration-base) var(--ease-standard),
+    color var(--duration-base) var(--ease-standard) !important;
+}
+
+.side-menu :deep(.el-menu-item)::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 50%;
+  width: 3px;
+  height: 0;
+  background: var(--gradient-main);
+  border-radius: 0 4px 4px 0;
+  transform: translateY(-50%);
+  transition: height var(--duration-base) var(--ease-emphasized),
+    opacity var(--duration-base) var(--ease-standard);
+  opacity: 0;
 }
 
 .glass-aside--collapsed .side-menu :deep(.el-menu-item) {
@@ -422,15 +463,29 @@ const handleCommand = (command: string) => {
   justify-content: center;
 }
 
+.glass-aside--collapsed .side-menu :deep(.el-menu-item)::before {
+  display: none;
+}
+
 .side-menu :deep(.el-menu-item:hover) {
   background: var(--primary-soft);
   color: var(--primary-color);
+  transform: translateX(4px);
+}
+
+.glass-aside--collapsed .side-menu :deep(.el-menu-item:hover) {
+  transform: none;
 }
 
 .side-menu :deep(.el-menu-item.is-active) {
   background: var(--gradient-soft);
   color: var(--primary-color);
   box-shadow: inset 0 0 0 1px var(--border-strong), 0 12px 24px rgba(37, 99, 235, 0.12);
+}
+
+.side-menu :deep(.el-menu-item.is-active)::before {
+  height: 24px;
+  opacity: 1;
 }
 
 .collapse-toggle-wrapper {
@@ -451,7 +506,8 @@ const handleCommand = (command: string) => {
   padding: 0 16px !important;
   color: var(--text-secondary) !important;
   border-radius: 12px;
-  transition: all 0.2s ease;
+  transition: background-color var(--duration-fast) var(--ease-standard),
+    color var(--duration-fast) var(--ease-standard);
 }
 
 .glass-aside--collapsed .collapse-toggle-btn {
@@ -472,7 +528,8 @@ const handleCommand = (command: string) => {
 
 .fade-transform-enter-active,
 .fade-transform-leave-active {
-  transition: all 0.45s cubic-bezier(0.22, 1, 0.36, 1);
+  transition: opacity var(--duration-slow) var(--ease-emphasized),
+    transform var(--duration-slow) var(--ease-emphasized);
 }
 .fade-transform-enter-from {
   opacity: 0;
@@ -574,11 +631,15 @@ const handleCommand = (command: string) => {
   border-radius: 16px;
   font-weight: 700;
   color: var(--text-secondary);
+  transition: transform var(--duration-base) var(--ease-emphasized),
+    background-color var(--duration-base) var(--ease-standard),
+    color var(--duration-base) var(--ease-standard) !important;
 }
 
 .drawer-side-menu :deep(.el-menu-item:hover) {
   background: var(--primary-soft);
   color: var(--primary-color);
+  transform: translateX(4px);
 }
 
 .drawer-side-menu :deep(.el-menu-item.is-active) {

@@ -31,7 +31,7 @@
       </div>
     </section>
 
-    <section class="summary-grid">
+    <section class="summary-grid stagger-children">
       <div class="summary-card glass-card summary-revenue">
         <div class="card-icon">
           <el-icon><Money /></el-icon>
@@ -278,6 +278,12 @@ const exportExcel = async () => {
   display: flex;
   align-items: center;
   gap: 18px;
+  cursor: default;
+}
+
+.summary-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 26px 50px rgba(37, 99, 235, 0.14);
 }
 
 .card-icon {

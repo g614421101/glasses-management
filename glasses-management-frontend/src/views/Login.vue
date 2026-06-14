@@ -1,13 +1,13 @@
 <template>
   <div class="login-container">
     <div class="login-box glass-card">
-      <div class="sys-title">
+      <div class="sys-title login-anim login-anim--1">
         <el-icon :size="28" color="var(--primary-color)"><View /></el-icon>
         <span>视光档案管理系统</span>
       </div>
-      <p class="sys-subtitle">Optical Record Management System</p>
+      <p class="sys-subtitle login-anim login-anim--2">Optical Record Management System</p>
       
-      <el-form :model="loginForm" @keyup.enter="handleLogin">
+      <el-form :model="loginForm" @keyup.enter="handleLogin" class="login-anim login-anim--3">
         <el-form-item>
           <el-input 
             v-model="loginForm.username" 
@@ -105,6 +105,37 @@ const handleLogin = async () => {
   border-radius: 28px;
   box-shadow: var(--shadow-card);
   border: 1px solid var(--border-color);
+  animation: login-card-in 0.55s var(--ease-emphasized) both;
+}
+
+.login-anim {
+  opacity: 0;
+  animation: login-rise var(--duration-slow) var(--ease-emphasized) forwards;
+}
+.login-anim--1 { animation-delay: 120ms; }
+.login-anim--2 { animation-delay: 200ms; }
+.login-anim--3 { animation-delay: 280ms; }
+
+@keyframes login-card-in {
+  from {
+    opacity: 0;
+    transform: translateY(24px) scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes login-rise {
+  from {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .sys-title {

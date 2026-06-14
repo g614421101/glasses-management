@@ -1,13 +1,13 @@
 <template>
   <div class="login-container">
     <div class="register-box glass-card">
-      <div class="sys-title">
+      <div class="sys-title login-anim login-anim--1">
         <el-icon :size="28" color="var(--primary-color)"><View /></el-icon>
         <span>商户注册</span>
       </div>
-      <p class="sys-subtitle">Create Your Account</p>
+      <p class="sys-subtitle login-anim login-anim--2">Create Your Account</p>
 
-      <el-form :model="regForm" @keyup.enter="handleRegister" label-position="top">
+      <el-form :model="regForm" @keyup.enter="handleRegister" label-position="top" class="login-anim login-anim--3">
         <div class="form-grid">
           <el-form-item label="用户名">
             <el-input v-model="regForm.username" placeholder="3-30 位登录用户名" :prefix-icon="User" size="large" />
@@ -130,6 +130,37 @@ const handleRegister = async () => {
   border-radius: 30px;
   box-shadow: var(--shadow-card);
   border: 1px solid var(--border-color);
+  animation: register-card-in 0.55s var(--ease-emphasized) both;
+}
+
+.login-anim {
+  opacity: 0;
+  animation: register-rise var(--duration-slow) var(--ease-emphasized) forwards;
+}
+.login-anim--1 { animation-delay: 120ms; }
+.login-anim--2 { animation-delay: 200ms; }
+.login-anim--3 { animation-delay: 280ms; }
+
+@keyframes register-card-in {
+  from {
+    opacity: 0;
+    transform: translateY(24px) scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes register-rise {
+  from {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .sys-title {

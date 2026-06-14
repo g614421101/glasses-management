@@ -151,7 +151,7 @@ onUnmounted(() => {
 
 <style scoped>
 .sys-user-page {
-  animation: fadeIn 0.4s ease-out;
+  /* 入场动画统一由路由过渡负责 */
 }
 
 .page-header {
@@ -227,10 +227,5 @@ onUnmounted(() => {
   .header-actions > * {
     width: 100%;
   }
-}
-
-@keyframes fadeIn {
-  from { opacity: 0; transform: translateY(10px); }
-  to { opacity: 1; transform: translateY(0); }
 }
 </style>

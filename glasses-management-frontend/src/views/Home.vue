@@ -1,11 +1,11 @@
 <template>
   <div class="home-container">
-    <div class="welcome-section">
+    <div class="welcome-section home-anim home-anim--1">
       <h1 class="greeting">工作台</h1>
       <p class="sub-greeting">输入顾客手机号即可快速调出其历史视光与配镜档案</p>
     </div>
 
-    <div class="search-section">
+    <div class="search-section home-anim home-anim--2">
       <div class="search-shell home-search-shell">
         <div class="search-icon-badge">
           <el-icon :size="20"><Search /></el-icon>
@@ -46,7 +46,7 @@
       </transition>
     </div>
 
-    <div class="shortcuts-group">
+    <div class="shortcuts-group home-anim home-anim--3">
       <div class="shortcut-card add-customer" @click="goCustomer">
         <el-icon :size="32"><UserFilled /></el-icon>
         <h3>新建顾客</h3>
@@ -60,7 +60,7 @@
       </div>
     </div>
 
-    <div v-if="lanUrl" class="lan-card glass-card">
+    <div v-if="lanUrl" class="lan-card glass-card home-anim home-anim--4">
       <div class="lan-header">
         <el-icon :size="20"><Link /></el-icon>
         <span>局域网连接</span>
@@ -166,6 +166,34 @@ const goCustomer = () => {
   align-items: center;
 }
 
+.home-anim {
+  opacity: 0;
+  animation: home-rise var(--duration-slow) var(--ease-emphasized) forwards;
+}
+
+.home-anim--1 { animation-delay: 60ms; }
+.home-anim--2 { animation-delay: 160ms; }
+.home-anim--3 { animation-delay: 260ms; }
+.home-anim--4 { animation-delay: 360ms; }
+
+.shortcuts-group .shortcut-card {
+  opacity: 0;
+  animation: home-rise var(--duration-slow) var(--ease-emphasized) forwards;
+}
+.shortcuts-group .shortcut-card:nth-child(1) { animation-delay: 320ms; }
+.shortcuts-group .shortcut-card:nth-child(2) { animation-delay: 400ms; }
+
+@keyframes home-rise {
+  from {
+    opacity: 0;
+    transform: translateY(18px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
 .welcome-section {
   text-align: center;
   margin-bottom: 40px;
@@ -264,7 +292,8 @@ const goCustomer = () => {
   padding: 12px 16px;
   border-radius: 8px;
   cursor: pointer;
-  transition: all 0.2s;
+  transition: transform var(--duration-fast) var(--ease-standard),
+    background-color var(--duration-fast) var(--ease-standard);
 }
 
 .result-item:hover {
@@ -302,7 +331,9 @@ const goCustomer = () => {
   border-radius: 24px;
   text-align: center;
   cursor: pointer;
-  transition: all 0.3s ease;
+  transition: transform var(--duration-base) var(--ease-emphasized),
+    box-shadow var(--duration-base) var(--ease-standard),
+    border-color var(--duration-base) var(--ease-standard);
   box-shadow: 0 20px 40px rgba(37, 99, 235, 0.1);
   border: 1px solid var(--border-color);
   position: relative;
@@ -314,12 +345,17 @@ const goCustomer = () => {
   position: absolute;
   top: 0; left: 0; right: 0; height: 4px;
   background: transparent;
-  transition: all 0.3s;
+  transition: background var(--duration-base) var(--ease-standard);
 }
 
 .shortcut-card:hover {
-  transform: translateY(-5px);
+  transform: translateY(-3px);
   box-shadow: 0 28px 55px rgba(37, 99, 235, 0.16);
+  border-color: var(--border-strong);
+}
+
+.shortcut-card:active {
+  transform: translateY(-1px) scale(0.995);
 }
 
 .add-customer:hover::before {

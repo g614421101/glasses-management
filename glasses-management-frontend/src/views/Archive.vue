@@ -1003,11 +1003,19 @@ const fmtInput = (val) => {
   background: var(--surface-overlay);
   box-shadow: 0 18px 40px rgba(15, 23, 42, 0.08);
   cursor: pointer;
+  transition: transform var(--duration-base) var(--ease-emphasized),
+    box-shadow var(--duration-base) var(--ease-standard),
+    border-color var(--duration-base) var(--ease-standard);
 }
 
 .timeline-detail-card:hover {
-  transform: translateY(-2px);
+  transform: translateY(-3px);
+  border-color: var(--border-strong);
   box-shadow: 0 24px 48px rgba(37, 99, 235, 0.14);
+}
+
+.timeline-detail-card:active {
+  transform: translateY(-1px) scale(0.995);
 }
 
 .card-glow {

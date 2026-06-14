@@ -49,6 +49,33 @@ withDefaults(defineProps<{
   border-radius: 12px;
   padding: 14px;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+  opacity: 0;
+  animation: mobile-card-in var(--duration-slow, 0.45s) var(--ease-emphasized, cubic-bezier(0.22, 1, 0.36, 1)) forwards;
+  transition: transform var(--duration-fast, 0.18s) var(--ease-standard, cubic-bezier(0.4, 0, 0.2, 1)),
+    box-shadow var(--duration-fast, 0.18s) var(--ease-standard, cubic-bezier(0.4, 0, 0.2, 1));
+}
+
+.mobile-card:nth-child(1) { animation-delay: 40ms; }
+.mobile-card:nth-child(2) { animation-delay: 90ms; }
+.mobile-card:nth-child(3) { animation-delay: 140ms; }
+.mobile-card:nth-child(4) { animation-delay: 190ms; }
+.mobile-card:nth-child(5) { animation-delay: 240ms; }
+.mobile-card:nth-child(6) { animation-delay: 290ms; }
+.mobile-card:nth-child(n+7) { animation-delay: 340ms; }
+
+.mobile-card:active {
+  transform: scale(0.99);
+}
+
+@keyframes mobile-card-in {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .mobile-card-header {
