@@ -9,6 +9,7 @@
 - `glasses-management-backend`：Spring Boot 后端，使用 MySQL，适合连接外部数据库部署。
 - `glasses-management-backend-h2`：Spring Boot 后端，使用 H2 文件数据库，适合本地单机、Electron 桌面版和安装包交付。
 - `glasses-management-frontend`：Vue 3 前端，Vite 构建。
+- `glasses-management-react`：React 18 前端（Ant Design + Redux Toolkit），Vite 构建。与 Vue 前端功能对齐，共享同一套后端 API。
 - `glasses-management-electron`：Electron 桌面壳，启动内置 Java 后端并加载本地 Web 应用。
 - `glasses-management-android`：Android WebView 版（方案 A），自动通过 mDNS 发现局域网后端。
 - `glasses-management-android-native`：Android 原生 Compose 版（方案 B），直接调用后端 API。
@@ -42,6 +43,17 @@
 - Element Plus
 - Axios
 - `vue3-print-nb`
+
+### React 前端
+
+- React 18
+- TypeScript
+- Vite
+- React Router v6（HashRouter，`@` 路径别名）
+- Redux Toolkit + React Redux
+- Ant Design 5 + @ant-design/icons
+- Axios
+- qrcode
 
 ### 桌面端
 
@@ -90,6 +102,16 @@ npm run dev
 
 前端开发服务器通过 Vite 代理把 `/api` 转发到 `http://localhost:8080`。
 
+### React 前端
+
+```powershell
+cd glasses-management-react
+npm install
+npm run dev
+```
+
+React 前端开发服务器同样通过 Vite 代理把 `/api` 转发到 `http://localhost:8080`，默认端口 3000。
+
 ## 构建与打包
 
 ### 只构建前端
@@ -109,6 +131,7 @@ npm run build
 
 - `-Backend H2`：只同步到 H2 后端。
 - `-Backend MySQL`：只同步到 MySQL 后端。
+- `-Frontend React`：同步 React 前端（默认 Vue）。
 - `-SkipBuild`：跳过前端构建，直接使用已有 `glasses-management-frontend/dist`。
 
 ### 构建桌面版
@@ -170,6 +193,8 @@ cd glasses-management-backend-h2 && mvn test -Dtest=SystemIntegrationTest#testMe
 ```
 
 前端无测试框架，验证以 `npm run build`（vue-tsc 类型检查 + vite 构建）为准。
+
+React 前端同样无测试框架，验证以 `npm run build`（tsc 类型检查 + vite 构建）为准。
 
 ## 日志与数据存储
 
@@ -287,6 +312,34 @@ Windows 平台上，即便给 Java 启动参数指定了 `-Dfile.encoding=UTF-8`
 - `src/views/Statistics.vue`：统计页。
 - `src/views/DataManage.vue`：数据管理（导入/导出/重置）。
 
+## React 前端结构
+
+- `src/main.tsx`：前端入口。
+- `src/App.tsx`：根组件，包含 HashRouter 和顶级路由定义。
+- `src/layout/BasicLayout.tsx`：登录后的基础布局，包含子路由定义和 `displayLocation` 过渡动画状态机。
+- `src/components/PrivateRoute.tsx`：路由守卫组件。
+- `src/store/index.ts`：Redux store。
+- `src/features/auth/authSlice.ts`：认证状态。
+- `src/utils/request.ts`：Axios 实例，`baseURL` 为 `/api`，从 `localStorage` 读取 `token` 写入 `Authorization` 请求头。
+- `src/utils/theme.ts`：主题相关工具。
+- `src/hooks/useTheme.ts`：主题切换 hook。
+- `src/hooks/useMobile.ts`：移动端检测 hook。
+- `src/hooks/useAuth.ts`：认证 hook。
+- `src/config/features.ts`：功能开关配置，控制导航菜单和路由是否注册（`CUSTOMER`、`STATISTICS`、`DATA_MANAGE`、`PROFILE`、`RECYCLE_BIN`、`SYS_USER`）。
+- `src/pages/Login.tsx`：登录页。
+- `src/pages/Register.tsx`：注册页。
+- `src/pages/Home.tsx`：首页。
+- `src/pages/Customer.tsx`：顾客管理。
+- `src/pages/Archive.tsx`：顾客档案（含子组件 DetailModal、TimelineCard、OptometryFormModal、SalesFormModal）。
+- `src/pages/SysUser.tsx`：用户管理。
+- `src/pages/Profile.tsx`：个人资料。
+- `src/pages/RecycleBin.tsx`：回收站。
+- `src/pages/Statistics.tsx`：统计页。
+- `src/pages/DataManage.tsx`：数据管理（导入/导出/重置，含子组件 DataCards）。
+- `src/styles/global.css`：全局样式（路由过渡、按钮、表格、页面布局）。
+- `src/styles/variables.css`：CSS 变量（浅色/暗色主题）。
+- `src/styles/theme-overrides.css`：Ant Design 主题覆盖。
+
 ## 后端结构
 
 两个后端模块的包名都是 `com.glasses`，大部分代码结构一致：
@@ -311,15 +364,18 @@ Windows 平台上，即便给 Java 启动参数指定了 `-Dfile.encoding=UTF-8`
 - 前端页面和后端接口路径已经耦合，改接口时需要同步检查对应 Vue 页面。
 - 打包桌面版主要依赖 H2 后端，不要只改 MySQL 后端后就认为桌面版已更新。
 - 版本号位置不同：Electron 安装包版本在 `glasses-management-electron/package.json`，前端版本在 `glasses-management-frontend/package.json`，后端版本在各自的 `pom.xml`。后端原生安装包版本另在 `jpackage.cfg`。当前全项目统一版本为 **3.1.0**（Android 独立版本 1.0.0）。
+- **React 前端路由过渡**：使用 `displayLocation` 状态机（非 `react-transition-group`）实现页面切换动画。`BasicLayout.tsx` 中 `displayLocation` 滞后于真实 `location`，退出动画期间冻结旧页面内容，退出完成后才切换 `displayLocation` 并播进入动画。内部用 `<Routes location={displayLocation}>` 替代 `<Outlet />`。修改路由过渡逻辑时需理解此机制，避免引入闪屏。路由定义在 `BasicLayout.tsx` 内部（非 `App.tsx`）。
+- **React 前端按钮样式**：`global.css` 中 danger 按钮（`.ant-btn-dangerous`）使用红色渐变实底 + 白字（对齐 Vue Element Plus）。`theme-overrides.css` 中不要添加只设 color/border 不设 background 的 danger 覆盖规则，否则会覆盖实底色。
 
 ## 验证建议
 
 根据改动范围选择最小验证：
 
 - 前端改动：在 `glasses-management-frontend` 运行 `npm run build`。
+- React 前端改动：在 `glasses-management-react` 运行 `npm run build`。
 - 后端改动：在对应后端模块运行 `mvn test` 或至少 `mvn clean package -DskipTests`。
 - 涉及桌面版交付：在根目录运行 `.\build-desktop.ps1`。
-- 涉及静态资源交付：运行 `.\sync-frontend.ps1` 后再构建后端或桌面版。
+- 涉及静态资源交付：运行 `.\sync-frontend.ps1`（或 `.\sync-frontend.ps1 -Frontend React`）后再构建后端或桌面版。
 
 ## 数据库架构演进
 
@@ -334,6 +390,7 @@ Windows 平台上，即便给 Java 启动参数指定了 `-Dfile.encoding=UTF-8`
 - 修改现有代码时优先匹配当前风格。
 - 新增后端接口时同步考虑权限、统一返回结构、软删除规则和两个后端模块的一致性。
 - 新增前端页面或功能时优先使用已有的 Element Plus、路由、Pinia 和 Axios 封装。
+- 新增 React 前端页面或功能时优先使用已有的 Ant Design、路由、Redux Toolkit 和 Axios 封装。
 - 不提交 `application-local.yml`、构建产物、数据库文件、日志和本地 IDE 配置。
 
 ## Android 项目注意事项

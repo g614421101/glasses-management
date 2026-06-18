@@ -5,13 +5,16 @@ param(
     [ValidateSet('All', 'MySQL', 'H2')]
     [string]$Backend = 'All',
 
+    [ValidateSet('Vue', 'React')]
+    [string]$Frontend = 'Vue',
+
     [switch]$SkipBuild
 )
 
 $ErrorActionPreference = 'Stop'
 
 $rootDir = $PSScriptRoot
-$frontendDir = Join-Path $rootDir 'glasses-management-frontend'
+$frontendDir = if ($Frontend -eq 'Vue') { Join-Path $rootDir 'glasses-management-frontend' } else { Join-Path $rootDir 'glasses-management-react' }
 $distDir = Join-Path $frontendDir 'dist'
 
 function Assert-Success {
@@ -46,7 +49,7 @@ function Copy-Frontend {
 }
 
 if (-not $SkipBuild) {
-    Write-Host "[1/2] Building Frontend..." -ForegroundColor Cyan
+    Write-Host "[1/2] Building $Frontend Frontend..." -ForegroundColor Cyan
     Push-Location $frontendDir
     if (-not (Test-Path 'node_modules')) {
         Write-Host "Installing frontend dependencies..." -ForegroundColor Yellow
