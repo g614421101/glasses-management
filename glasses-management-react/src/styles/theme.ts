@@ -1,0 +1,272 @@
+import { ThemeConfig, theme } from 'antd';
+
+export const lightTheme: ThemeConfig = {
+  token: {
+    colorPrimary: '#2563eb',
+    colorSuccess: '#0ea5e9',
+    colorWarning: '#60a5fa',
+    colorError: '#e11d48',
+    colorBgBase: '#ffffff',
+    colorTextBase: '#0f172a',
+    borderRadius: 18,
+    fontFamily: "'Manrope', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif",
+    colorText: '#0f172a',
+    colorTextSecondary: '#475569',
+    colorTextTertiary: '#64748b',
+    colorBorder: 'rgba(148, 163, 184, 0.22)',
+    colorBgContainer: '#ffffff',
+    colorBgElevated: '#ffffff',
+  },
+  components: {
+    Button: {
+      borderRadius: 999,
+      fontWeight: 700,
+      colorBgContainer: '#ffffff',
+      colorBorder: 'rgba(148, 163, 184, 0.35)',
+      colorText: '#0f172a',
+      colorLink: '#2563eb',
+      colorLinkHover: '#1d4ed8',
+      colorError: '#dc2626',
+      colorErrorBorder: 'rgba(239, 68, 68, 0.1)',
+    },
+    Input: {
+      borderRadius: 18,
+      colorBgContainer: '#ffffff',
+      colorBorder: 'rgba(148, 163, 184, 0.22)',
+      colorText: '#0f172a',
+      colorTextPlaceholder: '#64748b',
+    },
+    Table: {
+      borderRadius: 18,
+      colorBgContainer: 'transparent',
+      headerBg: 'transparent',
+      headerColor: '#64748b',
+      colorText: '#0f172a',
+      borderColor: 'rgba(148, 163, 184, 0.22)',
+      rowHoverBg: 'rgba(37, 99, 235, 0.04)',
+    },
+    Modal: {
+      borderRadius: 26,
+      colorBgElevated: '#ffffff',
+      colorText: '#0f172a',
+      colorTextSecondary: '#475569',
+    },
+    Pagination: {
+      colorBgContainer: '#ffffff',
+      colorBorder: 'rgba(148, 163, 184, 0.22)',
+      colorText: '#0f172a',
+      colorTextSecondary: '#475569',
+      colorPrimary: '#2563eb',
+      colorPrimaryHover: '#2563eb',
+    },
+    Tag: {
+      colorBgContainer: 'rgba(37, 99, 235, 0.1)',
+      colorBorder: 'rgba(148, 163, 184, 0.22)',
+      colorText: '#2563eb',
+    },
+    Menu: {
+      colorBgContainer: 'transparent',
+      colorItemText: '#475569',
+      colorItemTextHover: '#2563eb',
+      colorItemTextSelected: '#2563eb',
+      colorItemBgSelected: 'rgba(37, 99, 235, 0.1)',
+    },
+    Card: {
+      colorBgContainer: '#ffffff',
+      colorBorderSecondary: 'rgba(148, 163, 184, 0.22)',
+      colorText: '#0f172a',
+    },
+    Switch: {
+      colorPrimary: '#2563eb',
+    },
+    Radio: {
+      colorBorder: 'rgba(148, 163, 184, 0.22)',
+      colorText: '#0f172a',
+    },
+    InputNumber: {
+      colorBgContainer: '#ffffff',
+      colorBorder: 'rgba(148, 163, 184, 0.22)',
+      colorText: '#0f172a',
+    },
+    Descriptions: {
+      colorBgContainer: 'transparent',
+      colorText: '#0f172a',
+      colorTextSecondary: '#475569',
+      colorBorderSecondary: 'rgba(148, 163, 184, 0.22)',
+    },
+    Timeline: {
+      colorText: '#0f172a',
+      colorTextSecondary: '#475569',
+    },
+    Select: {
+      colorBgContainer: '#ffffff',
+      colorBorder: 'rgba(148, 163, 184, 0.22)',
+      colorText: '#0f172a',
+      colorTextPlaceholder: '#64748b',
+    },
+    DatePicker: {
+      colorBgContainer: '#ffffff',
+      colorBorder: 'rgba(148, 163, 184, 0.22)',
+      colorText: '#0f172a',
+    },
+    Dropdown: {
+      colorBgElevated: '#ffffff',
+      colorText: '#0f172a',
+    },
+    Alert: {
+      colorInfoBg: 'rgba(37, 99, 235, 0.06)',
+      colorInfoBorder: 'rgba(37, 99, 235, 0.2)',
+      colorText: '#0f172a',
+    },
+    Form: {
+      colorText: '#0f172a',
+      colorTextSecondary: '#475569',
+    },
+    Divider: {
+      colorSplit: 'rgba(148, 163, 184, 0.22)',
+    },
+    Drawer: {
+      colorBgElevated: '#ffffff',
+      colorText: '#0f172a',
+    },
+    Empty: {
+      colorTextDescription: '#475569',
+    },
+  },
+};
+
+export const darkTheme: ThemeConfig = {
+  algorithm: theme.darkAlgorithm,
+  token: {
+    colorPrimary: '#60a5fa',
+    colorSuccess: '#67e8f9',
+    colorWarning: '#fbbf24',
+    colorError: '#fb7185',
+    colorBgBase: '#0f172a',
+    colorTextBase: '#e5f0ff',
+    borderRadius: 18,
+    fontFamily: "'Manrope', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif",
+    colorText: '#e5f0ff',
+    colorTextSecondary: '#b6c7dd',
+    colorTextTertiary: '#88a3bf',
+    colorBorder: 'rgba(148, 163, 184, 0.18)',
+    colorBgContainer: 'rgba(15, 23, 42, 0.78)',
+    colorBgElevated: 'rgba(15, 23, 42, 0.96)',
+  },
+  components: {
+    Button: {
+      borderRadius: 999,
+      fontWeight: 700,
+      colorBgContainer: 'rgba(15, 23, 42, 0.78)',
+      colorBorder: 'rgba(148, 163, 184, 0.28)',
+      colorText: '#e5f0ff',
+      colorLink: '#60a5fa',
+      colorLinkHover: '#93c5fd',
+      colorError: '#fb7185',
+      colorErrorBorder: 'rgba(251, 113, 133, 0.18)',
+    },
+    Input: {
+      borderRadius: 18,
+      colorBgContainer: 'rgba(15, 23, 42, 0.78)',
+      colorBorder: 'rgba(148, 163, 184, 0.18)',
+      colorText: '#e5f0ff',
+      colorTextPlaceholder: '#88a3bf',
+    },
+    Table: {
+      borderRadius: 18,
+      colorBgContainer: 'transparent',
+      headerBg: 'rgba(15, 23, 42, 0.6)',
+      headerColor: '#88a3bf',
+      colorText: '#e5f0ff',
+      borderColor: 'rgba(148, 163, 184, 0.18)',
+      rowHoverBg: 'rgba(96, 165, 250, 0.06)',
+    },
+    Modal: {
+      borderRadius: 26,
+      colorBgElevated: 'rgba(15, 23, 42, 0.96)',
+      colorText: '#e5f0ff',
+      colorTextSecondary: '#b6c7dd',
+    },
+    Pagination: {
+      colorBgContainer: 'rgba(15, 23, 42, 0.78)',
+      colorBorder: 'rgba(148, 163, 184, 0.18)',
+      colorText: '#b6c7dd',
+      colorTextSecondary: '#88a3bf',
+      colorPrimary: '#60a5fa',
+      colorPrimaryHover: '#60a5fa',
+    },
+    Tag: {
+      colorBgContainer: 'rgba(96, 165, 250, 0.18)',
+      colorBorder: 'rgba(148, 163, 184, 0.18)',
+      colorText: '#60a5fa',
+    },
+    Menu: {
+      colorBgContainer: 'transparent',
+      colorItemText: '#b6c7dd',
+      colorItemTextHover: '#60a5fa',
+      colorItemTextSelected: '#60a5fa',
+      colorItemBgSelected: 'rgba(96, 165, 250, 0.18)',
+    },
+    Card: {
+      colorBgContainer: 'rgba(15, 23, 42, 0.78)',
+      colorBorderSecondary: 'rgba(148, 163, 184, 0.18)',
+      colorText: '#e5f0ff',
+    },
+    Switch: {
+      colorPrimary: '#60a5fa',
+    },
+    Radio: {
+      colorBorder: 'rgba(148, 163, 184, 0.18)',
+      colorText: '#e5f0ff',
+    },
+    InputNumber: {
+      colorBgContainer: 'rgba(15, 23, 42, 0.78)',
+      colorBorder: 'rgba(148, 163, 184, 0.18)',
+      colorText: '#e5f0ff',
+    },
+    Descriptions: {
+      colorBgContainer: 'transparent',
+      colorText: '#e5f0ff',
+      colorTextSecondary: '#b6c7dd',
+      colorBorderSecondary: 'rgba(148, 163, 184, 0.18)',
+    },
+    Timeline: {
+      colorText: '#e5f0ff',
+      colorTextSecondary: '#b6c7dd',
+    },
+    Select: {
+      colorBgContainer: 'rgba(15, 23, 42, 0.78)',
+      colorBorder: 'rgba(148, 163, 184, 0.18)',
+      colorText: '#e5f0ff',
+      colorTextPlaceholder: '#88a3bf',
+    },
+    DatePicker: {
+      colorBgContainer: 'rgba(15, 23, 42, 0.78)',
+      colorBorder: 'rgba(148, 163, 184, 0.18)',
+      colorText: '#e5f0ff',
+    },
+    Dropdown: {
+      colorBgElevated: 'rgba(15, 23, 42, 0.96)',
+      colorText: '#e5f0ff',
+    },
+    Alert: {
+      colorInfoBg: 'rgba(96, 165, 250, 0.12)',
+      colorInfoBorder: 'rgba(96, 165, 250, 0.24)',
+      colorText: '#e5f0ff',
+    },
+    Form: {
+      colorText: '#e5f0ff',
+      colorTextSecondary: '#b6c7dd',
+    },
+    Divider: {
+      colorSplit: 'rgba(148, 163, 184, 0.18)',
+    },
+    Drawer: {
+      colorBgElevated: 'rgba(15, 23, 42, 0.96)',
+      colorText: '#e5f0ff',
+    },
+    Empty: {
+      colorTextDescription: '#88a3bf',
+    },
+  },
+};
