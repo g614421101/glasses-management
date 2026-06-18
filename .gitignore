@@ -51,9 +51,17 @@ pnpm-debug.log*
 **/dist/
 **/dist-ssr/
 **/runtime/
+**/.vite/
 *.tsbuildinfo
 *.local
 glasses-management-electron/package-lock.json
+
+# Test artifacts
+test-results/
+playwright-report/
+
+# Screenshots
+login-*.png
 
 # Generated frontend assets copied into Spring Boot static directories
 /glasses-management-backend/src/main/resources/static/
