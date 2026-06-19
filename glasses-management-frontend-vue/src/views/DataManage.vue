@@ -60,7 +60,7 @@
           />
           <el-button class="action-btn action-btn--file" @click="triggerFileSelect">
             <el-icon><FolderOpened /></el-icon>
-            <span class="file-btn-text">{{ selectedFile ? selectedFile.name : '选择 JSON 文件' }}</span>
+            {{ selectedFile ? '重新选择' : '选择 JSON 文件' }}
           </el-button>
 
           <el-button
@@ -72,6 +72,20 @@
           >
             <el-icon><Upload /></el-icon>
             确认导入
+          </el-button>
+        </div>
+
+        <div v-if="selectedFile" class="file-info-card">
+          <div class="file-info-left">
+            <el-icon :size="20" class="file-icon"><Document /></el-icon>
+            <div class="file-detail">
+              <span class="file-name">{{ selectedFile.name }}</span>
+              <span class="file-size">{{ formatFileSize(selectedFile.size) }}</span>
+            </div>
+          </div>
+          <el-button link type="danger" @click="clearFile" class="file-remove-btn">
+            <el-icon><Close /></el-icon>
+            移除
           </el-button>
         </div>
 
@@ -135,7 +149,9 @@ import {
   CircleCheckFilled,
   CircleCloseFilled,
   WarningFilled,
-  Delete
+  Delete,
+  Document,
+  Close
 } from '@element-plus/icons-vue';
 import request, { downloadBlob } from '../utils/request';
 
@@ -186,6 +202,20 @@ const handleExport = async () => {
 
 const triggerFileSelect = () => {
   fileInputRef.value?.click();
+};
+
+const clearFile = () => {
+  selectedFile.value = null;
+  importResult.value = null;
+  if (fileInputRef.value) {
+    fileInputRef.value.value = '';
+  }
+};
+
+const formatFileSize = (bytes: number): string => {
+  if (bytes < 1024) return bytes + ' B';
+  if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB';
+  return (bytes / (1024 * 1024)).toFixed(1) + ' MB';
 };
 
 const handleFileChange = (e: Event) => {
@@ -402,23 +432,20 @@ const handleReset = async () => {
   font-weight: 700;
   border-radius: 12px;
   flex-shrink: 0;
+  transition: transform 0.2s ease, box-shadow 0.2s ease !important;
+}
+
+.action-btn:hover {
+  transform: translateY(-2px) !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1) !important;
 }
 
 .action-btn--file {
-  max-width: 200px;
+  min-width: 140px;
 }
 
 .action-btn--import {
   min-width: 140px;
-}
-
-.file-btn-text {
-  display: inline-block;
-  max-width: 120px;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  vertical-align: middle;
 }
 
 .import-mode-group {
@@ -434,6 +461,67 @@ const handleReset = async () => {
   gap: 12px;
   align-items: center;
   justify-content: center;
+}
+
+.file-info-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: 14px;
+  padding: 12px 16px;
+  border-radius: 12px;
+  background: var(--surface-muted);
+  border: 1px solid var(--border-color);
+  animation: fadeSlideIn 0.25s ease;
+}
+
+.file-info-left {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+}
+
+.file-icon {
+  color: var(--primary-color);
+  flex-shrink: 0;
+}
+
+.file-detail {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.file-name {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-primary);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.file-size {
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
+.file-remove-btn {
+  flex-shrink: 0;
+  font-size: 13px;
+}
+
+@keyframes fadeSlideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .import-alert {
@@ -535,11 +623,7 @@ const handleReset = async () => {
   }
 
   .action-btn--file {
-    max-width: none;
-  }
-
-  .file-btn-text {
-    max-width: none;
+    min-width: 0;
   }
 
   .action-btn--import {

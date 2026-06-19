@@ -196,7 +196,7 @@ const goCustomer = () => {
 
 .welcome-section {
   text-align: center;
-  margin-bottom: 40px;
+  margin-bottom: 28px;
 }
 
 .greeting {
@@ -215,7 +215,7 @@ const goCustomer = () => {
   width: 100%;
   max-width: 680px;
   position: relative;
-  margin-bottom: 60px;
+  margin-bottom: 28px;
 }
 
 .home-search-shell {
@@ -425,7 +425,7 @@ const goCustomer = () => {
   width: 100%;
   max-width: 400px;
   padding: 28px;
-  margin-top: 8px;
+  margin-top: 28px;
   text-align: center;
 }
 

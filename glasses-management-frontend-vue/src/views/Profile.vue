@@ -7,9 +7,6 @@
       </div>
       <div class="hero-profile-actions">
         <el-tag v-if="authStore.mustChangePassword" type="warning" effect="dark">建议修改默认密码</el-tag>
-        <el-button class="action-pill" @click="startEdit">
-          {{ editing ? '继续编辑' : '编辑资料' }}
-        </el-button>
       </div>
     </section>
 
