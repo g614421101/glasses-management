@@ -13,8 +13,22 @@ param(
 
 $ErrorActionPreference = 'Stop'
 
+# Only show interactive menu when running standalone (not called by other scripts)
+if (-not $MyInvocation.BoundParameters.ContainsKey('Frontend')) {
+    Write-Host "=== Frontend Sync ===" -ForegroundColor Cyan
+    Write-Host ""
+    Write-Host "Select frontend:"
+    Write-Host "  [1] Vue   (default)"
+    Write-Host "  [2] React"
+    Write-Host ""
+    $choice = Read-Host "Enter choice (1 or 2, press Enter for default)"
+    $Frontend = if ($choice -eq '2') { 'React' } else { 'Vue' }
+    Write-Host "Using $Frontend frontend." -ForegroundColor Green
+    Write-Host ""
+}
+
 $rootDir = $PSScriptRoot
-$frontendDir = if ($Frontend -eq 'Vue') { Join-Path $rootDir 'glasses-management-frontend' } else { Join-Path $rootDir 'glasses-management-react' }
+$frontendDir = if ($Frontend -eq 'Vue') { Join-Path $rootDir 'glasses-management-frontend-vue' } else { Join-Path $rootDir 'glasses-management-frontend-react' }
 $distDir = Join-Path $frontendDir 'dist'
 
 function Assert-Success {

@@ -1,9 +1,22 @@
 # build-desktop.ps1
 # Glasses Management System - Desktop Packaging Script (H2)
 
+$ErrorActionPreference = 'Stop'
+
+Write-Host "=== Glasses Management Desktop Builder ===" -ForegroundColor Cyan
+Write-Host ""
+Write-Host "Select frontend to package:"
+Write-Host "  [1] Vue   (default)"
+Write-Host "  [2] React"
+Write-Host ""
+$choice = Read-Host "Enter choice (1 or 2, press Enter for default)"
+$Frontend = if ($choice -eq '2') { 'React' } else { 'Vue' }
+Write-Host "Using $Frontend frontend." -ForegroundColor Green
+Write-Host ""
+
 # Step 1: Build and sync Frontend
 Write-Host "[1/5] Building and syncing Frontend..." -ForegroundColor Cyan
-& "$PSScriptRoot\sync-frontend.ps1" -Backend H2
+& "$PSScriptRoot\sync-frontend.ps1" -Backend H2 -Frontend $Frontend
 if ($LASTEXITCODE -ne 0) { Write-Host "Error: Frontend sync failed." -ForegroundColor Red; exit }
 
 $h2LocalConfig = Join-Path $PSScriptRoot 'glasses-management-backend-h2\application-local.yml'

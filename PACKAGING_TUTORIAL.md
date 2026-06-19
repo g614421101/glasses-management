@@ -4,7 +4,7 @@
 
 - `glasses-management-backend`
 - `glasses-management-backend-h2`
-- `glasses-management-frontend`
+- `glasses-management-frontend-vue`
 - `glasses-management-electron`
 
 当前仓库里没有 `glasses-management-desktop-javafx`，因此本教程不再包含旧版 JavaFX 打包说明。
@@ -130,7 +130,7 @@ cd ..
 .\sync-frontend.ps1 -Backend MySQL
 ```
 
-如果已经有最新的 `glasses-management-frontend/dist`，也可以跳过前端构建：
+如果已经有最新的 `glasses-management-frontend-vue/dist`，也可以跳过前端构建：
 
 ```powershell
 .\sync-frontend.ps1 -SkipBuild
@@ -143,7 +143,7 @@ cd ..
 1. 构建前端
 
    ```powershell
-   cd glasses-management-frontend
+   cd glasses-management-frontend-vue
    npm install
    npm run build
    cd ..
@@ -156,7 +156,7 @@ cd ..
    ```powershell
    Remove-Item 'glasses-management-backend-h2\src\main\resources\static\*' -Recurse -Force -ErrorAction SilentlyContinue
    New-Item -ItemType Directory -Force -Path 'glasses-management-backend-h2\src\main\resources\static' -ErrorAction SilentlyContinue
-   Copy-Item -Path 'glasses-management-frontend\dist\*' -Destination 'glasses-management-backend-h2\src\main\resources\static' -Recurse -Force
+   Copy-Item -Path 'glasses-management-frontend-vue\dist\*' -Destination 'glasses-management-backend-h2\src\main\resources\static' -Recurse -Force
    ```
 
    MySQL 版：
@@ -164,7 +164,7 @@ cd ..
    ```powershell
    Remove-Item 'glasses-management-backend\src\main\resources\static\*' -Recurse -Force -ErrorAction SilentlyContinue
    New-Item -ItemType Directory -Force -Path 'glasses-management-backend\src\main\resources\static' -ErrorAction SilentlyContinue
-   Copy-Item -Path 'glasses-management-frontend\dist\*' -Destination 'glasses-management-backend\src\main\resources\static' -Recurse -Force
+   Copy-Item -Path 'glasses-management-frontend-vue\dist\*' -Destination 'glasses-management-backend\src\main\resources\static' -Recurse -Force
    ```
 
 3. 打包后端 JAR

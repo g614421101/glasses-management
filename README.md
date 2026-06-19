@@ -19,7 +19,8 @@
 
 - `glasses-management-backend`: MySQL 版后端，适合连接外部 MySQL 部署。
 - `glasses-management-backend-h2`: H2 单机版后端，适合本地运行、原生安装包和 Electron 桌面版。
-- `glasses-management-frontend`: Vue 3 前端。
+- `glasses-management-frontend-vue`: Vue 3 前端。
+- `glasses-management-frontend-react`: React 18 前端。
 - `glasses-management-electron`: Electron 桌面打包项目。
 - `glasses-management-android`: Android WebView 客户端版，全屏 WebView 套壳并支持 mDNS 自动配对。
 - `glasses-management-android-native`: Android 原生 Compose 客户端版，直接对接接口，包含极致蓝白配色与丰富的动效体验。
@@ -69,7 +70,7 @@ mvn spring-boot:run
 前端：
 
 ```powershell
-cd glasses-management-frontend
+cd glasses-management-frontend-vue
 npm install
 npm run dev
 ```

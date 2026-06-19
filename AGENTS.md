@@ -8,8 +8,8 @@
 
 - `glasses-management-backend`：Spring Boot 后端，使用 MySQL，适合连接外部数据库部署。
 - `glasses-management-backend-h2`：Spring Boot 后端，使用 H2 文件数据库，适合本地单机、Electron 桌面版和安装包交付。
-- `glasses-management-frontend`：Vue 3 前端，Vite 构建。
-- `glasses-management-react`：React 18 前端（Ant Design + Redux Toolkit），Vite 构建。与 Vue 前端功能对齐，共享同一套后端 API。
+- `glasses-management-frontend-vue`：Vue 3 前端，Vite 构建。
+- `glasses-management-frontend-react`：React 18 前端（Ant Design + Redux Toolkit），Vite 构建。与 Vue 前端功能对齐，共享同一套后端 API。
 - `glasses-management-electron`：Electron 桌面壳，启动内置 Java 后端并加载本地 Web 应用。
 - `glasses-management-android`：Android WebView 版（方案 A），自动通过 mDNS 发现局域网后端。
 - `glasses-management-android-native`：Android 原生 Compose 版（方案 B），直接调用后端 API。
@@ -95,7 +95,7 @@ mvn spring-boot:run
 ### 前端
 
 ```powershell
-cd glasses-management-frontend
+cd glasses-management-frontend-vue
 npm install
 npm run dev
 ```
@@ -105,7 +105,7 @@ npm run dev
 ### React 前端
 
 ```powershell
-cd glasses-management-react
+cd glasses-management-frontend-react
 npm install
 npm run dev
 ```
@@ -117,7 +117,7 @@ React 前端开发服务器同样通过 Vite 代理把 `/api` 转发到 `http://
 ### 只构建前端
 
 ```powershell
-cd glasses-management-frontend
+cd glasses-management-frontend-vue
 npm run build
 ```
 
@@ -132,7 +132,7 @@ npm run build
 - `-Backend H2`：只同步到 H2 后端。
 - `-Backend MySQL`：只同步到 MySQL 后端。
 - `-Frontend React`：同步 React 前端（默认 Vue）。
-- `-SkipBuild`：跳过前端构建，直接使用已有 `glasses-management-frontend/dist`。
+- `-SkipBuild`：跳过前端构建，直接使用已有 `glasses-management-frontend-vue/dist`。
 
 ### 构建桌面版
 
@@ -363,7 +363,7 @@ Windows 平台上，即便给 Java 启动参数指定了 `-Dfile.encoding=UTF-8`
 - 角色主要区分 `admin` 和 `merchant`。
 - 前端页面和后端接口路径已经耦合，改接口时需要同步检查对应 Vue 页面。
 - 打包桌面版主要依赖 H2 后端，不要只改 MySQL 后端后就认为桌面版已更新。
-- 版本号位置不同：Electron 安装包版本在 `glasses-management-electron/package.json`，前端版本在 `glasses-management-frontend/package.json`，后端版本在各自的 `pom.xml`。后端原生安装包版本另在 `jpackage.cfg`。当前全项目统一版本为 **3.1.0**（Android 独立版本 1.0.0）。
+- 版本号位置不同：Electron 安装包版本在 `glasses-management-electron/package.json`，前端版本在 `glasses-management-frontend-vue/package.json`，后端版本在各自的 `pom.xml`。后端原生安装包版本另在 `jpackage.cfg`。当前全项目统一版本为 **3.1.0**（Android 独立版本 1.0.0）。
 - **React 前端路由过渡**：使用 `displayLocation` 状态机（非 `react-transition-group`）实现页面切换动画。`BasicLayout.tsx` 中 `displayLocation` 滞后于真实 `location`，退出动画期间冻结旧页面内容，退出完成后才切换 `displayLocation` 并播进入动画。内部用 `<Routes location={displayLocation}>` 替代 `<Outlet />`。修改路由过渡逻辑时需理解此机制，避免引入闪屏。路由定义在 `BasicLayout.tsx` 内部（非 `App.tsx`）。
 - **React 前端按钮样式**：`global.css` 中 danger 按钮（`.ant-btn-dangerous`）使用红色渐变实底 + 白字（对齐 Vue Element Plus）。`theme-overrides.css` 中不要添加只设 color/border 不设 background 的 danger 覆盖规则，否则会覆盖实底色。
 
@@ -371,8 +371,8 @@ Windows 平台上，即便给 Java 启动参数指定了 `-Dfile.encoding=UTF-8`
 
 根据改动范围选择最小验证：
 
-- 前端改动：在 `glasses-management-frontend` 运行 `npm run build`。
-- React 前端改动：在 `glasses-management-react` 运行 `npm run build`。
+- 前端改动：在 `glasses-management-frontend-vue` 运行 `npm run build`。
+- React 前端改动：在 `glasses-management-frontend-react` 运行 `npm run build`。
 - 后端改动：在对应后端模块运行 `mvn test` 或至少 `mvn clean package -DskipTests`。
 - 涉及桌面版交付：在根目录运行 `.\build-desktop.ps1`。
 - 涉及静态资源交付：运行 `.\sync-frontend.ps1`（或 `.\sync-frontend.ps1 -Frontend React`）后再构建后端或桌面版。

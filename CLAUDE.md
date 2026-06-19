@@ -12,10 +12,10 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 # 开发启动
 cd glasses-management-backend-h2 && mvn spring-boot:run    # H2 后端（本地单机）
 cd glasses-management-backend && mvn spring-boot:run        # MySQL 后端
-cd glasses-management-frontend && npm install && npm run dev # 前端（Vite 代理 /api → localhost:8080）
+cd glasses-management-frontend-vue && npm install && npm run dev # 前端（Vite 代理 /api → localhost:8080）
 
 # 验证
-cd glasses-management-frontend && npm run build             # vue-tsc + vite build
+cd glasses-management-frontend-vue && npm run build             # vue-tsc + vite build
 cd glasses-management-backend-h2 && mvn clean package -DskipTests  # 后端打包
 cd glasses-management-backend-h2 && mvn test                # 后端测试
 
@@ -35,7 +35,7 @@ cd glasses-management-backend && .\build-package.ps1
 ## 架构
 
 ```
-glasses-management-frontend/     Vue 3 + TypeScript + Element Plus + Pinia
+glasses-management-frontend-vue/     Vue 3 + TypeScript + Element Plus + Pinia
 glasses-management-backend/      Spring Boot + MyBatis Plus + Sa-Token + MySQL
 glasses-management-backend-h2/   同上，H2 文件数据库（MODE=MySQL），用于桌面版
 glasses-management-electron/     Electron 壳，启动 H2 后端 JAR + 内置 JRE
@@ -86,7 +86,7 @@ cd glasses-management-backend-h2 && mvn test -Dtest=SystemIntegrationTest#testMe
 
 ## 版本号位置（发版时需同步更新）
 
-- `glasses-management-frontend/package.json`
+- `glasses-management-frontend-vue/package.json`
 - `glasses-management-backend/pom.xml`
 - `glasses-management-backend-h2/pom.xml`
 - `glasses-management-electron/package.json`

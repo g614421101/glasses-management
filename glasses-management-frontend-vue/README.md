@@ -1,6 +1,6 @@
 # 视光档案管理系统前端
 
-`glasses-management-frontend` 是系统的 Vue 3 前端项目，负责登录注册、工作台、顾客管理、档案时间轴、营收统计和账号管理等页面。
+`glasses-management-frontend-vue` 是系统的 Vue 3 前端项目，负责登录注册、工作台、顾客管理、档案时间轴、营收统计和账号管理等页面。
 
 ## 技术栈
 
