@@ -64,6 +64,8 @@ public class SalesRecordController {
 
     @PutMapping("/update")
     public Result<Boolean> updateRecord(@RequestBody SalesRecord record) {
+        record.setCreateTime(null);
+        record.setUpdateTime(null);
         return Result.success(salesRecordService.updateById(record));
     }
 

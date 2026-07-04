@@ -1,6 +1,7 @@
 import React from 'react';
 import { Button } from 'antd';
 import { EditOutlined, DeleteOutlined, UserOutlined, EyeOutlined } from '@ant-design/icons';
+import dayjs from 'dayjs';
 import type { TimelineItem } from '@/api/archive';
 import { fmt } from './formatters';
 
@@ -26,7 +27,14 @@ const TimelineCard: React.FC<Props> = ({ item, isMobile, onView, onEdit, onDelet
 
       <div className="record-top">
         <div className="record-title-wrap">
-          <span className="record-badge">{isOpto ? '验光单' : '配镜单'}</span>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
+            <span className="record-badge">{isOpto ? '验光单' : '配镜单'}</span>
+            <span className="record-date-badge">
+              📅 {isOpto
+                ? (d.examDate ? dayjs(d.examDate).format('YYYY-MM-DD') : '-')
+                : (d.salesDate ? dayjs(d.salesDate).format('YYYY-MM-DD') : '-')}
+            </span>
+          </div>
           <h4>{item.title}</h4>
           <p className="subtitle">{item.subtitle}</p>
         </div>

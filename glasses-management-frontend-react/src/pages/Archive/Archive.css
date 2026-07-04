@@ -281,6 +281,19 @@
   color: var(--color-success);
 }
 
+.record-date-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 10px;
+  border-radius: 999px;
+  background: var(--surface-muted);
+  color: var(--text-secondary);
+  font-size: 11px;
+  font-weight: 700;
+  border: 1px solid var(--border-color);
+  white-space: nowrap;
+}
+
 :root[data-theme='dark'] .record-badge {
   background: rgba(96, 165, 250, 0.18);
   color: #60a5fa;
@@ -554,6 +567,13 @@
   line-height: 1.15;
   overflow-wrap: anywhere;
   word-break: break-word;
+}
+
+.sheet-date {
+  margin: 6px 0 0;
+  font-size: 14px;
+  color: var(--text-secondary);
+  font-weight: 600;
 }
 
 .sheet-halo {

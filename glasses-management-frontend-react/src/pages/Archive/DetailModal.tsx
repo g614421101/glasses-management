@@ -1,5 +1,6 @@
 import React from 'react';
 import { Button } from 'antd';
+import dayjs from 'dayjs';
 import { fmt } from './formatters';
 import type { TimelineItem } from '@/api/archive';
 
@@ -23,6 +24,7 @@ const DetailModal: React.FC<Props> = ({ open, detail, onClose }) => {
               <div>
                 <div className="receipt-badge primary">验光记录</div>
                 <h3 className="sheet-title">双眼屈光参数总览</h3>
+                <p className="sheet-date">📅 检查日期：{d.examDate ? dayjs(d.examDate).format('YYYY-MM-DD') : '-'}</p>
               </div>
             </div>
 
@@ -75,6 +77,7 @@ const DetailModal: React.FC<Props> = ({ open, detail, onClose }) => {
               <div>
                 <div className="receipt-badge success">配镜信息</div>
                 <h3 className="sheet-title">订单 {d.recordNo}</h3>
+                <p className="sheet-date">📅 销售日期：{d.salesDate ? dayjs(d.salesDate).format('YYYY-MM-DD') : '-'}</p>
               </div>
               <div className="total-bubble">
                 <small>

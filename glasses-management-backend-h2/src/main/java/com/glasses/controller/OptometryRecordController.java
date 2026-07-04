@@ -45,6 +45,7 @@ public class OptometryRecordController {
 
     @PutMapping("/update")
     public Result<Boolean> updateRecord(@RequestBody OptometryRecord record) {
+        record.setCreateTime(null);
         return Result.success(optometryRecordService.updateById(record));
     }
 

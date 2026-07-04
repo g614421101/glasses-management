@@ -401,3 +401,10 @@ Windows 平台上，即便给 Java 启动参数指定了 `-Dfile.encoding=UTF-8`
 - Android 项目的 `build.gradle.kts` 需要 `buildFeatures { buildConfig = true }` 才能使用 `BuildConfig.DEBUG`。
 - Kotlin 文件中的中文字符串如果被 `git filter-branch` 等工具损坏，会出现 `�?` 乱码导致编译报错。遇到 `Expecting '"'` 或 `Unresolved reference` 等莫名错误时，先检查文件编码。
 - `.gradle/`、`build/`、`local.properties` 已在 `.gitignore` 中排除，不要手动提交。
+
+## Changelog 维护规范
+
+- 记录文件放在 `changelog/` 目录下，以日期命名：`YYYY-MM-DD.md`
+- 每次合并功能分支或重要改动后，新增一个日期文件，简要描述改动内容、背景和涉及模块
+- `changelog/` 目录已在 `.gitignore` 中排除，不被 Git 托管（本地开发记录用）
+- 保持简洁，每条改动一两句话即可，目的是日后回顾时能快速理解"做了什么、为什么做"

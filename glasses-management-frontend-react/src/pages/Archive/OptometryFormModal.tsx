@@ -1,9 +1,14 @@
 import React from 'react';
-import { Modal, Form, Input, Row, Col, Divider, message } from 'antd';
+import { Modal, Form, Input, Row, Col, Divider, DatePicker, message } from 'antd';
+import dayjs from 'dayjs';
 import { optometryAPI, OptometryRecord } from '@/api/optometry';
 import { fmtInput } from './formatters';
 
-export type OptoForm = Omit<Partial<OptometryRecord>, 'id'> & { id?: number | null; customerId: number };
+export type OptoForm = Omit<Partial<OptometryRecord>, 'id' | 'examDate'> & {
+  id?: number | null;
+  customerId: number;
+  examDate?: dayjs.Dayjs;
+};
 
 export const buildEmptyOpto = (customerId: number): OptoForm => ({
   id: null,
@@ -12,16 +17,29 @@ export const buildEmptyOpto = (customerId: number): OptoForm => ({
   osSph: '', osCyl: '', osAxis: '', osVa: '',
   odPd: '', osPd: '', pdFar: '', pdNear: '', addPower: '',
   optometristName: '',
+  examDate: dayjs(),
   remark: '',
 });
 
 export const prepareOptoForEdit = (raw: any): OptoForm => ({
-  ...raw,
+  id: raw.id,
+  customerId: raw.customerId,
   odSph: fmtInput(raw.odSph),
   odCyl: fmtInput(raw.odCyl),
+  odAxis: raw.odAxis,
+  odVa: raw.odVa,
   osSph: fmtInput(raw.osSph),
   osCyl: fmtInput(raw.osCyl),
+  osAxis: raw.osAxis,
+  osVa: raw.osVa,
+  odPd: raw.odPd,
+  osPd: raw.osPd,
+  pdFar: raw.pdFar,
+  pdNear: raw.pdNear,
   addPower: fmtInput(raw.addPower),
+  optometristName: raw.optometristName,
+  examDate: raw.examDate ? dayjs(raw.examDate) : undefined,
+  remark: raw.remark,
 });
 
 interface Props {
@@ -49,13 +67,19 @@ const OptometryFormModal: React.FC<Props> = ({ open, initial, onClose, onSaved }
 
   const handleSubmit = async () => {
     const values = await form.validateFields();
+    const payload: any = { ...values, createTime: undefined, updateTime: undefined };
+    if (payload.examDate) {
+      payload.examDate = dayjs.isDayjs(payload.examDate)
+        ? (payload.examDate as dayjs.Dayjs).format('YYYY-MM-DD') + ' 00:00:00'
+        : payload.examDate;
+    }
     setSubmitting(true);
     try {
-      if (values.id) {
-        await optometryAPI.update(values as any);
+      if (payload.id) {
+        await optometryAPI.update(payload);
         message.success('更新成功');
       } else {
-        await optometryAPI.add(values as any);
+        await optometryAPI.add(payload);
         message.success('验光单录入成功');
       }
       onClose();
@@ -114,6 +138,10 @@ const OptometryFormModal: React.FC<Props> = ({ open, initial, onClose, onSaved }
           <Col xs={24} sm={12} md={8}><Form.Item label="下加光" name="addPower"><Input /></Form.Item></Col>
           <Col xs={24} sm={12} md={8}><Form.Item label="验光师" name="optometristName"><Input placeholder="默认操作人" /></Form.Item></Col>
         </Row>
+
+        <Form.Item label="检查日期" name="examDate">
+          <DatePicker style={{ width: '100%' }} placeholder="选择检查日期" />
+        </Form.Item>
 
         <Form.Item label="备注" name="remark">
           <Input.TextArea rows={2} placeholder="选填，记录眼部情况或其他补充信息..." />

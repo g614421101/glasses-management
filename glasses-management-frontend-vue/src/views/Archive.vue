@@ -89,7 +89,12 @@
 
               <div class="record-top">
                 <div class="record-title-wrap">
-                  <span class="record-badge">{{ item.type === 'OPTOMETRY' ? '验光单' : '配镜单' }}</span>
+                  <div style="display:flex; align-items:center; gap:8px; flex-wrap:wrap;">
+                    <span class="record-badge">{{ item.type === 'OPTOMETRY' ? '验光单' : '配镜单' }}</span>
+                    <span class="record-date-badge">
+                      📅 {{ item.type === 'OPTOMETRY' ? (item.data.examDate?.substring(0, 10) || '-') : (item.data.salesDate?.substring(0, 10) || '-') }}
+                    </span>
+                  </div>
                   <h4>{{ item.title }}</h4>
                   <p class="subtitle">{{ item.subtitle }}</p>
                 </div>
@@ -261,6 +266,7 @@
           <div>
             <div class="receipt-badge primary">验光记录</div>
             <h3 class="sheet-title">双眼屈光参数总览</h3>
+            <p class="sheet-date">📅 检查日期：{{ currentDetail.data.examDate?.substring(0, 10) || '-' }}</p>
           </div>
           <div class="sheet-halo"></div>
         </div>
@@ -313,6 +319,7 @@
           <div>
             <div class="receipt-badge success">配镜信息</div>
             <h3 class="sheet-title">订单 {{ currentDetail.data.recordNo }}</h3>
+            <p class="sheet-date">📅 销售日期：{{ currentDetail.data.salesDate?.substring(0, 10) || '-' }}</p>
           </div>
           <div class="total-bubble">
             <small>
@@ -393,6 +400,20 @@
           <el-col :xs="24" :sm="12" :md="8"><el-form-item label="验光师" label-width="68px"><el-input v-model="optoForm.optometristName" placeholder="默认操作人" /></el-form-item></el-col>
         </el-row>
 
+        <el-row :gutter="12">
+          <el-col :xs="24" :sm="12">
+            <el-form-item label="检查日期" label-width="84px">
+              <el-date-picker
+                v-model="optoForm.examDate"
+                type="date"
+                value-format="YYYY-MM-DD"
+                placeholder="选择检查日期"
+                style="width: 100%"
+              />
+            </el-form-item>
+          </el-col>
+        </el-row>
+
         <el-row>
           <el-col :span="24">
             <el-form-item label="备注" label-width="60px">
@@ -420,6 +441,20 @@
                   :value="item.data.id"
                 />
               </el-select>
+            </el-form-item>
+          </el-col>
+        </el-row>
+
+        <el-row :gutter="12">
+          <el-col :xs="24" :sm="12">
+            <el-form-item label="销售日期" label-width="80px">
+              <el-date-picker
+                v-model="salesForm.salesDate"
+                type="date"
+                value-format="YYYY-MM-DD"
+                placeholder="选择销售日期"
+                style="width: 100%"
+              />
             </el-form-item>
           </el-col>
         </el-row>
@@ -560,6 +595,11 @@ const currentDetail = ref<any>(null);
 
 const optoDialogVisible = ref(false);
 const optoSubmitting = ref(false);
+const todayStr = () => {
+  const d = new Date();
+  return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+};
+
 const optoForm = reactive<any>({
   id: null,
   customerId,
@@ -567,6 +607,7 @@ const optoForm = reactive<any>({
   osSph: '', osCyl: '', osAxis: '', osVa: '',
   odPd: '', osPd: '', pdFar: '', pdNear: '', addPower: '',
   optometristName: '',
+  examDate: todayStr(),
   remark: ''
 });
 
@@ -588,6 +629,7 @@ const salesForm = reactive<any>({
   lensPrice: 0,
   totalRetailPrice: 0,
   totalAmount: 0,
+  salesDate: todayStr(),
   remark: ''
 });
 
@@ -644,7 +686,7 @@ const resetOpto = () => {
     odSph: '', odCyl: '', odAxis: '', odVa: '',
     osSph: '', osCyl: '', osAxis: '', osVa: '',
     odPd: '', osPd: '', pdFar: '', pdNear: '', addPower: '',
-    optometristName: '', remark: ''
+    optometristName: '', examDate: todayStr(), remark: ''
   });
 };
 
@@ -665,11 +707,15 @@ const submitOpto = async () => {
   if (optoSubmitting.value) return;
   optoSubmitting.value = true;
   try {
-    if (optoForm.id) {
-      await request.put('/optometry/update', optoForm);
+    const payload = { ...optoForm, createTime: undefined, updateTime: undefined };
+    if (payload.examDate && payload.examDate.length === 10) {
+      payload.examDate = payload.examDate + ' 00:00:00';
+    }
+    if (payload.id) {
+      await request.put('/optometry/update', payload);
       ElMessage.success('更新成功');
     } else {
-      await request.post('/optometry/add', optoForm);
+      await request.post('/optometry/add', payload);
       ElMessage.success('验光单录入成功');
     }
     optoDialogVisible.value = false;
@@ -696,6 +742,7 @@ const resetSales = () => {
     lensPrice: 0,
     totalRetailPrice: 0,
     totalAmount: 0,
+    salesDate: todayStr(),
     remark: ''
   });
 };
@@ -716,11 +763,15 @@ const submitSales = async () => {
   if (salesSubmitting.value) return;
   salesSubmitting.value = true;
   try {
-    if (salesForm.id) {
-      await request.put('/sales/update', salesForm);
+    const payload = { ...salesForm, createTime: undefined, updateTime: undefined };
+    if (payload.salesDate && payload.salesDate.length === 10) {
+      payload.salesDate = payload.salesDate + ' 00:00:00';
+    }
+    if (payload.id) {
+      await request.put('/sales/update', payload);
       ElMessage.success('更新成功');
     } else {
-      await request.post('/sales/add', salesForm);
+      await request.post('/sales/add', payload);
       ElMessage.success('配镜开单成功');
     }
     salesDialogVisible.value = false;
@@ -732,15 +783,49 @@ const submitSales = async () => {
 
 const openEdit = (item) => {
   if (item.type === 'OPTOMETRY') {
-    Object.assign(optoForm, item.data);
-    optoForm.odSph = fmtInput(optoForm.odSph);
-    optoForm.odCyl = fmtInput(optoForm.odCyl);
-    optoForm.osSph = fmtInput(optoForm.osSph);
-    optoForm.osCyl = fmtInput(optoForm.osCyl);
-    optoForm.addPower = fmtInput(optoForm.addPower);
+    const d = item.data;
+    Object.assign(optoForm, {
+      id: d.id,
+      customerId: d.customerId,
+      odSph: fmtInput(d.odSph),
+      odCyl: fmtInput(d.odCyl),
+      odAxis: d.odAxis,
+      odVa: d.odVa,
+      osSph: fmtInput(d.osSph),
+      osCyl: fmtInput(d.osCyl),
+      osAxis: d.osAxis,
+      osVa: d.osVa,
+      odPd: d.odPd,
+      osPd: d.osPd,
+      pdFar: d.pdFar,
+      pdNear: d.pdNear,
+      addPower: fmtInput(d.addPower),
+      optometristName: d.optometristName,
+      examDate: d.examDate?.substring(0, 10) || todayStr(),
+      remark: d.remark,
+    });
     optoDialogVisible.value = true;
   } else {
-    Object.assign(salesForm, item.data);
+    const d = item.data;
+    Object.assign(salesForm, {
+      id: d.id,
+      customerId: d.customerId,
+      optometryId: d.optometryId,
+      frameBrand: d.frameBrand,
+      frameModel: d.frameModel,
+      frameQuantity: d.frameQuantity ?? 1,
+      frameRetailPrice: d.frameRetailPrice ?? 0,
+      framePrice: d.framePrice ?? 0,
+      lensBrand: d.lensBrand,
+      lensParams: d.lensParams,
+      lensQuantity: d.lensQuantity ?? 1,
+      lensRetailPrice: d.lensRetailPrice ?? 0,
+      lensPrice: d.lensPrice ?? 0,
+      totalRetailPrice: d.totalRetailPrice ?? 0,
+      totalAmount: d.totalAmount ?? 0,
+      salesDate: d.salesDate?.substring(0, 10) || todayStr(),
+      remark: d.remark,
+    });
     salesDialogVisible.value = true;
   }
 };
@@ -1060,6 +1145,19 @@ const fmtInput = (val) => {
   font-weight: 800;
 }
 
+.record-date-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 10px;
+  border-radius: 999px;
+  background: var(--surface-muted);
+  color: var(--text-secondary);
+  font-size: 11px;
+  font-weight: 700;
+  border: 1px solid var(--border-color);
+  white-space: nowrap;
+}
+
 .timeline-detail-card.is-sales .record-badge {
   background: var(--surface-muted);
   color: var(--primary-color);
@@ -1333,6 +1431,13 @@ const fmtInput = (val) => {
   line-height: 1.15;
   overflow-wrap: anywhere;
   word-break: break-word;
+}
+
+.sheet-date {
+  margin: 6px 0 0;
+  font-size: 14px;
+  color: var(--text-secondary);
+  font-weight: 600;
 }
 
 .sheet-halo {

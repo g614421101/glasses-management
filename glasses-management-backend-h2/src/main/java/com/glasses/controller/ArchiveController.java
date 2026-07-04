@@ -31,9 +31,10 @@ public class ArchiveController {
         for (OptometryRecord record : optometryRecords) {
             TimelineItemDTO item = new TimelineItemDTO();
             item.setType("OPTOMETRY");
-            item.setDate(record.getExamDate());
+            item.setDate(record.getCreateTime());
             item.setTitle("验光记录");
-            item.setSubtitle("验光师: " + (record.getOptometristName() != null ? record.getOptometristName() : "未知"));
+            String optometrist = record.getOptometristName() != null ? record.getOptometristName() : "未知";
+            item.setSubtitle("验光师: " + optometrist);
             item.setData(record);
             timeline.add(item);
         }
@@ -43,7 +44,7 @@ public class ArchiveController {
         for (SalesRecord record : salesRecords) {
             TimelineItemDTO item = new TimelineItemDTO();
             item.setType("SALES");
-            item.setDate(record.getSalesDate());
+            item.setDate(record.getCreateTime());
             item.setTitle("配镜记录");
             item.setSubtitle("总计金额: " + record.getTotalAmount() + "元");
             

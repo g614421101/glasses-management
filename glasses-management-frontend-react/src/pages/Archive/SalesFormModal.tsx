@@ -1,9 +1,14 @@
 import React from 'react';
-import { Modal, Form, Input, InputNumber, Row, Col, Divider, Select, message } from 'antd';
+import { Modal, Form, Input, InputNumber, Row, Col, Divider, Select, DatePicker, message } from 'antd';
+import dayjs from 'dayjs';
 import { salesAPI, SalesRecord } from '@/api/sales';
 import type { TimelineItem } from '@/api/archive';
 
-export type SalesForm = Omit<Partial<SalesRecord>, 'id'> & { id?: number | null; customerId: number };
+export type SalesForm = Omit<Partial<SalesRecord>, 'id' | 'salesDate'> & {
+  id?: number | null;
+  customerId: number;
+  salesDate?: dayjs.Dayjs;
+};
 
 export const buildEmptySales = (customerId: number): SalesForm => ({
   id: null,
@@ -21,6 +26,7 @@ export const buildEmptySales = (customerId: number): SalesForm => ({
   lensPrice: 0,
   totalRetailPrice: 0,
   totalAmount: 0,
+  salesDate: dayjs(),
   remark: '',
 });
 
@@ -39,7 +45,11 @@ const SalesFormModal: React.FC<Props> = ({ open, initial, optoOptions, onClose, 
 
   React.useEffect(() => {
     if (open && initial) {
-      form.setFieldsValue(initial);
+      const init: any = { ...initial };
+      if (init.salesDate && typeof init.salesDate === 'string') {
+        init.salesDate = dayjs(init.salesDate);
+      }
+      form.setFieldsValue(init);
       updateDiscount(initial.totalRetailPrice || 0, initial.totalAmount || 0);
     }
   }, [open, initial, form]);
@@ -70,13 +80,19 @@ const SalesFormModal: React.FC<Props> = ({ open, initial, optoOptions, onClose, 
 
   const handleSubmit = async () => {
     const values = await form.validateFields();
+    const payload: any = { ...values, createTime: undefined, updateTime: undefined };
+    if (payload.salesDate) {
+      payload.salesDate = dayjs.isDayjs(payload.salesDate)
+        ? (payload.salesDate as dayjs.Dayjs).format('YYYY-MM-DD') + ' 00:00:00'
+        : payload.salesDate;
+    }
     setSubmitting(true);
     try {
-      if (values.id) {
-        await salesAPI.update(values as any);
+      if (payload.id) {
+        await salesAPI.update(payload);
         message.success('更新成功');
       } else {
-        await salesAPI.add(values as any);
+        await salesAPI.add(payload);
         message.success('配镜开单成功');
       }
       onClose();
@@ -115,6 +131,10 @@ const SalesFormModal: React.FC<Props> = ({ open, initial, optoOptions, onClose, 
               </Select.Option>
             ))}
           </Select>
+        </Form.Item>
+
+        <Form.Item label="销售日期" name="salesDate">
+          <DatePicker style={{ width: '100%' }} placeholder="选择销售日期" />
         </Form.Item>
 
         <h4 className="form-block-title" style={{ marginTop: 8 }}>镜架信息</h4>

@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Button, Timeline, Descriptions, Empty, Modal, message } from 'antd';
+import dayjs from 'dayjs';
 import {
   ArrowLeftOutlined,
   FileAddOutlined,
@@ -82,7 +83,26 @@ const Archive: React.FC = () => {
       setOptoInitial(prepareOptoForEdit(item.data));
       setOptoOpen(true);
     } else {
-      setSalesInitial({ ...buildEmptySales(customerId), ...item.data });
+      const d = item.data;
+      setSalesInitial({
+        ...buildEmptySales(customerId),
+        id: d.id,
+        optometryId: d.optometryId,
+        frameBrand: d.frameBrand,
+        frameModel: d.frameModel,
+        frameQuantity: d.frameQuantity ?? 1,
+        frameRetailPrice: d.frameRetailPrice ?? 0,
+        framePrice: d.framePrice ?? 0,
+        lensBrand: d.lensBrand,
+        lensParams: d.lensParams,
+        lensQuantity: d.lensQuantity ?? 1,
+        lensRetailPrice: d.lensRetailPrice ?? 0,
+        lensPrice: d.lensPrice ?? 0,
+        totalRetailPrice: d.totalRetailPrice ?? 0,
+        totalAmount: d.totalAmount ?? 0,
+        salesDate: d.salesDate ? dayjs(d.salesDate) : undefined,
+        remark: d.remark,
+      });
       setSalesOpen(true);
     }
   };
