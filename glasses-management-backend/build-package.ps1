@@ -1,13 +1,18 @@
 # glasses-management-backend/build-package.ps1
 # Build the MySQL Spring Boot native Windows installer.
 
+param(
+    [ValidateSet('Vue', 'React')]
+    [string]$Frontend = 'Vue'
+)
+
 $ErrorActionPreference = 'Stop'
 
 $backendDir = $PSScriptRoot
 $rootDir = Split-Path -Parent $backendDir
 $tempDir = Join-Path $backendDir 'jpackage-temp'
 $distDir = Join-Path $backendDir 'dist-install'
-$jarName = 'glasses-management-backend-0.0.1-SNAPSHOT.jar'
+$jarName = 'glasses-management-backend-3.2.0.jar'
 $jarPath = Join-Path $backendDir "target\$jarName"
 $localConfigPath = Join-Path $backendDir 'application-local.yml'
 
@@ -35,11 +40,11 @@ function Resolve-Jpackage {
     return $candidates | Where-Object { $_ -and (Test-Path $_) } | Select-Object -First 1
 }
 
-Write-Host "[1/5] Building and syncing Frontend..." -ForegroundColor Cyan
-& (Join-Path $rootDir 'sync-frontend.ps1') -Backend MySQL
+Write-Host "[1/4] Building and syncing $Frontend Frontend..." -ForegroundColor Cyan
+& (Join-Path $rootDir 'sync-frontend.ps1') -Backend MySQL -Frontend $Frontend
 Assert-Success 'Frontend sync failed.'
 
-Write-Host "[3/5] Building MySQL Spring Boot Backend (Maven)..." -ForegroundColor Cyan
+Write-Host "[2/4] Building MySQL Spring Boot Backend (Maven)..." -ForegroundColor Cyan
 Push-Location $backendDir
 mvn clean package -DskipTests
 Assert-Success 'Backend build failed.'
@@ -50,7 +55,7 @@ if (-not (Test-Path $jarPath)) {
     exit 1
 }
 
-Write-Host "[4/5] Preparing jpackage input..." -ForegroundColor Cyan
+Write-Host "[3/4] Preparing jpackage input..." -ForegroundColor Cyan
 Remove-Item $tempDir -Recurse -Force -ErrorAction SilentlyContinue
 Remove-Item $distDir -Recurse -Force -ErrorAction SilentlyContinue
 New-Item -ItemType Directory -Force -Path $tempDir | Out-Null
@@ -62,7 +67,7 @@ if (Test-Path $localConfigPath) {
     Write-Host 'Warning: application-local.yml not found. Packaged app will require environment variables or an external config file.' -ForegroundColor Yellow
 }
 
-Write-Host "[5/5] Building MySQL native installer..." -ForegroundColor Cyan
+Write-Host "[4/4] Building MySQL native installer..." -ForegroundColor Cyan
 $jpackage = Resolve-Jpackage
 if (-not $jpackage) {
     Write-Host 'Error: jpackage.exe not found. Install JDK 21 or set JAVA_HOME.' -ForegroundColor Red
