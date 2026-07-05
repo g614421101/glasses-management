@@ -33,6 +33,10 @@ import com.glasses.app.ui.common.staggeredEntrance
 import com.glasses.app.viewmodel.ArchiveViewModel
 import java.math.BigDecimal
 import java.math.RoundingMode
+import java.text.SimpleDateFormat
+import java.util.Calendar
+import java.util.Locale
+import java.util.TimeZone
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -356,6 +360,9 @@ private fun TimelineCard(
         colors = CardDefaults.cardColors(containerColor = Color.White),
         border = BorderStroke(1.dp, BorderColor)
     ) {
+        val dataMap = item.data as? Map<*, *> ?: emptyMap<String, Any>()
+        val businessDate = if (isOptometry) dateStrShort(parseOptometry(dataMap).examDate) else dateStrShort(parseSales(dataMap).salesDate)
+
         Column(modifier = Modifier.padding(18.dp)) {
             // 标题行
             Row(
@@ -393,6 +400,14 @@ private fun TimelineCard(
                                 maxLines = 1
                             )
                         }
+                        if (!businessDate.isNullOrBlank()) {
+                            Text(
+                                text = "📅 $businessDate",
+                                fontSize = 11.sp,
+                                color = TextTertiary,
+                                fontWeight = FontWeight.SemiBold
+                            )
+                        }
                     }
                 }
                 Row(verticalAlignment = Alignment.CenterVertically) {
@@ -407,7 +422,6 @@ private fun TimelineCard(
         }
 
         // ── 数据预览 ──
-        val dataMap = item.data as? Map<*, *> ?: emptyMap<String, Any>()
         Spacer(modifier = Modifier.height(10.dp))
         HorizontalDivider(color = BorderColor, thickness = 0.5.dp)
         Spacer(modifier = Modifier.height(8.dp))
@@ -448,6 +462,7 @@ private fun TimelineCard(
     if (showDetail) {
         val dataMap = item.data as? Map<*, *> ?: emptyMap<String, Any>()
         val recordId = (dataMap["id"] as? Double)?.toLong()
+        val businessDate = if (isOptometry) dateStrShort(parseOptometry(dataMap).examDate) else dateStrShort(parseSales(dataMap).salesDate)
 
         ModalBottomSheet(
             onDismissRequest = { showDetail = false },
@@ -483,7 +498,15 @@ private fun TimelineCard(
                             color = TextPrimary,
                             fontSize = 20.sp
                         )
-                        Text(item.date ?: "", fontSize = 13.sp, color = TextSecondary)
+                        Text("录入时间：${item.date ?: "-"}", fontSize = 13.sp, color = TextSecondary)
+                        if (!businessDate.isNullOrBlank()) {
+                            Text(
+                                text = "📅 ${if (isOptometry) "检查日期" else "销售日期"}：$businessDate",
+                                fontSize = 13.sp,
+                                color = TextSecondary,
+                                fontWeight = FontWeight.Medium
+                            )
+                        }
                     }
                 }
 
@@ -701,6 +724,38 @@ private fun fmtPlain(value: BigDecimal?): String {
     return value.setScale(2, RoundingMode.HALF_UP).toPlainString()
 }
 
+// 日期辅助函数：与 Vue 前端的 todayStr() / substring(0,10) 行为保持一致
+private fun todayStr(): String {
+    val cal = Calendar.getInstance()
+    val y = cal.get(Calendar.YEAR)
+    val m = (cal.get(Calendar.MONTH) + 1).toString().padStart(2, '0')
+    val d = cal.get(Calendar.DAY_OF_MONTH).toString().padStart(2, '0')
+    return "$y-$m-$d"
+}
+
+private fun dateStrShort(s: String?): String? {
+    return s?.take(10)?.takeIf { it.length == 10 }
+}
+
+private fun dateStrToMillis(s: String?): Long? {
+    val dateStr = dateStrShort(s) ?: return null
+    return try {
+        SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).apply {
+            timeZone = TimeZone.getTimeZone("UTC")
+        }.parse(dateStr)?.time
+    } catch (_: Exception) {
+        null
+    }
+}
+
+private fun millisToDateStr(millis: Long): String {
+    val cal = Calendar.getInstance(TimeZone.getTimeZone("UTC")).apply { timeInMillis = millis }
+    val y = cal.get(Calendar.YEAR)
+    val m = (cal.get(Calendar.MONTH) + 1).toString().padStart(2, '0')
+    val d = cal.get(Calendar.DAY_OF_MONTH).toString().padStart(2, '0')
+    return "$y-$m-$d"
+}
+
 @Composable
 private fun DetailField(label: String?, value: String?, modifier: Modifier = Modifier) {
     Column(modifier = modifier.padding(vertical = 2.dp)) {
@@ -779,6 +834,7 @@ private fun OptometryDialog(
     var pdNear by remember { mutableStateOf(record?.pdNear?.toString() ?: "") }
     var addPower by remember { mutableStateOf(record?.addPower?.toString() ?: "") }
     var optometrist by remember { mutableStateOf(record?.optometristName ?: "") }
+    var examDate by remember(record) { mutableStateOf(dateStrShort(record?.examDate) ?: todayStr()) }
     var remark by remember { mutableStateOf(record?.remark ?: "") }
 
     val fieldColors = OutlinedTextFieldDefaults.colors(
@@ -904,6 +960,14 @@ private fun OptometryDialog(
                     Spacer(modifier = Modifier.height(6.dp))
                     OutlinedTextField(value = optometrist, onValueChange = { optometrist = it }, label = { Text("验光师") }, singleLine = true, colors = fieldColors, shape = RoundedCornerShape(12.dp), modifier = Modifier.fillMaxWidth())
                     Spacer(modifier = Modifier.height(6.dp))
+                    DatePickerField(
+                        label = "检查日期",
+                        date = examDate,
+                        onDateChange = { examDate = it },
+                        colors = fieldColors,
+                        modifier = Modifier.fillMaxWidth()
+                    )
+                    Spacer(modifier = Modifier.height(6.dp))
                     OutlinedTextField(value = remark, onValueChange = { remark = it }, label = { Text("备注") }, colors = fieldColors, shape = RoundedCornerShape(12.dp), modifier = Modifier.fillMaxWidth(), minLines = 2)
                 }
             }
@@ -942,6 +1006,7 @@ private fun OptometryDialog(
                                 pdNear = pdNear.toBigDecimalOrNull(),
                                 addPower = addPower.toBigDecimalOrNull(),
                                 optometristName = optometrist.ifBlank { null },
+                                examDate = examDate.takeIf { it.isNotBlank() }?.let { "$it 00:00:00" },
                                 remark = remark.ifBlank { null }
                             )
                         )
@@ -976,6 +1041,7 @@ private fun SalesDialog(
     var lensPrice by remember { mutableStateOf(record?.lensPrice?.toString() ?: "") }
     var totalRetailPrice by remember { mutableStateOf(record?.totalRetailPrice?.toString() ?: "") }
     var totalAmount by remember { mutableStateOf(record?.totalAmount?.toString() ?: "") }
+    var salesDate by remember(record) { mutableStateOf(dateStrShort(record?.salesDate) ?: todayStr()) }
     var remark by remember { mutableStateOf(record?.remark ?: "") }
 
     val fieldColors = OutlinedTextFieldDefaults.colors(
@@ -1018,6 +1084,21 @@ private fun SalesDialog(
             }
 
             Spacer(modifier = Modifier.height(20.dp))
+
+            // ── 销售日期 ──
+            Surface(shape = sectionShape, color = Background, modifier = Modifier.fillMaxWidth()) {
+                Column(modifier = Modifier.padding(14.dp)) {
+                    DatePickerField(
+                        label = "销售日期",
+                        date = salesDate,
+                        onDateChange = { salesDate = it },
+                        colors = fieldColors,
+                        modifier = Modifier.fillMaxWidth()
+                    )
+                }
+            }
+
+            Spacer(modifier = Modifier.height(12.dp))
 
             // ── 镜架 ──
             Surface(shape = sectionShape, color = Background, modifier = Modifier.fillMaxWidth()) {
@@ -1154,6 +1235,7 @@ private fun SalesDialog(
                                 lensPrice = lp,
                                 totalRetailPrice = totalRetailPrice.toBigDecimalOrNull() ?: computedTotalRetail,
                                 totalAmount = totalAmount.toBigDecimalOrNull() ?: computedTotal,
+                                salesDate = salesDate.takeIf { it.isNotBlank() }?.let { "$it 00:00:00" },
                                 remark = remark.ifBlank { null }
                             )
                         )
@@ -1202,4 +1284,50 @@ private fun SmallField(
         textStyle = MaterialTheme.typography.bodyMedium,
         modifier = modifier
     )
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun DatePickerField(
+    label: String,
+    date: String,
+    onDateChange: (String) -> Unit,
+    colors: TextFieldColors,
+    modifier: Modifier = Modifier
+) {
+    var showPicker by remember { mutableStateOf(false) }
+    OutlinedTextField(
+        value = date,
+        onValueChange = {},
+        readOnly = true,
+        label = { Text(label) },
+        singleLine = true,
+        colors = colors,
+        shape = RoundedCornerShape(12.dp),
+        trailingIcon = {
+            IconButton(onClick = { showPicker = true }) {
+                Icon(Icons.Default.CalendarToday, contentDescription = "选择日期", tint = Primary)
+            }
+        },
+        modifier = modifier
+    )
+    if (showPicker) {
+        val state = rememberDatePickerState(initialSelectedDateMillis = dateStrToMillis(date))
+        DatePickerDialog(
+            onDismissRequest = { showPicker = false },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        state.selectedDateMillis?.let { onDateChange(millisToDateStr(it)) }
+                        showPicker = false
+                    }
+                ) { Text("确定", color = Primary, fontWeight = FontWeight.SemiBold) }
+            },
+            dismissButton = {
+                TextButton(onClick = { showPicker = false }) { Text("取消") }
+            }
+        ) {
+            DatePicker(state = state)
+        }
+    }
 }
