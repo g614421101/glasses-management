@@ -496,12 +496,24 @@
         <el-row :gutter="12">
           <el-col :xs="24" :sm="12">
             <el-form-item label="镜片品牌">
-              <el-input v-model="salesForm.lensBrand" />
+              <el-autocomplete
+                v-model="salesForm.lensBrand"
+                :fetch-suggestions="queryLensBrand"
+                placeholder="选择或输入镜片品牌"
+                clearable
+                style="width: 100%"
+              />
             </el-form-item>
           </el-col>
           <el-col :xs="24" :sm="12">
             <el-form-item label="镜片参数">
-              <el-input v-model="salesForm.lensParams" placeholder="例: 1.60 防蓝光" />
+              <el-autocomplete
+                v-model="salesForm.lensParams"
+                :fetch-suggestions="queryLensParams"
+                placeholder="例: 1.60 防蓝光"
+                clearable
+                style="width: 100%"
+              />
             </el-form-item>
           </el-col>
         </el-row>
@@ -563,6 +575,7 @@
 import { ref, reactive, onMounted, onUnmounted, computed } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import request, { openBlob, downloadBlob } from '../utils/request';
+import { getLensSuggestions, saveLensHistory } from '../utils/lensOptions';
 import { ElMessage, ElMessageBox } from 'element-plus';
 import {
   Back,
@@ -632,6 +645,20 @@ const salesForm = reactive<any>({
   salesDate: todayStr(),
   remark: ''
 });
+
+const queryLensBrand = (query: string, cb: (items: { value: string }[]) => void) => {
+  const list = getLensSuggestions('lensBrand');
+  const q = (query || '').trim().toLowerCase();
+  const result = q ? list.filter((v) => v.toLowerCase().includes(q)) : list;
+  cb(result.map((v) => ({ value: v })));
+};
+
+const queryLensParams = (query: string, cb: (items: { value: string }[]) => void) => {
+  const list = getLensSuggestions('lensParams');
+  const q = (query || '').trim().toLowerCase();
+  const result = q ? list.filter((v) => v.toLowerCase().includes(q)) : list;
+  cb(result.map((v) => ({ value: v })));
+};
 
 const computedDiscount = computed(() => {
   const retail = salesForm.totalRetailPrice || 0;
@@ -774,6 +801,7 @@ const submitSales = async () => {
       await request.post('/sales/add', payload);
       ElMessage.success('配镜开单成功');
     }
+    saveLensHistory({ lensBrand: salesForm.lensBrand, lensParams: salesForm.lensParams });
     salesDialogVisible.value = false;
     loadTimeline();
   } catch (e) {} finally {

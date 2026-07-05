@@ -1,8 +1,9 @@
 import React from 'react';
-import { Modal, Form, Input, InputNumber, Row, Col, Divider, Select, DatePicker, message } from 'antd';
+import { Modal, Form, Input, InputNumber, Row, Col, Divider, Select, DatePicker, AutoComplete, message } from 'antd';
 import dayjs from 'dayjs';
 import { salesAPI, SalesRecord } from '@/api/sales';
 import type { TimelineItem } from '@/api/archive';
+import { getLensSuggestions, saveLensHistory } from '@/utils/lensOptions';
 
 export type SalesForm = Omit<Partial<SalesRecord>, 'id' | 'salesDate'> & {
   id?: number | null;
@@ -42,6 +43,16 @@ const SalesFormModal: React.FC<Props> = ({ open, initial, optoOptions, onClose, 
   const [form] = Form.useForm<SalesForm>();
   const [submitting, setSubmitting] = React.useState(false);
   const [discount, setDiscount] = React.useState('-');
+
+  // 镜片品牌 / 镜片参数建议选项：预设常量 + localStorage 历史记忆，每次打开对话框时刷新
+  const lensBrandOptions = React.useMemo(
+    () => getLensSuggestions('lensBrand').map((v) => ({ value: v })),
+    [open]
+  );
+  const lensParamsOptions = React.useMemo(
+    () => getLensSuggestions('lensParams').map((v) => ({ value: v })),
+    [open]
+  );
 
   React.useEffect(() => {
     if (open && initial) {
@@ -95,6 +106,7 @@ const SalesFormModal: React.FC<Props> = ({ open, initial, optoOptions, onClose, 
         await salesAPI.add(payload);
         message.success('配镜开单成功');
       }
+      saveLensHistory({ lensBrand: payload.lensBrand, lensParams: payload.lensParams });
       onClose();
       onSaved();
     } catch (e) {
@@ -152,8 +164,28 @@ const SalesFormModal: React.FC<Props> = ({ open, initial, optoOptions, onClose, 
 
         <h4 className="form-block-title">镜片信息</h4>
         <Row gutter={12}>
-          <Col xs={24} sm={12}><Form.Item label="镜片品牌" name="lensBrand"><Input /></Form.Item></Col>
-          <Col xs={24} sm={12}><Form.Item label="镜片参数" name="lensParams"><Input placeholder="例: 1.60 防蓝光" /></Form.Item></Col>
+          <Col xs={24} sm={12}>
+            <Form.Item label="镜片品牌" name="lensBrand">
+              <AutoComplete
+                options={lensBrandOptions}
+                filterOption={(input, option) =>
+                  (option?.value ?? '').toString().toLowerCase().includes(input.trim().toLowerCase())
+                }
+                placeholder="选择或输入镜片品牌"
+              />
+            </Form.Item>
+          </Col>
+          <Col xs={24} sm={12}>
+            <Form.Item label="镜片参数" name="lensParams">
+              <AutoComplete
+                options={lensParamsOptions}
+                filterOption={(input, option) =>
+                  (option?.value ?? '').toString().toLowerCase().includes(input.trim().toLowerCase())
+                }
+                placeholder="例: 1.60 防蓝光"
+              />
+            </Form.Item>
+          </Col>
         </Row>
         <Row gutter={12}>
           <Col xs={24} sm={8}><Form.Item label="数量" name="lensQuantity"><InputNumber min={1} step={1} onChange={calcTotal} style={{ width: '100%' }} /></Form.Item></Col>
