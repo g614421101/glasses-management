@@ -21,4 +21,6 @@ export const FEATURES = {
   RECYCLE_BIN: true,
   /** 账号管理 / 超管功能 */
   SYS_USER: true,
+  /** 操作日志 */
+  OPERATION_LOG: true,
 } as const;

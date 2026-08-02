@@ -37,6 +37,28 @@ public class SchemaCompatibilityInitializer implements ApplicationRunner {
         addColumnIfMissing("sales_record", "frame_quantity", "int NOT NULL DEFAULT 1");
         addColumnIfMissing("sales_record", "lens_quantity", "int NOT NULL DEFAULT 1");
 
+        // operation_log 为新表：存量库升级时先建表再补列，避免 ALTER 不存在的表导致启动失败
+        jdbcTemplate.execute("CREATE TABLE IF NOT EXISTS operation_log ("
+                + "id bigint NOT NULL AUTO_INCREMENT, "
+                + "operator_id bigint DEFAULT NULL, "
+                + "operator_name varchar(50) DEFAULT NULL, "
+                + "module varchar(50) NOT NULL, "
+                + "action varchar(20) NOT NULL, "
+                + "method varchar(10) NOT NULL, "
+                + "uri varchar(200) NOT NULL, "
+                + "description varchar(500) DEFAULT NULL, "
+                + "params text, "
+                + "status int NOT NULL DEFAULT 200, "
+                + "message varchar(500) DEFAULT NULL, "
+                + "cost_ms bigint DEFAULT NULL, "
+                + "ip varchar(50) DEFAULT NULL, "
+                + "create_time datetime DEFAULT CURRENT_TIMESTAMP, "
+                + "PRIMARY KEY (id), "
+                + "KEY idx_operation_log_operator_id (operator_id), "
+                + "KEY idx_operation_log_create_time (create_time)"
+                + ") ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci");
+        addColumnIfMissing("operation_log", "description", "varchar(500) DEFAULT NULL");
+
         addIndexIfMissing("sys_user", "uk_phone", "CREATE UNIQUE INDEX uk_phone ON sys_user(phone)");
         addIndexIfMissing("sys_user", "idx_sys_user_deleted", "CREATE INDEX idx_sys_user_deleted ON sys_user(deleted)");
         addIndexIfMissing("sys_user", "idx_sys_user_deleted_time", "CREATE INDEX idx_sys_user_deleted_time ON sys_user(deleted_time)");

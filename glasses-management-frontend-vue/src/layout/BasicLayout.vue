@@ -99,6 +99,10 @@
             <el-icon><User /></el-icon>
             <span>个人主页</span>
           </el-menu-item>
+          <el-menu-item index="/operation-log" v-if="FEATURES.OPERATION_LOG">
+            <el-icon><List /></el-icon>
+            <span>操作日志</span>
+          </el-menu-item>
           <el-menu-item index="/recycle-bin" v-if="FEATURES.RECYCLE_BIN && authStore.role === 'admin'">
             <el-icon><Delete /></el-icon>
             <span>回收站</span>
@@ -156,6 +160,10 @@
             <el-icon><User /></el-icon>
             <span>个人主页</span>
           </el-menu-item>
+          <el-menu-item index="/operation-log" v-if="FEATURES.OPERATION_LOG">
+            <el-icon><List /></el-icon>
+            <span>操作日志</span>
+          </el-menu-item>
           <el-menu-item index="/recycle-bin" v-if="FEATURES.RECYCLE_BIN && authStore.role === 'admin'">
             <el-icon><Delete /></el-icon>
             <span>回收站</span>
@@ -182,7 +190,7 @@
 import { ref, onMounted, onUnmounted } from 'vue';
 import { useAuthStore } from '../store/auth';
 import { useRouter, useRoute } from 'vue-router';
-import { Monitor, User, Setting, View, TrendCharts, Moon, Sunny, Delete, FolderOpened, SwitchButton, Menu as MenuIcon, Expand, Fold } from '@element-plus/icons-vue';
+import { Monitor, User, Setting, View, TrendCharts, Moon, Sunny, Delete, FolderOpened, SwitchButton, Menu as MenuIcon, Expand, Fold, List } from '@element-plus/icons-vue';
 import { useTheme } from '../utils/theme';
 import { FEATURES } from '../config/features';
 

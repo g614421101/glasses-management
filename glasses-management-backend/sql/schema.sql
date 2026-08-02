@@ -102,4 +102,25 @@ CREATE TABLE `sales_record` (
   KEY `idx_sales_deleted_time` (`deleted_time`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='sales records';
 
+DROP TABLE IF EXISTS `operation_log`;
+CREATE TABLE `operation_log` (
+  `id` bigint NOT NULL AUTO_INCREMENT,
+  `operator_id` bigint DEFAULT NULL COMMENT 'operator user id',
+  `operator_name` varchar(50) DEFAULT NULL COMMENT 'operator username',
+  `module` varchar(50) NOT NULL COMMENT 'business module',
+  `action` varchar(20) NOT NULL COMMENT 'ADD/UPDATE/DELETE/OTHER',
+  `method` varchar(10) NOT NULL COMMENT 'HTTP method',
+  `uri` varchar(200) NOT NULL COMMENT 'request URI',
+  `description` varchar(500) DEFAULT NULL COMMENT 'human readable description',
+  `params` text COMMENT 'request params JSON (empty for sensitive APIs)',
+  `status` int NOT NULL DEFAULT '200' COMMENT 'result code',
+  `message` varchar(500) DEFAULT NULL COMMENT 'result message',
+  `cost_ms` bigint DEFAULT NULL COMMENT 'cost ms',
+  `ip` varchar(50) DEFAULT NULL COMMENT 'client ip',
+  `create_time` datetime DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  KEY `idx_operation_log_operator_id` (`operator_id`),
+  KEY `idx_operation_log_create_time` (`create_time`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='operation audit logs';
+
 SET FOREIGN_KEY_CHECKS = 1;

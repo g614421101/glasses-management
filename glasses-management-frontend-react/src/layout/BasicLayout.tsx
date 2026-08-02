@@ -11,6 +11,7 @@ import {
   BarChartOutlined,
   FolderOutlined,
   DeleteOutlined,
+  FileTextOutlined,
   ExpandOutlined,
   ShrinkOutlined,
 } from '@ant-design/icons';
@@ -28,6 +29,7 @@ const DataManage = lazy(() => import('@/pages/DataManage'));
 const Profile = lazy(() => import('@/pages/Profile'));
 const RecycleBin = lazy(() => import('@/pages/RecycleBin'));
 const SysUser = lazy(() => import('@/pages/SysUser'));
+const OperationLog = lazy(() => import('@/pages/OperationLog'));
 
 const { Content } = Layout;
 
@@ -65,6 +67,7 @@ const BasicLayout: React.FC = () => {
     FEATURES.STATISTICS && { key: '/stats', icon: <BarChartOutlined />, label: '营收统计' },
     FEATURES.DATA_MANAGE && { key: '/data-manage', icon: <FolderOutlined />, label: '数据管理' },
     FEATURES.PROFILE && { key: '/profile', icon: <UserOutlined />, label: '个人主页' },
+    FEATURES.OPERATION_LOG && { key: '/operation-log', icon: <FileTextOutlined />, label: '操作日志' },
     FEATURES.RECYCLE_BIN && isAdmin && { key: '/recycle-bin', icon: <DeleteOutlined />, label: '回收站' },
     FEATURES.SYS_USER && isAdmin && { key: '/sys-user', icon: <SettingOutlined />, label: '账号管理(超管)' },
   ].filter(Boolean) as any[];
@@ -268,6 +271,7 @@ const BasicLayout: React.FC = () => {
                 {FEATURES.STATISTICS && <Route path="stats" element={<Statistics />} />}
                 {FEATURES.DATA_MANAGE && <Route path="data-manage" element={<DataManage />} />}
                 {FEATURES.PROFILE && <Route path="profile" element={<Profile />} />}
+                {FEATURES.OPERATION_LOG && <Route path="operation-log" element={<OperationLog />} />}
                 {FEATURES.RECYCLE_BIN && (
                   <Route path="recycle-bin" element={<PrivateRoute adminOnly><RecycleBin /></PrivateRoute>} />
                 )}

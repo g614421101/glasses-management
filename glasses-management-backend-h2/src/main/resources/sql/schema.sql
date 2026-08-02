@@ -81,3 +81,23 @@ CREATE TABLE IF NOT EXISTS `sales_record` (
   PRIMARY KEY (`id`),
   UNIQUE KEY `uk_sales_record_record_no` (`record_no`)
 );
+
+CREATE TABLE IF NOT EXISTS `operation_log` (
+  `id` bigint NOT NULL AUTO_INCREMENT,
+  `operator_id` bigint DEFAULT NULL,
+  `operator_name` varchar(50) DEFAULT NULL,
+  `module` varchar(50) NOT NULL,
+  `action` varchar(20) NOT NULL,
+  `method` varchar(10) NOT NULL,
+  `uri` varchar(200) NOT NULL,
+  `description` varchar(500) DEFAULT NULL,
+  `params` text DEFAULT NULL,
+  `status` int NOT NULL DEFAULT 200,
+  `message` varchar(500) DEFAULT NULL,
+  `cost_ms` bigint DEFAULT NULL,
+  `ip` varchar(50) DEFAULT NULL,
+  `create_time` datetime DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  KEY `idx_operation_log_operator_id` (`operator_id`),
+  KEY `idx_operation_log_create_time` (`create_time`)
+);

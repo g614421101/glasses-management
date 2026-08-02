@@ -5,4 +5,5 @@ export const FEATURES = {
   PROFILE: true,
   RECYCLE_BIN: true,
   SYS_USER: true,
+  OPERATION_LOG: true,
 } as const;

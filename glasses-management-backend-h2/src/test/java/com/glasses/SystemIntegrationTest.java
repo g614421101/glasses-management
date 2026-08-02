@@ -7,9 +7,11 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.glasses.dto.LoginDTO;
 import com.glasses.entity.Customer;
+import com.glasses.entity.OperationLog;
 import com.glasses.entity.OptometryRecord;
 import com.glasses.entity.SalesRecord;
 import com.glasses.entity.SysUser;
+import com.glasses.mapper.OperationLogMapper;
 import com.glasses.mapper.SysUserMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -42,6 +44,9 @@ public class SystemIntegrationTest {
 
     @Autowired
     private SysUserMapper sysUserMapper;
+
+    @Autowired
+    private OperationLogMapper operationLogMapper;
 
     private String saToken;
 
@@ -212,5 +217,186 @@ public class SystemIntegrationTest {
                 .header("Authorization", saToken))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.code").value(200));
+    }
+
+    @Test
+    public void testOperationLog() throws Exception {
+        // 1. admin 执行写操作（新增顾客），应产生一条操作日志
+        Customer customer = new Customer();
+        customer.setName("日志测试顾客");
+        customer.setPhone("13711112222");
+        customer.setGender(1);
+        mockMvc.perform(MockMvcRequestBuilders.post("/api/customer/add")
+                .header("Authorization", saToken)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(customer)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.code").value(200));
+
+        // 2. admin 查询操作日志：应能看到记录，且参数 JSON 已入库
+        MvcResult adminPageResult = mockMvc.perform(MockMvcRequestBuilders.get("/api/operation-log/page")
+                .param("action", "ADD")
+                .header("Authorization", saToken))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.code").value(200))
+                .andReturn();
+        String jsonResponse = adminPageResult.getResponse().getContentAsString(java.nio.charset.StandardCharsets.UTF_8);
+        JsonNode adminRecords = objectMapper.readTree(jsonResponse).path("data").path("records");
+        assertTrue(adminRecords.size() > 0, "admin 应能查询到操作日志");
+        assertTrue(jsonResponse.contains("13711112222"), "操作日志应包含请求参数 JSON");
+        assertTrue(jsonResponse.contains("新增顾客：日志测试顾客"),
+                "操作日志应包含用户可读的中文描述（动作 + 对象名）");
+
+        // 3. 认证类接口（登录/注册/改密）不属于业务增删改，不应被记录
+        for (JsonNode record : adminRecords) {
+            assertFalse(record.path("uri").asText().startsWith("/api/auth/"),
+                    "认证类接口（auth）不应出现在操作日志中，实际: " + record.path("uri").asText());
+        }
+
+        // 4. 创建 merchant 账号并登录
+        SysUser merchant = new SysUser();
+        merchant.setUsername("testmerchant_log");
+        merchant.setPhone("13800001111");
+        merchant.setPassword(BCrypt.hashpw("123456"));
+        merchant.setRealName("Test Merchant");
+        merchant.setRole("merchant");
+        merchant.setDeleted(false);
+        merchant.setDisabled(false);
+        merchant.setMustChangePassword(false);
+        sysUserMapper.insert(merchant);
+
+        LoginDTO merchantLogin = new LoginDTO();
+        merchantLogin.setUsername("testmerchant_log");
+        merchantLogin.setPassword("123456");
+        MvcResult merchantLoginResult = mockMvc.perform(MockMvcRequestBuilders.post("/api/auth/login")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(merchantLogin)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.code").value(200))
+                .andReturn();
+        String merchantToken = objectMapper.readTree(
+                        merchantLoginResult.getResponse().getContentAsString(java.nio.charset.StandardCharsets.UTF_8))
+                .path("data").path("token").asText();
+        assertNotNull(merchantToken, "merchant 登录应成功");
+
+        // 5. merchant 查询：只能看到自己的记录，看不到 admin 的
+        MvcResult merchantPageResult = mockMvc.perform(MockMvcRequestBuilders.get("/api/operation-log/page")
+                .header("Authorization", merchantToken))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.code").value(200))
+                .andReturn();
+        JsonNode merchantRecords = objectMapper.readTree(
+                        merchantPageResult.getResponse().getContentAsString(java.nio.charset.StandardCharsets.UTF_8))
+                .path("data").path("records");
+        for (JsonNode record : merchantRecords) {
+            assertNotEquals("testadmin", record.path("operatorName").asText(),
+                    "merchant 不应看到 admin 的操作记录");
+        }
+
+        // 6. merchant 执行写操作后，应能看到自己的记录
+        Customer merchantCustomer = new Customer();
+        merchantCustomer.setName("商户顾客");
+        merchantCustomer.setPhone("13733334444");
+        mockMvc.perform(MockMvcRequestBuilders.post("/api/customer/add")
+                .header("Authorization", merchantToken)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(merchantCustomer)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.code").value(200));
+
+        MvcResult merchantPage2Result = mockMvc.perform(MockMvcRequestBuilders.get("/api/operation-log/page")
+                .header("Authorization", merchantToken))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.code").value(200))
+                .andReturn();
+        JsonNode merchantRecords2 = objectMapper.readTree(
+                        merchantPage2Result.getResponse().getContentAsString(java.nio.charset.StandardCharsets.UTF_8))
+                .path("data").path("records");
+        boolean foundOwn = false;
+        for (JsonNode record : merchantRecords2) {
+            if ("testmerchant_log".equals(record.path("operatorName").asText())) {
+                foundOwn = true;
+            }
+            assertNotEquals("testadmin", record.path("operatorName").asText(),
+                    "merchant 不应看到 admin 的操作记录");
+        }
+        assertTrue(foundOwn, "merchant 应能看到自己的操作记录");
+
+        // 7. 手动清理测试：插入一条 3 天前的近期日志与一条 31 天前的旧日志，
+        //    调用 cleanup 后近期日志应被删除、31 天前的旧日志应保留
+        // 先记录清理前 operation-log 模块的记录数，避免测试数据库中存在历史数据时断言不稳定
+        MvcResult beforeCleanupResult = mockMvc.perform(MockMvcRequestBuilders.get("/api/operation-log/page")
+                .header("Authorization", saToken)
+                .param("size", "200"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.code").value(200))
+                .andReturn();
+        JsonNode beforeCleanupRecords = objectMapper.readTree(
+                        beforeCleanupResult.getResponse().getContentAsString(java.nio.charset.StandardCharsets.UTF_8))
+                .path("data").path("records");
+        long beforeOperationLogCount = countOperationLogRecords(beforeCleanupRecords);
+
+        OperationLog oldLog = new OperationLog();
+        oldLog.setOperatorId(1L);
+        oldLog.setOperatorName("olduser");
+        oldLog.setModule("customer");
+        oldLog.setAction("ADD");
+        oldLog.setMethod("POST");
+        oldLog.setUri("/api/customer/add");
+        oldLog.setDescription("历史日志记录");
+        oldLog.setStatus(200);
+        oldLog.setCreateTime(DateUtil.offsetDay(DateUtil.date(), -31));
+        operationLogMapper.insert(oldLog);
+
+        OperationLog recentLog = new OperationLog();
+        recentLog.setOperatorId(1L);
+        recentLog.setOperatorName("recentuser");
+        recentLog.setModule("customer");
+        recentLog.setAction("UPDATE");
+        recentLog.setMethod("POST");
+        recentLog.setUri("/api/customer/update");
+        recentLog.setDescription("近期日志记录");
+        recentLog.setStatus(200);
+        recentLog.setCreateTime(DateUtil.offsetDay(DateUtil.date(), -3));
+        operationLogMapper.insert(recentLog);
+
+        MvcResult cleanupResult = mockMvc.perform(MockMvcRequestBuilders.post("/api/operation-log/cleanup")
+                .header("Authorization", saToken))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.code").value(200))
+                .andReturn();
+        JsonNode cleanupData = objectMapper.readTree(
+                        cleanupResult.getResponse().getContentAsString(java.nio.charset.StandardCharsets.UTF_8))
+                .path("data");
+        assertTrue(cleanupData.path("count").asInt() >= 1, "手动清理应删除至少 1 条近期日志");
+        assertEquals(30, cleanupData.path("days").asInt(), "手动清理天数应为配置的 30 天");
+
+        // 8. 清理后查询：近期日志已删除、31 天前的旧日志保留，且不应新增 operation-log 模块记录
+        MvcResult afterCleanupResult = mockMvc.perform(MockMvcRequestBuilders.get("/api/operation-log/page")
+                .header("Authorization", saToken)
+                .param("size", "200"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.code").value(200))
+                .andReturn();
+        JsonNode afterCleanupRecords = objectMapper.readTree(
+                        afterCleanupResult.getResponse().getContentAsString(java.nio.charset.StandardCharsets.UTF_8))
+                .path("data").path("records");
+        long afterOperationLogCount = countOperationLogRecords(afterCleanupRecords);
+        assertFalse(afterCleanupRecords.toString().contains("近期日志记录"),
+                "清理后不应再包含近期日志记录");
+        assertTrue(afterCleanupRecords.toString().contains("历史日志记录"),
+                "31 天前的旧日志应保留");
+        assertTrue(afterOperationLogCount <= beforeOperationLogCount,
+                "清理动作本身不应被记录，避免审计闭环自引用");
+    }
+
+    private long countOperationLogRecords(JsonNode records) {
+        long count = 0;
+        for (JsonNode record : records) {
+            if ("operation-log".equals(record.path("module").asText())) {
+                count++;
+            }
+        }
+        return count;
     }
 }

@@ -3,6 +3,11 @@ server:
 
 app:
   invite-code: ${APP_INVITE_CODE}
+  operation-log:
+    # 操作日志定时保留天数：超过该天数的日志会被定时任务自动清理（0 表示不自动清理）
+    retention-days: ${APP_OPERATION_LOG_RETENTION_DAYS:90}
+    # 手动清理天数：管理页"清理过期日志"按钮删除最近该天数内的日志（更早的历史记录保留，0 表示禁用手动清理）
+    manual-cleanup-days: ${APP_OPERATION_LOG_MANUAL_CLEANUP_DAYS:30}
 
 glasses:
   admin:

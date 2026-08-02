@@ -26,6 +26,7 @@ const routes: Array<RouteRecordRaw> = [
       },
       ...(FEATURES.SYS_USER ? [{ path: 'sys-user', name: 'SysUser', component: () => import('../views/SysUser.vue') }] : []),
       ...(FEATURES.PROFILE ? [{ path: 'profile', name: 'Profile', component: () => import('../views/Profile.vue') }] : []),
+      ...(FEATURES.OPERATION_LOG ? [{ path: 'operation-log', name: 'OperationLog', component: () => import('../views/OperationLog.vue') }] : []),
       ...(FEATURES.RECYCLE_BIN ? [{ path: 'recycle-bin', name: 'RecycleBin', component: () => import('../views/RecycleBin.vue') }] : []),
       ...(FEATURES.STATISTICS ? [{ path: 'stats', name: 'Statistics', component: () => import('../views/Statistics.vue') }] : []),
       ...(FEATURES.DATA_MANAGE ? [{ path: 'data-manage', name: 'DataManage', component: () => import('../views/DataManage.vue') }] : [])
