@@ -1,4 +1,4 @@
-package com.glasses.config;
+package com.glasses.scheduler;
 
 import com.glasses.service.OperationLogService;
 import lombok.extern.slf4j.Slf4j;

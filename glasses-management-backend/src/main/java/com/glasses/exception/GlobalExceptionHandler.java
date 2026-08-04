@@ -1,4 +1,4 @@
-package com.glasses.config;
+package com.glasses.exception;
 
 import cn.dev33.satoken.exception.NotLoginException;
 import cn.dev33.satoken.exception.NotPermissionException;
@@ -23,6 +23,13 @@ public class GlobalExceptionHandler {
     public Result<String> handleForbiddenException(Exception e, HttpServletResponse response) {
         response.setStatus(403);
         return Result.error(403, "\u65e0\u6743\u9650");
+    }
+
+    @ExceptionHandler(BizException.class)
+    public Result<String> handleBizException(BizException e) {
+        // 预期内的业务失败，仅记录 info，不按系统异常告警
+        log.info("\u4e1a\u52a1\u64cd\u4f5c\u5931\u8d25: {}", e.getMessage());
+        return Result.error(e.getMessage());
     }
 
     @ExceptionHandler(RuntimeException.class)
