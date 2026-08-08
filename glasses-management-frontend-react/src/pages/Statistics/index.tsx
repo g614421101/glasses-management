@@ -5,6 +5,7 @@ import dayjs from 'dayjs';
 import { statsAPI } from '@/api/stats';
 import { useNavigate } from 'react-router-dom';
 import { useCountUp } from '@/hooks/useCountUp';
+import './index.css';
 
 const { RangePicker } = DatePicker;
 

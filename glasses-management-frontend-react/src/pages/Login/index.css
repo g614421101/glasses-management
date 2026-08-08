@@ -1,0 +1,441 @@
+/* ── Login & Register ── */
+.login-container {
+  min-height: 100vh;
+  width: 100%;
+  padding: 24px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  position: relative;
+  overflow: hidden;
+  background: transparent;
+}
+
+.theme-toggle-fixed {
+  position: fixed;
+  top: 22px;
+  right: 22px;
+  z-index: 100;
+}
+
+.login-box {
+  width: min(100%, 460px);
+  padding: 48px;
+  text-align: center;
+  z-index: 10;
+  background: var(--surface-overlay);
+  border-radius: 28px;
+  box-shadow: var(--shadow-card);
+  border: 1px solid var(--border-color);
+  animation: login-card-in 0.55s var(--ease-emphasized) both;
+}
+
+.login-anim {
+  opacity: 0;
+  animation: login-rise var(--duration-slow) var(--ease-emphasized) forwards;
+}
+
+.login-anim--1 { animation-delay: 380ms; }
+.login-anim--2 { animation-delay: 460ms; }
+.login-anim--3 { animation-delay: 540ms; }
+.login-anim--4 { animation-delay: 620ms; }
+
+@keyframes login-card-in {
+  from { opacity: 0; transform: translateY(24px) scale(0.96); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+@keyframes login-rise {
+  from { opacity: 0; transform: translateY(14px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.sys-title {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 12px;
+  font-size: 28px;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin-bottom: 12px;
+}
+
+.sys-subtitle {
+  font-size: 15px;
+  color: var(--text-secondary);
+  margin-bottom: 36px;
+}
+
+.login-link {
+  text-align: right;
+  margin-top: -10px;
+  margin-bottom: 20px;
+}
+
+.login-btn {
+  width: 100%;
+  letter-spacing: 2px;
+  font-size: 16px;
+  font-weight: 600;
+  border-radius: 18px;
+}
+
+.register-footer {
+  margin-top: 16px;
+}
+
+.register-footer span {
+  color: var(--text-muted);
+}
+
+@media (max-width: 640px) {
+  .login-container {
+    padding: 14px;
+  }
+
+  .login-box {
+    padding: 30px 22px;
+  }
+
+  .sys-title {
+    font-size: 22px;
+  }
+}
+
+/* ── Split Login Page (Animated Characters) ── */
+.login-page-split {
+  min-height: 100vh;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+}
+
+.login-left-panel {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  background: linear-gradient(135deg, rgba(29, 78, 216, 0.9) 0%, #1d4ed8 40%, rgba(37, 99, 235, 0.85) 100%);
+  padding: 48px;
+  overflow: hidden;
+  color: #fff;
+}
+
+.login-left-panel::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image:
+    linear-gradient(rgba(255, 255, 255, 0.04) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.04) 1px, transparent 1px);
+  background-size: 20px 20px;
+  pointer-events: none;
+}
+
+.login-left-panel::after {
+  content: '';
+  position: absolute;
+  top: 25%;
+  right: 20%;
+  width: 260px;
+  height: 260px;
+  background: radial-gradient(circle, rgba(255, 255, 255, 0.1), transparent);
+  border-radius: 50%;
+  filter: blur(60px);
+  pointer-events: none;
+}
+
+.login-left-brand {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 18px;
+  font-weight: 600;
+}
+
+.login-left-brand .brand-icon {
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.12);
+  backdrop-filter: blur(8px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+}
+
+.login-characters-anchor {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* 角色容器 */
+.characters-wrapper {
+  position: relative;
+  z-index: 2;
+  width: 550px;
+  height: 400px;
+  margin: 0 auto;
+  flex-shrink: 0;
+}
+
+.character {
+  position: absolute;
+  bottom: 0;
+  transition: all 0.7s cubic-bezier(0.22, 1, 0.36, 1);
+  transform-origin: bottom center;
+}
+
+.character__eyes {
+  position: absolute;
+  display: flex;
+  gap: 32px;
+  transition: all 0.7s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.character__eyes--pupil {
+  gap: 32px;
+  transition: all 0.2s ease-out;
+}
+
+/* 紫色高个角色 */
+.character--purple {
+  left: 70px;
+  width: 180px;
+  height: 400px;
+  background-color: #6C3FF5;
+  border-radius: 10px 10px 0 0;
+  z-index: 1;
+}
+
+.character--purple .character__eyes {
+  gap: 32px;
+}
+
+/* 黑色高个角色 */
+.character--dark {
+  left: 240px;
+  width: 120px;
+  height: 310px;
+  background-color: #2D2D2D;
+  border-radius: 8px 8px 0 0;
+  z-index: 2;
+}
+
+.character--dark .character__eyes {
+  gap: 24px;
+}
+
+/* 橙色半圆角色 */
+.character--orange {
+  left: 0;
+  width: 240px;
+  height: 200px;
+  background-color: #FF9B6B;
+  border-radius: 120px 120px 0 0;
+  z-index: 3;
+}
+
+.character--orange .character__eyes {
+  gap: 32px;
+}
+
+/* 黄色圆顶角色 */
+.character--sky {
+  left: 310px;
+  width: 140px;
+  height: 230px;
+  background-color: #E8D754;
+  border-radius: 70px 70px 0 0;
+  z-index: 4;
+}
+
+.character--sky .character__eyes {
+  gap: 24px;
+}
+
+.character__mouth {
+  position: absolute;
+  width: 80px;
+  height: 4px;
+  background-color: #0f172a;
+  border-radius: 999px;
+  transition: all 0.2s ease-out;
+}
+
+/* 眼球样式 */
+.eye-ball {
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  transition: height 0.15s ease;
+}
+
+.eye-pupil {
+  border-radius: 50%;
+  transition: transform 0.1s ease-out;
+}
+
+.pupil-dot {
+  border-radius: 50%;
+  transition: transform 0.1s ease-out;
+}
+
+/* 右侧登录面板 */
+.login-right-panel {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 40px;
+  background: var(--bg-color);
+  position: relative;
+  overflow: hidden;
+}
+
+.login-form-wrapper {
+  width: 100%;
+  max-width: 400px;
+  animation: login-card-in 0.55s var(--ease-emphasized) both;
+}
+
+.login-form-header {
+  text-align: center;
+  margin-bottom: 36px;
+}
+
+.login-form-header h1 {
+  font-size: 30px;
+  font-weight: 800;
+  color: var(--text-primary);
+  margin: 0 0 8px;
+  letter-spacing: -0.02em;
+}
+
+.login-form-header p {
+  font-size: 14px;
+  color: var(--text-muted);
+  margin: 0;
+}
+
+.login-form-section {
+  margin-bottom: 20px;
+}
+
+.login-form-section label {
+  display: block;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  margin-bottom: 6px;
+}
+
+.login-form-section .ant-input-affix-wrapper {
+  height: 48px;
+  border-radius: 14px;
+}
+
+.login-form-section .ant-input {
+  font-size: 15px;
+}
+
+/* 清除密码框可能的伪元素遮挡和 autofill 背景 */
+.login-form-section .ant-input-affix-wrapper::before,
+.login-form-section .ant-input-affix-wrapper::after,
+.login-form-section .ant-input-password::before,
+.login-form-section .ant-input-password::after,
+.login-form-section .ant-input::before,
+.login-form-section .ant-input::after {
+  display: none !important;
+  content: none !important;
+}
+
+.login-form-section .ant-input:-webkit-autofill,
+.login-form-section .ant-input-affix-wrapper:-webkit-autofill,
+.login-form-section .ant-input-password:-webkit-autofill {
+  -webkit-box-shadow: 0 0 0 1000px var(--bg-color) inset !important;
+  -webkit-text-fill-color: var(--text-primary) !important;
+}
+
+.login-form-actions {
+  margin-top: 24px;
+}
+
+.login-form-actions .ant-btn {
+  width: 100%;
+  height: 48px;
+  border-radius: 14px;
+  font-size: 16px;
+  font-weight: 600;
+  letter-spacing: 1px;
+}
+
+.login-form-footer {
+  text-align: center;
+  margin-top: 28px;
+  font-size: 13px;
+  color: var(--text-muted);
+}
+
+.login-form-footer a {
+  color: var(--primary-color);
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.login-form-footer a:hover {
+  text-decoration: underline;
+}
+
+.login-error-msg {
+  padding: 10px 14px;
+  font-size: 13px;
+  color: var(--color-danger);
+  background: var(--color-danger-soft);
+  border: 1px solid rgba(239, 68, 68, 0.2);
+  border-radius: 12px;
+  margin-bottom: 16px;
+}
+
+
+/* ── Login / Register 深浅色覆盖(原 theme-overrides)── */
+:root[data-theme='dark'] .login-box {
+  background: rgba(15, 23, 42, 0.82);
+  border-color: var(--border-color);
+  box-shadow: var(--shadow-soft);
+}
+
+:root[data-theme='dark'] .login-left-panel {
+  background: linear-gradient(135deg, rgba(30, 64, 175, 0.95) 0%, #1e3a8a 40%, rgba(29, 78, 216, 0.9) 100%);
+}
+
+:root[data-theme='dark'] .login-right-panel {
+  background: var(--bg-color);
+}
+
+:root[data-theme='dark'] .login-form-header h1 {
+  color: var(--text-primary);
+}
+
+:root[data-theme='dark'] .login-form-section label {
+  color: var(--text-secondary);
+}
+
+:root[data-theme='dark'] .login-error-msg {
+  background: rgba(251, 113, 133, 0.12);
+  border-color: rgba(251, 113, 133, 0.25);
+  color: var(--color-danger);
+}
+
+:root[data-theme='light'] .login-box {
+  background: var(--surface-color);
+  border-color: var(--border-color);
+  box-shadow: var(--shadow-soft);
+  color: var(--text-primary);
+}
+

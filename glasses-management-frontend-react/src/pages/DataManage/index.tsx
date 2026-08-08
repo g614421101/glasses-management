@@ -1,7 +1,8 @@
 import React, { useState, useRef } from 'react';
 import { Modal, message, Input } from 'antd';
 import { dataAPI, ImportDetail } from '@/api/data';
-import DataCards from './DataManage/DataCards';
+import DataCards from './DataCards';
+import './index.css';
 
 const DataManage: React.FC = () => {
   const [exportLoading, setExportLoading] = useState(false);

@@ -1,0 +1,91 @@
+.stagger-children > * {
+  opacity: 0;
+  animation: fade-up var(--duration-slow) var(--ease-emphasized) forwards;
+}
+
+.stagger-children > *:nth-child(1) { animation-delay: 60ms; }
+.stagger-children > *:nth-child(2) { animation-delay: 130ms; }
+.stagger-children > *:nth-child(3) { animation-delay: 200ms; }
+.stagger-children > *:nth-child(4) { animation-delay: 270ms; }
+.stagger-children > *:nth-child(5) { animation-delay: 340ms; }
+.stagger-children > *:nth-child(6) { animation-delay: 410ms; }
+.stagger-children > *:nth-child(7) { animation-delay: 480ms; }
+.stagger-children > *:nth-child(8) { animation-delay: 550ms; }
+
+/* ── Statistics Stat Icons ── */
+.stat-icon {
+  width: 60px;
+  height: 60px;
+  border-radius: 20px;
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 28px;
+  flex-shrink: 0;
+}
+
+.stat-icon--revenue {
+  background: linear-gradient(135deg, #1d4ed8, #2563eb);
+  box-shadow: 0 18px 36px rgba(37, 99, 235, 0.18);
+}
+
+.stat-icon--orders {
+  background: linear-gradient(135deg, #2563eb, #38bdf8);
+  box-shadow: 0 18px 36px rgba(37, 99, 235, 0.18);
+}
+
+.stat-icon--average {
+  background: linear-gradient(135deg, #1e40af, #3b82f6);
+  box-shadow: 0 18px 36px rgba(37, 99, 235, 0.18);
+}
+
+:root[data-theme='dark'] .stat-icon--revenue {
+  background: linear-gradient(135deg, #2563eb, #3b82f6);
+  box-shadow: 0 18px 36px rgba(59, 130, 246, 0.24);
+}
+
+:root[data-theme='dark'] .stat-icon--orders {
+  background: linear-gradient(135deg, #3b82f6, #22d3ee);
+  box-shadow: 0 18px 36px rgba(34, 211, 238, 0.2);
+}
+
+:root[data-theme='dark'] .stat-icon--average {
+  background: linear-gradient(135deg, #1e3a5f, #2563eb);
+  box-shadow: 0 18px 36px rgba(37, 99, 235, 0.22);
+}
+
+/* ── Stat Value Pulse ── */
+.stat-value {
+  margin: 0;
+  font-size: 28px;
+  font-weight: 800;
+  line-height: 1.1;
+  color: var(--text-primary);
+  display: inline-block;
+  transition: transform 0.2s var(--ease-emphasized, cubic-bezier(0.22, 1, 0.36, 1));
+}
+
+.stat-value--pulse {
+  animation: value-pulse 0.35s var(--ease-emphasized, cubic-bezier(0.22, 1, 0.36, 1));
+}
+
+@keyframes value-pulse {
+  0%   { transform: scale(1); }
+  40%  { transform: scale(1.06); }
+  100% { transform: scale(1); }
+}
+
+/* ── Stats Summary Grid ── */
+.summary-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 20px;
+}
+
+@media (max-width: 1024px) {
+  .summary-grid {
+    grid-template-columns: 1fr;
+  }
+}
+

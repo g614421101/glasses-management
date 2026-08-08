@@ -4,6 +4,7 @@ import { Form, Input, Button, message } from 'antd';
 import { UserOutlined, LockOutlined, PhoneOutlined, KeyOutlined } from '@ant-design/icons';
 import request from '@/utils/request';
 import ThemeToggle from '@/components/ThemeToggle';
+import '../Login/index.css';
 
 const Register: React.FC = () => {
   const navigate = useNavigate();

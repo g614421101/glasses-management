@@ -11,15 +11,15 @@ import {
 } from '@ant-design/icons';
 import { customerAPI, Customer } from '@/api/customer';
 import { archiveAPI, TimelineItem } from '@/api/archive';
-import './Archive/Archive.css';
+import './Archive.css';
 import { optometryAPI } from '@/api/optometry';
 import { salesAPI } from '@/api/sales';
 import { downloadBlob, openBlob } from '@/utils/request';
 import { useMobile } from '@/hooks/useMobile';
-import DetailModal from './Archive/DetailModal';
-import OptometryFormModal, { OptoForm, buildEmptyOpto, prepareOptoForEdit } from './Archive/OptometryFormModal';
-import SalesFormModal, { SalesForm, buildEmptySales } from './Archive/SalesFormModal';
-import TimelineCard from './Archive/TimelineCard';
+import DetailModal from './DetailModal';
+import OptometryFormModal, { OptoForm, buildEmptyOpto, prepareOptoForEdit } from './OptometryFormModal';
+import SalesFormModal, { SalesForm, buildEmptySales } from './SalesFormModal';
+import TimelineCard from './TimelineCard';
 
 const Archive: React.FC = () => {
   const { id } = useParams<{ id: string }>();

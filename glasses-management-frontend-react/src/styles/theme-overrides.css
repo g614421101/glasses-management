@@ -6,7 +6,6 @@
 /* ── Dark Mode Overrides ── */
 :root[data-theme='dark'] .glass-card,
 :root[data-theme='dark'] .surface-panel,
-:root[data-theme='dark'] .login-box,
 :root[data-theme='dark'] .table-card {
   background: rgba(15, 23, 42, 0.82);
   border-color: var(--border-color);
@@ -16,28 +15,6 @@
 :root[data-theme='dark'] .glass-card::before,
 :root[data-theme='dark'] .surface-panel::before {
   background: linear-gradient(120deg, rgba(125, 211, 252, 0.12), transparent 44%);
-}
-
-:root[data-theme='dark'] .login-left-panel {
-  background: linear-gradient(135deg, rgba(30, 64, 175, 0.95) 0%, #1e3a8a 40%, rgba(29, 78, 216, 0.9) 100%);
-}
-
-:root[data-theme='dark'] .login-right-panel {
-  background: var(--bg-color);
-}
-
-:root[data-theme='dark'] .login-form-header h1 {
-  color: var(--text-primary);
-}
-
-:root[data-theme='dark'] .login-form-section label {
-  color: var(--text-secondary);
-}
-
-:root[data-theme='dark'] .login-error-msg {
-  background: rgba(251, 113, 133, 0.12);
-  border-color: rgba(251, 113, 133, 0.25);
-  color: var(--color-danger);
 }
 
 :root[data-theme='dark'] .search-shell {
@@ -217,7 +194,6 @@
 /* Only custom classes that ConfigProvider can't handle */
 :root[data-theme='light'] .glass-card,
 :root[data-theme='light'] .surface-panel,
-:root[data-theme='light'] .login-box,
 :root[data-theme='light'] .table-card {
   background: var(--surface-color);
   border-color: var(--border-color);
@@ -630,20 +606,4 @@
 :root[data-theme='dark'] .ant-timeline-item-head-green {
   background: var(--color-success) !important;
   border-color: var(--color-success) !important;
-}
-
-/* ── User info dark mode ── */
-:root[data-theme='dark'] .info-card .ant-descriptions-item-label,
-:root[data-theme='dark'] .info-card .ant-descriptions-item-content {
-  background: transparent !important;
-  border-color: var(--border-color) !important;
-  color: var(--text-primary) !important;
-}
-
-:root[data-theme='dark'] .info-card .ant-descriptions-item-label {
-  color: var(--text-secondary) !important;
-}
-
-:root[data-theme='dark'] .c-phone {
-  color: var(--text-secondary);
 }

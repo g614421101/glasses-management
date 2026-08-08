@@ -5,6 +5,7 @@ import { PlusOutlined, SearchOutlined, EyeOutlined, EditOutlined, DeleteOutlined
 import dayjs from 'dayjs';
 import { customerAPI, Customer } from '@/api/customer';
 import { useMobile } from '@/hooks/useMobile';
+import './index.css';
 
 const CustomerPage: React.FC = () => {
   const navigate = useNavigate();

@@ -4,6 +4,10 @@
   padding-top: 6px;
 }
 
+.archive-page .archive-hero {
+  position: relative;
+}
+
 /* ── Hero ── */
 .archive-hero {
   display: flex;
@@ -439,6 +443,10 @@
 
 .mini-optometry-table .label-os {
   color: var(--color-success) !important;
+}
+
+.mini-optometry-table .label-od {
+  color: var(--primary-color) !important;
 }
 
 /* ── Sales Product Glance ── */

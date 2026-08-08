@@ -5,6 +5,7 @@ import { AppDispatch } from '@/store';
 import { verifyToken } from '@/features/auth/authSlice';
 import { useAuth } from '@/hooks/useAuth';
 import { authAPI } from '@/features/auth/authAPI';
+import './index.css';
 
 const Profile: React.FC = () => {
   const dispatch = useDispatch<AppDispatch>();

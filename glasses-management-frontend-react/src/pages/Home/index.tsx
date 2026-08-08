@@ -4,6 +4,7 @@ import { Input, Button, message } from 'antd';
 import { SearchOutlined, ArrowRightOutlined, UserAddOutlined, UnorderedListOutlined, LinkOutlined } from '@ant-design/icons';
 import request from '@/utils/request';
 import QRCode from 'qrcode';
+import './index.css';
 
 const Home: React.FC = () => {
   const navigate = useNavigate();
