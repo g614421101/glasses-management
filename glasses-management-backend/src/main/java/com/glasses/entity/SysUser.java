@@ -1,19 +1,17 @@
 package com.glasses.entity;
 
-import com.baomidou.mybatisplus.annotation.FieldFill;
-import com.baomidou.mybatisplus.annotation.IdType;
-import com.baomidou.mybatisplus.annotation.TableField;
-import com.baomidou.mybatisplus.annotation.TableId;
-import com.baomidou.mybatisplus.annotation.TableLogic;
-import com.baomidou.mybatisplus.annotation.TableName;
+import com.mybatisflex.annotation.Column;
+import com.mybatisflex.annotation.Id;
+import com.mybatisflex.annotation.KeyType;
+import com.mybatisflex.annotation.Table;
 import lombok.Data;
 
 import java.util.Date;
 
 @Data
-@TableName("sys_user")
+@Table("sys_user")
 public class SysUser {
-    @TableId(type = IdType.AUTO)
+    @Id(keyType = KeyType.Auto)
     private Long id;
     private String username;
     private String phone;
@@ -23,9 +21,8 @@ public class SysUser {
     private Boolean mustChangePassword;
     private Boolean disabled;
     private Date disabledTime;
-    @TableLogic
+    @Column(isLogicDelete = true)
     private Boolean deleted = false;
     private Date deletedTime;
-    @TableField(fill = FieldFill.INSERT)
     private Date createTime;
 }

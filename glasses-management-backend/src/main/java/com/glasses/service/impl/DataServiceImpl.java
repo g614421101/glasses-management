@@ -101,7 +101,7 @@ public class DataServiceImpl implements DataService {
                 sysUserMapper.insert(user);
                 if (wasDeleted) {
                     user.setDeleted(true);
-                    sysUserMapper.updateById(user);
+                    sysUserMapper.update(user, true);
                 }
                 userIdMap.put(oldId, user.getId());
                 result.setSysUserInserted(result.getSysUserInserted() + 1);
@@ -124,7 +124,7 @@ public class DataServiceImpl implements DataService {
                 customerMapper.insert(customer);
                 if (wasDeleted) {
                     customer.setDeleted(true);
-                    customerMapper.updateById(customer);
+                    customerMapper.update(customer, true);
                 }
                 customerIdMap.put(oldId, customer.getId());
                 result.setCustomerInserted(result.getCustomerInserted() + 1);
@@ -150,7 +150,7 @@ public class DataServiceImpl implements DataService {
                 optometryRecordMapper.insert(record);
                 if (wasDeleted) {
                     record.setDeleted(true);
-                    optometryRecordMapper.updateById(record);
+                    optometryRecordMapper.update(record, true);
                 }
                 optometryIdMap.put(oldId, record.getId());
                 result.setOptometryInserted(result.getOptometryInserted() + 1);
@@ -180,7 +180,7 @@ public class DataServiceImpl implements DataService {
                 salesRecordMapper.insert(record);
                 if (wasDeleted) {
                     record.setDeleted(true);
-                    salesRecordMapper.updateById(record);
+                    salesRecordMapper.update(record, true);
                 }
                 result.setSalesInserted(result.getSalesInserted() + 1);
             }
@@ -216,7 +216,7 @@ public class DataServiceImpl implements DataService {
                     sysUserMapper.insert(user);
                     if (wasDeleted) {
                         user.setDeleted(true);
-                        sysUserMapper.updateById(user);
+                        sysUserMapper.update(user, true);
                     }
                     userIdMap.put(oldId, user.getId());
                     result.setSysUserInserted(result.getSysUserInserted() + 1);
@@ -245,7 +245,7 @@ public class DataServiceImpl implements DataService {
                     customerMapper.insert(customer);
                     if (wasDeleted) {
                         customer.setDeleted(true);
-                        customerMapper.updateById(customer);
+                        customerMapper.update(customer, true);
                     }
                     customerIdMap.put(oldId, customer.getId());
                     result.setCustomerInserted(result.getCustomerInserted() + 1);
@@ -298,7 +298,7 @@ public class DataServiceImpl implements DataService {
                 optometryRecordMapper.insert(record);
                 if (wasDeleted) {
                     record.setDeleted(true);
-                    optometryRecordMapper.updateById(record);
+                    optometryRecordMapper.update(record, true);
                 }
                 optometryIdMap.put(oldId, record.getId());
                 result.setOptometryInserted(result.getOptometryInserted() + 1);
@@ -333,7 +333,7 @@ public class DataServiceImpl implements DataService {
                 salesRecordMapper.insert(record);
                 if (wasDeleted) {
                     record.setDeleted(true);
-                    salesRecordMapper.updateById(record);
+                    salesRecordMapper.update(record, true);
                 }
                 result.setSalesInserted(result.getSalesInserted() + 1);
             }

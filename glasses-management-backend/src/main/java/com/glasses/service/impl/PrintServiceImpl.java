@@ -2,7 +2,7 @@ package com.glasses.service.impl;
 
 import cn.hutool.core.date.DateUtil;
 import com.alibaba.excel.EasyExcel;
-import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.mybatisflex.core.query.QueryWrapper;
 import com.glasses.dto.PrintResult;
 import com.glasses.dto.SalesRecordExcelDTO;
 import com.glasses.entity.Customer;
@@ -251,15 +251,16 @@ public class PrintServiceImpl implements PrintService {
 
     @Override
     public PrintResult buildRevenueExcel(String startDate, String endDate, boolean showAll) {
-        LambdaQueryWrapper<SalesRecord> wrapper = new LambdaQueryWrapper<>();
-        wrapper.eq(SalesRecord::getDeleted, false);
+        QueryWrapper query = QueryWrapper.create()
+                .from(SalesRecord.class)
+                .where(SalesRecord::getDeleted).eq(false);
         if (!showAll && startDate != null && endDate != null) {
-            wrapper.ge(SalesRecord::getSalesDate, startDate + " 00:00:00")
-                   .le(SalesRecord::getSalesDate, endDate + " 23:59:59");
+            query.and(SalesRecord::getSalesDate).ge(startDate + " 00:00:00")
+                    .and(SalesRecord::getSalesDate).le(endDate + " 23:59:59");
         }
-        wrapper.orderByDesc(SalesRecord::getSalesDate);
+        query.orderBy(SalesRecord::getSalesDate).desc();
 
-        List<SalesRecord> records = salesRecordService.list(wrapper);
+        List<SalesRecord> records = salesRecordService.list(query);
 
         // 批量查询顾客信息，避免 N+1
         Map<Long, Customer> customerMap = new java.util.HashMap<>();

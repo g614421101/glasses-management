@@ -1,6 +1,6 @@
 package com.glasses.mapper;
 
-import com.baomidou.mybatisplus.core.mapper.BaseMapper;
+import com.mybatisflex.core.BaseMapper;
 import com.glasses.entity.OperationLog;
 import org.apache.ibatis.annotations.Mapper;
 

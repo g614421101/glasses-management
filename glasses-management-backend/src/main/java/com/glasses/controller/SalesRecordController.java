@@ -2,12 +2,13 @@ package com.glasses.controller;
 
 import cn.dev33.satoken.stp.StpUtil;
 import cn.hutool.core.date.DateUtil;
-import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
-import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.mybatisflex.core.paginate.Page;
+import com.mybatisflex.core.query.QueryWrapper;
 import com.glasses.entity.Customer;
 import com.glasses.entity.SalesRecord;
 import com.glasses.service.CustomerService;
 import com.glasses.service.SalesRecordService;
+import com.glasses.util.PageAdapter;
 import com.glasses.util.Result;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -57,7 +58,7 @@ public class SalesRecordController {
                                    @RequestParam(required = false) Integer current,
                                    @RequestParam(required = false) Integer size) {
         if (current != null && size != null) {
-            return Result.success(salesRecordService.listByCustomerId(customerId, current, size));
+            return Result.success(PageAdapter.of(salesRecordService.listByCustomerId(customerId, current, size)));
         }
         return Result.success(salesRecordService.listByCustomerId(customerId));
     }
@@ -85,11 +86,12 @@ public class SalesRecordController {
             @RequestParam(defaultValue = "10") Integer size,
             @RequestParam(defaultValue = "false") Boolean showAll) {
 
-        LambdaQueryWrapper<SalesRecord> wrapper = new LambdaQueryWrapper<>();
-        wrapper.eq(SalesRecord::getDeleted, false);
+        QueryWrapper query = QueryWrapper.create()
+                .from(SalesRecord.class)
+                .where(SalesRecord::getDeleted).eq(false);
         if (!showAll && startDate != null && endDate != null) {
-            wrapper.ge(SalesRecord::getSalesDate, startDate + " 00:00:00")
-                   .le(SalesRecord::getSalesDate, endDate + " 23:59:59");
+            query.and(SalesRecord::getSalesDate).ge(startDate + " 00:00:00")
+                    .and(SalesRecord::getSalesDate).le(endDate + " 23:59:59");
         }
 
         // 1. 汇总统计（SQL 聚合查询）
@@ -100,10 +102,10 @@ public class SalesRecordController {
         long orderCount = ((Number) summary.get("orderCount")).longValue();
 
         // 2. 分页明细
-        wrapper.orderByDesc(SalesRecord::getSalesDate)
-               .orderByDesc(SalesRecord::getId);
-        Page<SalesRecord> page = new Page<>(current, size);
-        Page<SalesRecord> recordsPage = salesRecordService.page(page, wrapper);
+        query.orderBy(SalesRecord::getSalesDate).desc()
+                .orderBy(SalesRecord::getId).desc();
+        Page<SalesRecord> page = Page.of(current, size);
+        Page<SalesRecord> recordsPage = salesRecordService.page(page, query);
 
         // 补充顾客姓名
         if (recordsPage.getRecords() != null && !recordsPage.getRecords().isEmpty()) {
@@ -127,7 +129,7 @@ public class SalesRecordController {
         Map<String, Object> result = new HashMap<>();
         result.put("totalRevenue", totalRevenue);
         result.put("orderCount", orderCount);
-        result.put("records", recordsPage);
+        result.put("records", PageAdapter.of(recordsPage));
 
         return Result.success(result);
     }

@@ -1,10 +1,8 @@
 package com.glasses.entity;
 
-import com.baomidou.mybatisplus.annotation.FieldFill;
-import com.baomidou.mybatisplus.annotation.IdType;
-import com.baomidou.mybatisplus.annotation.TableField;
-import com.baomidou.mybatisplus.annotation.TableId;
-import com.baomidou.mybatisplus.annotation.TableName;
+import com.mybatisflex.annotation.Id;
+import com.mybatisflex.annotation.KeyType;
+import com.mybatisflex.annotation.Table;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Data;
 
@@ -14,10 +12,10 @@ import java.util.Date;
  * 操作日志（审计用，物理保留，不参与软删除）。
  */
 @Data
-@TableName("operation_log")
+@Table("operation_log")
 public class OperationLog {
 
-    @TableId(type = IdType.AUTO)
+    @Id(keyType = KeyType.Auto)
     private Long id;
 
     /** 操作人 ID（未登录为 null） */
@@ -56,7 +54,6 @@ public class OperationLog {
     /** 客户端 IP */
     private String ip;
 
-    @TableField(fill = FieldFill.INSERT)
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "Asia/Shanghai")
     private Date createTime;
 }

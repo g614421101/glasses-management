@@ -1,7 +1,7 @@
 package com.glasses.service;
 
-import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
-import com.baomidou.mybatisplus.extension.service.IService;
+import com.mybatisflex.core.paginate.Page;
+import com.mybatisflex.core.service.IService;
 import com.glasses.entity.SalesRecord;
 
 import java.util.List;

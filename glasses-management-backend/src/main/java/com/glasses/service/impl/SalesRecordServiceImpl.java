@@ -2,9 +2,9 @@ package com.glasses.service.impl;
 
 import cn.dev33.satoken.stp.StpUtil;
 import cn.hutool.core.date.DateUtil;
-import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
-import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
-import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.mybatisflex.core.query.QueryWrapper;
+import com.mybatisflex.core.paginate.Page;
+import com.mybatisflex.spring.service.impl.ServiceImpl;
 import com.glasses.entity.SalesRecord;
 import com.glasses.mapper.SalesRecordMapper;
 import com.glasses.service.SalesRecordService;
@@ -19,29 +19,33 @@ public class SalesRecordServiceImpl extends ServiceImpl<SalesRecordMapper, Sales
 
     @Override
     public List<SalesRecord> listByCustomerId(Long customerId) {
-        return baseMapper.selectList(new LambdaQueryWrapper<SalesRecord>()
-                .eq(SalesRecord::getCustomerId, customerId)
-                .eq(SalesRecord::getDeleted, false)
-                .orderByDesc(SalesRecord::getSalesDate));
+        return mapper.selectListByQuery(
+                QueryWrapper.create()
+                        .from(SalesRecord.class)
+                        .where(SalesRecord::getCustomerId).eq(customerId)
+                        .and(SalesRecord::getDeleted).eq(false)
+                        .orderBy(SalesRecord::getSalesDate).desc());
     }
 
     @Override
     public Page<SalesRecord> listByCustomerId(Long customerId, Integer current, Integer size) {
-        Page<SalesRecord> page = new Page<>(current, size);
-        return baseMapper.selectPage(page, new LambdaQueryWrapper<SalesRecord>()
-                .eq(SalesRecord::getCustomerId, customerId)
-                .eq(SalesRecord::getDeleted, false)
-                .orderByDesc(SalesRecord::getSalesDate));
+        Page<SalesRecord> page = Page.of(current, size);
+        return mapper.paginate(page,
+                QueryWrapper.create()
+                        .from(SalesRecord.class)
+                        .where(SalesRecord::getCustomerId).eq(customerId)
+                        .and(SalesRecord::getDeleted).eq(false)
+                        .orderBy(SalesRecord::getSalesDate).desc());
     }
 
     @Override
     public boolean softDeleteRecord(Long id) {
-        SalesRecord record = baseMapper.selectAnyById(id);
+        SalesRecord record = mapper.selectAnyById(id);
         if (record == null) {
             return false;
         }
         Long loginId = StpUtil.getLoginIdAsLong();
-        boolean result = baseMapper.softDeleteById(id, DateUtil.date(), loginId) > 0;
+        boolean result = mapper.softDeleteById(id, DateUtil.date(), loginId) > 0;
         if (result) {
             log.info("软删除配镜记录: id={}, 操作人={}", id, loginId);
         }
@@ -52,6 +56,6 @@ public class SalesRecordServiceImpl extends ServiceImpl<SalesRecordMapper, Sales
     public java.util.Map<String, Object> getRevenueSummary(String startDate, String endDate) {
         String start = (startDate != null && !startDate.isEmpty()) ? startDate + " 00:00:00" : null;
         String end = (endDate != null && !endDate.isEmpty()) ? endDate + " 23:59:59" : null;
-        return baseMapper.selectRevenueSummary(start, end);
+        return mapper.selectRevenueSummary(start, end);
     }
 }

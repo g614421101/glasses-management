@@ -38,18 +38,18 @@ class LogicDeleteConfigTest {
 
         Long id = customer.getId();
         assertNotNull(id);
-        assertFalse(Boolean.TRUE.equals(customerMapper.selectById(id).getDeleted()));
+        assertFalse(Boolean.TRUE.equals(customerMapper.selectOneById(id).getDeleted()));
 
         assertEquals(1, customerMapper.softDeleteById(id, DateUtil.date(), 1L));
 
-        assertNull(customerMapper.selectById(id));
+        assertNull(customerMapper.selectOneById(id));
         Customer deletedCustomer = customerMapper.selectAnyById(id);
         assertNotNull(deletedCustomer);
         assertTrue(Boolean.TRUE.equals(deletedCustomer.getDeleted()));
 
         Result<Boolean> restoreResult = recycleBinService.restore("customer", id);
         assertEquals(200, restoreResult.getCode());
-        assertNotNull(customerMapper.selectById(id));
+        assertNotNull(customerMapper.selectOneById(id));
 
         assertEquals(1, customerMapper.softDeleteById(id, DateUtil.date(), 1L));
 

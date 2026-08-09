@@ -2,9 +2,9 @@ package com.glasses.service.impl;
 
 import cn.dev33.satoken.stp.StpUtil;
 import cn.hutool.core.date.DateUtil;
-import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
-import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
-import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.mybatisflex.core.query.QueryWrapper;
+import com.mybatisflex.core.paginate.Page;
+import com.mybatisflex.spring.service.impl.ServiceImpl;
 import com.glasses.entity.OptometryRecord;
 import com.glasses.mapper.OptometryRecordMapper;
 import com.glasses.service.OptometryRecordService;
@@ -19,29 +19,33 @@ public class OptometryRecordServiceImpl extends ServiceImpl<OptometryRecordMappe
 
     @Override
     public List<OptometryRecord> listByCustomerId(Long customerId) {
-        return baseMapper.selectList(new LambdaQueryWrapper<OptometryRecord>()
-                .eq(OptometryRecord::getCustomerId, customerId)
-                .eq(OptometryRecord::getDeleted, false)
-                .orderByDesc(OptometryRecord::getExamDate));
+        return mapper.selectListByQuery(
+                QueryWrapper.create()
+                        .from(OptometryRecord.class)
+                        .where(OptometryRecord::getCustomerId).eq(customerId)
+                        .and(OptometryRecord::getDeleted).eq(false)
+                        .orderBy(OptometryRecord::getExamDate).desc());
     }
 
     @Override
     public Page<OptometryRecord> listByCustomerId(Long customerId, Integer current, Integer size) {
-        Page<OptometryRecord> page = new Page<>(current, size);
-        return baseMapper.selectPage(page, new LambdaQueryWrapper<OptometryRecord>()
-                .eq(OptometryRecord::getCustomerId, customerId)
-                .eq(OptometryRecord::getDeleted, false)
-                .orderByDesc(OptometryRecord::getExamDate));
+        Page<OptometryRecord> page = Page.of(current, size);
+        return mapper.paginate(page,
+                QueryWrapper.create()
+                        .from(OptometryRecord.class)
+                        .where(OptometryRecord::getCustomerId).eq(customerId)
+                        .and(OptometryRecord::getDeleted).eq(false)
+                        .orderBy(OptometryRecord::getExamDate).desc());
     }
 
     @Override
     public boolean softDeleteRecord(Long id) {
-        OptometryRecord record = baseMapper.selectAnyById(id);
+        OptometryRecord record = mapper.selectAnyById(id);
         if (record == null) {
             return false;
         }
         Long loginId = StpUtil.getLoginIdAsLong();
-        boolean result = baseMapper.softDeleteById(id, DateUtil.date(), loginId) > 0;
+        boolean result = mapper.softDeleteById(id, DateUtil.date(), loginId) > 0;
         if (result) {
             log.info("软删除验光记录: id={}, 操作人={}", id, loginId);
         }
