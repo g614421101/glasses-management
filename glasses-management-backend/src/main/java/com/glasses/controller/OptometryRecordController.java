@@ -4,6 +4,7 @@ import cn.dev33.satoken.stp.StpUtil;
 import cn.hutool.core.date.DateUtil;
 import com.glasses.entity.OptometryRecord;
 import com.glasses.service.OptometryRecordService;
+import com.glasses.util.PageAdapter;
 import com.glasses.util.Result;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -35,7 +36,7 @@ public class OptometryRecordController {
                                    @RequestParam(required = false) Integer current,
                                    @RequestParam(required = false) Integer size) {
         if (current != null && size != null) {
-            return Result.success(optometryRecordService.listByCustomerId(customerId, current, size));
+            return Result.success(PageAdapter.of(optometryRecordService.listByCustomerId(customerId, current, size)));
         }
         return Result.success(optometryRecordService.listByCustomerId(customerId));
     }

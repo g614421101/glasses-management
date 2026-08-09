@@ -44,6 +44,12 @@
             <scope>runtime</scope>
         </dependency>
 
+        <!-- HikariCP 连接池（MyBatis Flex starter 不自带，需显式引入） -->
+        <dependency>
+            <groupId>com.zaxxer</groupId>
+            <artifactId>HikariCP</artifactId>
+        </dependency>
+
         <!-- MyBatis Flex for Spring Boot 3 -->
         <dependency>
             <groupId>com.mybatis-flex</groupId>
