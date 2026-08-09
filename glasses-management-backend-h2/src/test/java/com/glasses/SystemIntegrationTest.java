@@ -2,7 +2,7 @@ package com.glasses;
 
 import cn.hutool.core.date.DateUtil;
 import cn.hutool.crypto.digest.BCrypt;
-import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.mybatisflex.core.query.QueryWrapper;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.glasses.dto.LoginDTO;
@@ -53,7 +53,10 @@ public class SystemIntegrationTest {
     @BeforeEach
     public void setup() throws Exception {
         // 创建一个专用的测试管理员账号
-        SysUser testAdmin = sysUserMapper.selectOne(new LambdaQueryWrapper<SysUser>().eq(SysUser::getUsername, "testadmin"));
+        SysUser testAdmin = sysUserMapper.selectOneByQuery(
+                QueryWrapper.create()
+                        .from(SysUser.class)
+                        .where(SysUser::getUsername).eq("testadmin"));
         if (testAdmin == null) {
             testAdmin = new SysUser();
             testAdmin.setUsername("testadmin");
@@ -66,7 +69,7 @@ public class SystemIntegrationTest {
             sysUserMapper.insert(testAdmin);
         } else {
             testAdmin.setPassword(BCrypt.hashpw("123456"));
-            sysUserMapper.updateById(testAdmin);
+            sysUserMapper.update(testAdmin, true);
         }
 
         // 使用 MockMvc 调用登录接口获取 token

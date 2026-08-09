@@ -8,8 +8,8 @@ spring:
     console:
       enabled: false
 
-# 关闭 MyBatis SQL 日志输出，避免日志过于冗杂
-mybatis-plus:
+# 关闭 MyBatis SQL 日志输出，避免日志过于冗长
+mybatis-flex:
   configuration:
     log-impl: org.apache.ibatis.logging.nologging.NoLoggingImpl
 

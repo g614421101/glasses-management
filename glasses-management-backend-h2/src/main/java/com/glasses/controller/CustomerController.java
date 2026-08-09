@@ -1,9 +1,9 @@
 package com.glasses.controller;
 
-import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.glasses.entity.Customer;
 import com.glasses.mapper.CustomerMapper;
 import com.glasses.service.CustomerService;
+import com.glasses.util.PageAdapter;
 import com.glasses.util.Result;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -19,10 +19,10 @@ public class CustomerController {
     private CustomerMapper customerMapper;
 
     @GetMapping("/page")
-    public Result<Page<Customer>> getPage(@RequestParam(required = false) String keyword,
-                                          @RequestParam(defaultValue = "1") Integer current,
-                                          @RequestParam(defaultValue = "10") Integer size) {
-        return Result.success(customerService.searchCustomer(keyword, current, size));
+    public Result<PageAdapter<Customer>> getPage(@RequestParam(required = false) String keyword,
+                                                 @RequestParam(defaultValue = "1") Integer current,
+                                                 @RequestParam(defaultValue = "10") Integer size) {
+        return Result.success(PageAdapter.of(customerService.searchCustomer(keyword, current, size)));
     }
 
     @PostMapping("/add")

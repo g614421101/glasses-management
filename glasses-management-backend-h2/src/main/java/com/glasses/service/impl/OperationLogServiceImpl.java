@@ -3,9 +3,9 @@ package com.glasses.service.impl;
 import cn.dev33.satoken.stp.StpUtil;
 import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.util.StrUtil;
-import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
-import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
-import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.mybatisflex.core.query.QueryWrapper;
+import com.mybatisflex.core.paginate.Page;
+import com.mybatisflex.spring.service.impl.ServiceImpl;
 import com.glasses.constant.RoleConstants;
 import com.glasses.entity.OperationLog;
 import com.glasses.mapper.OperationLogMapper;
@@ -45,7 +45,7 @@ public class OperationLogServiceImpl extends ServiceImpl<OperationLogMapper, Ope
             logEntry.setCostMs(costMs);
             logEntry.setIp(ip);
             fillOperator(logEntry);
-            baseMapper.insert(logEntry);
+            mapper.insert(logEntry);
         } catch (Exception e) {
             log.warn("操作日志写入失败: uri={}, err={}", uri, e.getMessage());
         }
@@ -55,29 +55,29 @@ public class OperationLogServiceImpl extends ServiceImpl<OperationLogMapper, Ope
     public Page<OperationLog> pageQuery(String operatorName, String action,
                                         String startTime, String endTime,
                                         Integer current, Integer size) {
-        Page<OperationLog> page = new Page<>(current, size);
-        LambdaQueryWrapper<OperationLog> wrapper = new LambdaQueryWrapper<>();
+        Page<OperationLog> page = Page.of(current, size);
+        QueryWrapper query = QueryWrapper.create().from(OperationLog.class);
         // 数据隔离：admin 可见全部，其余角色只能看到自己的记录
         if (!isAdmin()) {
-            wrapper.eq(OperationLog::getOperatorId, StpUtil.getLoginIdAsLong());
+            query.where(OperationLog::getOperatorId).eq(StpUtil.getLoginIdAsLong());
         }
         if (StrUtil.isNotBlank(operatorName)) {
-            wrapper.like(OperationLog::getOperatorName, operatorName.trim());
+            query.and(OperationLog::getOperatorName).like(operatorName.trim());
         }
         if (StrUtil.isNotBlank(action)) {
-            wrapper.eq(OperationLog::getAction, action.trim());
+            query.and(OperationLog::getAction).eq(action.trim());
         }
         Date start = parseTime(startTime);
         Date end = parseTime(endTime);
         if (start != null) {
-            wrapper.ge(OperationLog::getCreateTime, start);
+            query.and(OperationLog::getCreateTime).ge(start);
         }
         if (end != null) {
-            wrapper.le(OperationLog::getCreateTime, end);
+            query.and(OperationLog::getCreateTime).le(end);
         }
-        wrapper.orderByDesc(OperationLog::getCreateTime)
-               .orderByDesc(OperationLog::getId);
-        page = baseMapper.selectPage(page, wrapper);
+        query.orderBy(OperationLog::getCreateTime).desc()
+                .orderBy(OperationLog::getId).desc();
+        page = mapper.paginate(page, query);
         // 存量记录没有 description 时，返回前兜底生成，保证前端始终有可读描述
         page.getRecords().forEach(r -> {
             if (StrUtil.isBlank(r.getDescription())) {
@@ -93,8 +93,10 @@ public class OperationLogServiceImpl extends ServiceImpl<OperationLogMapper, Ope
             return 0;
         }
         Date cutoff = DateUtil.offsetDay(DateUtil.date(), -days);
-        return baseMapper.delete(new LambdaQueryWrapper<OperationLog>()
-                .lt(OperationLog::getCreateTime, cutoff));
+        return mapper.deleteByQuery(
+                QueryWrapper.create()
+                        .from(OperationLog.class)
+                        .where(OperationLog::getCreateTime).lt(cutoff));
     }
 
     @Override
@@ -103,8 +105,10 @@ public class OperationLogServiceImpl extends ServiceImpl<OperationLogMapper, Ope
             return 0;
         }
         Date cutoff = DateUtil.offsetDay(DateUtil.date(), -days);
-        return baseMapper.delete(new LambdaQueryWrapper<OperationLog>()
-                .ge(OperationLog::getCreateTime, cutoff));
+        return mapper.deleteByQuery(
+                QueryWrapper.create()
+                        .from(OperationLog.class)
+                        .where(OperationLog::getCreateTime).ge(cutoff));
     }
 
     private boolean isAdmin() {
@@ -118,7 +122,7 @@ public class OperationLogServiceImpl extends ServiceImpl<OperationLogMapper, Ope
         return false;
     }
 
-    /** 前缀匹配敏感接口（避免尾部斜杠/大小写变化绕过全等比较） */
+    /** 前缀匹配敏感接口（避免尾部斜杠、大小写变化绕过全等比较） */
     private boolean isSensitiveUri(String uri) {
         if (uri == null) {
             return false;

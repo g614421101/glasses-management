@@ -43,7 +43,7 @@ public class DataGenerationTest {
         String[] frameBrands = {"雷朋", "派丽蒙", "暴龙", "陌森", "亓那", "施洛华", "精工"};
         String[] lensBrands = {"蔡司", "依视路", "明月", "凯米", "罗敦斯得", "豪雅"};
         
-        List<SysUser> users = sysUserMapper.selectList(null);
+        List<SysUser> users = sysUserMapper.selectAll();
         Long operatorId = users.isEmpty() ? 1L : users.get(0).getId();
         Date now = new Date();
 

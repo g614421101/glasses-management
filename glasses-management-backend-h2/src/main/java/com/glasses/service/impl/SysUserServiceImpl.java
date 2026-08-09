@@ -45,7 +45,7 @@ public class SysUserServiceImpl implements SysUserService {
         }
         user.setDisabled(true);
         user.setDisabledTime(new Date());
-        sysUserMapper.updateById(user);
+        sysUserMapper.update(user, true);
         StpUtil.logout(user.getId());
         log.info("封禁商户: id={}, username={}, 操作人={}", id, user.getUsername(), StpUtil.getLoginIdAsLong());
     }
@@ -58,7 +58,7 @@ public class SysUserServiceImpl implements SysUserService {
         }
         user.setDisabled(false);
         user.setDisabledTime(null);
-        sysUserMapper.updateById(user);
+        sysUserMapper.update(user, true);
         log.info("解封商户: id={}, username={}, 操作人={}", id, user.getUsername(), StpUtil.getLoginIdAsLong());
     }
 
@@ -109,7 +109,7 @@ public class SysUserServiceImpl implements SysUserService {
         String temporaryPassword = generateTemporaryPassword();
         user.setPassword(BCrypt.hashpw(temporaryPassword));
         user.setMustChangePassword(true);
-        sysUserMapper.updateById(user);
+        sysUserMapper.update(user, true);
         log.info("重置商户密码: id={}, username={}, 操作人={}", id, user.getUsername(), StpUtil.getLoginIdAsLong());
         return temporaryPassword;
     }

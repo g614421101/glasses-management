@@ -16,7 +16,7 @@
 
     <properties>
         <java.version>21</java.version>
-        <mybatis-plus.version>3.5.16</mybatis-plus.version>
+        <mybatis-flex.version>1.11.8</mybatis-flex.version>
     </properties>
 
     <dependencies>
@@ -44,16 +44,24 @@
             <scope>runtime</scope>
         </dependency>
 
-        <!-- MyBatis Plus for Spring Boot 3 -->
+        <!-- HikariCP 连接池（MyBatis Flex starter 不自带，需显式引入） -->
         <dependency>
-            <groupId>com.baomidou</groupId>
-            <artifactId>mybatis-plus-spring-boot3-starter</artifactId>
-            <version>${mybatis-plus.version}</version>
+            <groupId>com.zaxxer</groupId>
+            <artifactId>HikariCP</artifactId>
         </dependency>
+
+        <!-- MyBatis Flex for Spring Boot 3 -->
         <dependency>
-            <groupId>com.baomidou</groupId>
-            <artifactId>mybatis-plus-jsqlparser</artifactId>
-            <version>${mybatis-plus.version}</version>
+            <groupId>com.mybatis-flex</groupId>
+            <artifactId>mybatis-flex-spring-boot3-starter</artifactId>
+            <version>${mybatis-flex.version}</version>
+            <exclusions>
+                <!-- 排除 MyBatis Flex 的 APT 处理器（本项目不使用/不生成 TableDef 类） -->
+                <exclusion>
+                    <groupId>com.mybatis-flex</groupId>
+                    <artifactId>mybatis-flex-processor</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
 
         <!-- Sa-Token -->

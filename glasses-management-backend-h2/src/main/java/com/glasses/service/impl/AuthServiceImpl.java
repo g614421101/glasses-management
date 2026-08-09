@@ -4,7 +4,7 @@ import cn.dev33.satoken.stp.StpUtil;
 import cn.hutool.core.util.PhoneUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.crypto.digest.BCrypt;
-import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.mybatisflex.core.query.QueryWrapper;
 import com.glasses.constant.RoleConstants;
 import com.glasses.dto.ChangePasswordDTO;
 import com.glasses.dto.LoginDTO;
@@ -39,9 +39,11 @@ public class AuthServiceImpl implements AuthService {
         }
 
         String account = loginDTO.getUsername().trim();
-        SysUser user = sysUserMapper.selectOne(new LambdaQueryWrapper<SysUser>()
-                .and(w -> w.eq(SysUser::getUsername, account).or().eq(SysUser::getPhone, account))
-                .last("LIMIT 1"));
+        SysUser user = sysUserMapper.selectOneByQuery(
+                QueryWrapper.create()
+                        .from(SysUser.class)
+                        .where(SysUser::getUsername).eq(account)
+                        .or(SysUser::getPhone).eq(account));
 
         if (user == null || !BCrypt.checkpw(loginDTO.getPassword(), user.getPassword())) {
             log.info("用户登录失败: {} (用户名或密码错误)", account);
@@ -141,7 +143,7 @@ public class AuthServiceImpl implements AuthService {
         }
         user.setPassword(BCrypt.hashpw(dto.getNewPassword()));
         user.setMustChangePassword(false);
-        sysUserMapper.updateById(user);
+        sysUserMapper.update(user, true);
         refreshSession(user);
         log.info("修改密码: userId={}", user.getId());
     }
@@ -181,14 +183,14 @@ public class AuthServiceImpl implements AuthService {
         user.setUsername(username);
         user.setPhone(phone);
         user.setRealName(StrUtil.isBlank(realName) ? username : realName);
-        sysUserMapper.updateById(user);
+        sysUserMapper.update(user, true);
         refreshSession(user);
         log.info("修改个人资料: userId={}", user.getId());
         return buildUserInfo(user);
     }
 
     private SysUser currentUser() {
-        return sysUserMapper.selectById(StpUtil.getLoginIdAsLong());
+        return sysUserMapper.selectOneById(StpUtil.getLoginIdAsLong());
     }
 
     private void refreshSession(SysUser user) {

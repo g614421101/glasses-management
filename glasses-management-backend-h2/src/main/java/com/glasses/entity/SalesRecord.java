@@ -1,11 +1,9 @@
 package com.glasses.entity;
 
-import com.baomidou.mybatisplus.annotation.FieldFill;
-import com.baomidou.mybatisplus.annotation.IdType;
-import com.baomidou.mybatisplus.annotation.TableField;
-import com.baomidou.mybatisplus.annotation.TableId;
-import com.baomidou.mybatisplus.annotation.TableLogic;
-import com.baomidou.mybatisplus.annotation.TableName;
+import com.mybatisflex.annotation.Column;
+import com.mybatisflex.annotation.Id;
+import com.mybatisflex.annotation.KeyType;
+import com.mybatisflex.annotation.Table;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Data;
 
@@ -13,16 +11,16 @@ import java.math.BigDecimal;
 import java.util.Date;
 
 @Data
-@TableName("sales_record")
+@Table("sales_record")
 public class SalesRecord {
-    @TableId(type = IdType.AUTO)
+    @Id(keyType = KeyType.Auto)
     private Long id;
 
     private String recordNo;
     private Long customerId;
     private Long optometryId;
 
-    @TableField(exist = false)
+    @Column(ignore = true)
     private String customerName;
 
     // 镜架信息
@@ -48,15 +46,13 @@ public class SalesRecord {
     private Date salesDate;
     private Long operatorId;
 
-    @TableField(fill = FieldFill.INSERT)
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "Asia/Shanghai")
     private Date createTime;
 
-    @TableField(fill = FieldFill.INSERT_UPDATE)
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "Asia/Shanghai")
     private Date updateTime;
 
-    @TableLogic
+    @Column(isLogicDelete = true)
     private Boolean deleted = false;
 
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "Asia/Shanghai")

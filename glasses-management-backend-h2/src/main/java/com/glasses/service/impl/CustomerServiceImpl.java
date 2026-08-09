@@ -3,9 +3,9 @@ package com.glasses.service.impl;
 import cn.dev33.satoken.stp.StpUtil;
 import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.util.StrUtil;
-import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
-import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
-import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.mybatisflex.core.query.QueryWrapper;
+import com.mybatisflex.core.paginate.Page;
+import com.mybatisflex.spring.service.impl.ServiceImpl;
 import com.glasses.entity.Customer;
 import com.glasses.mapper.CustomerMapper;
 import com.glasses.mapper.OptometryRecordMapper;
@@ -30,29 +30,29 @@ public class CustomerServiceImpl extends ServiceImpl<CustomerMapper, Customer> i
 
     @Override
     public Page<Customer> searchCustomer(String keyword, Integer current, Integer size) {
-        Page<Customer> page = new Page<>(current, size);
-        LambdaQueryWrapper<Customer> wrapper = new LambdaQueryWrapper<>();
-        wrapper.eq(Customer::getDeleted, false);
+        Page<Customer> page = Page.of(current, size);
+        QueryWrapper query = QueryWrapper.create()
+                .from(Customer.class)
+                .where(Customer::getDeleted).eq(false);
         if (StrUtil.isNotBlank(keyword)) {
-            wrapper.and(w -> w.like(Customer::getPhone, keyword)
-                    .or()
-                    .like(Customer::getName, keyword));
+            query.and(Customer::getPhone).like(keyword)
+                    .or(Customer::getName).like(keyword);
         }
-        wrapper.orderByDesc(Customer::getCreateTime)
-               .orderByDesc(Customer::getId);
-        return baseMapper.selectPage(page, wrapper);
+        query.orderBy(Customer::getCreateTime).desc()
+                .orderBy(Customer::getId).desc();
+        return mapper.paginate(page, query);
     }
 
     @Override
     @Transactional
     public boolean softDeleteCustomer(Long id) {
-        Customer customer = baseMapper.selectAnyById(id);
+        Customer customer = mapper.selectAnyById(id);
         if (customer == null || Boolean.TRUE.equals(customer.getDeleted())) {
             return false;
         }
         Date now = DateUtil.date();
         Long loginId = StpUtil.getLoginIdAsLong();
-        baseMapper.softDeleteById(id, now, loginId);
+        mapper.softDeleteById(id, now, loginId);
         optometryRecordMapper.softDeleteByCustomerId(id, now, loginId);
         salesRecordMapper.softDeleteByCustomerId(id, now, loginId);
         log.info("软删除顾客: id={}, 操作人={}", id, loginId);

@@ -1,10 +1,10 @@
 package com.glasses.controller;
 
 import cn.dev33.satoken.annotation.SaCheckRole;
-import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.glasses.constant.RoleConstants;
 import com.glasses.entity.OperationLog;
 import com.glasses.service.OperationLogService;
+import com.glasses.util.PageAdapter;
 import com.glasses.util.Result;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -33,14 +33,14 @@ public class OperationLogController {
     private int manualCleanupDays;
 
     @GetMapping("/page")
-    public Result<Page<OperationLog>> getPage(@RequestParam(required = false) String operatorName,
-                                              @RequestParam(required = false) String action,
-                                              @RequestParam(required = false) String startTime,
-                                              @RequestParam(required = false) String endTime,
-                                              @RequestParam(defaultValue = "1") Integer current,
-                                              @RequestParam(defaultValue = "10") Integer size) {
-        return Result.success(
-                operationLogService.pageQuery(operatorName, action, startTime, endTime, current, size));
+    public Result<PageAdapter<OperationLog>> getPage(@RequestParam(required = false) String operatorName,
+                                                     @RequestParam(required = false) String action,
+                                                     @RequestParam(required = false) String startTime,
+                                                     @RequestParam(required = false) String endTime,
+                                                     @RequestParam(defaultValue = "1") Integer current,
+                                                     @RequestParam(defaultValue = "10") Integer size) {
+        return Result.success(PageAdapter.of(
+                operationLogService.pageQuery(operatorName, action, startTime, endTime, current, size)));
     }
 
     /**
