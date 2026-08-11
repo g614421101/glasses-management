@@ -16,10 +16,10 @@ import { optometryAPI } from '@/api/optometry';
 import { salesAPI } from '@/api/sales';
 import { downloadBlob, openBlob } from '@/utils/request';
 import { useMobile } from '@/hooks/useMobile';
-import DetailModal from './DetailModal';
-import OptometryFormModal, { OptoForm, buildEmptyOpto, prepareOptoForEdit } from './OptometryFormModal';
-import SalesFormModal, { SalesForm, buildEmptySales } from './SalesFormModal';
-import TimelineCard from './TimelineCard';
+import DetailModal from './components/DetailModal';
+import OptometryFormModal, { OptoForm, buildEmptyOpto, prepareOptoForEdit } from './components/OptometryFormModal';
+import SalesFormModal, { SalesForm, buildEmptySales } from './components/SalesFormModal';
+import TimelineCard from './components/TimelineCard';
 
 const Archive: React.FC = () => {
   const { id } = useParams<{ id: string }>();

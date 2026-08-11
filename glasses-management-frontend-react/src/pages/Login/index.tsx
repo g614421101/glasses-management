@@ -6,7 +6,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { login } from '@/features/auth/authSlice';
 import { useMobile } from '@/hooks/useMobile';
 import ThemeToggle from '@/components/ThemeToggle';
-import LoginCharacters from './LoginCharacters';
+import LoginCharacters from './components/LoginCharacters';
 import './index.css';
 
 const Login: React.FC = () => {

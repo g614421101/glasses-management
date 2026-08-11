@@ -2,7 +2,7 @@ import React from 'react';
 import { Modal, Form, Input, Row, Col, Divider, DatePicker, message } from 'antd';
 import dayjs from 'dayjs';
 import { optometryAPI, OptometryRecord } from '@/api/optometry';
-import { fmtInput } from './formatters';
+import { fmtInput } from '../utils/formatters';
 
 export type OptoForm = Omit<Partial<OptometryRecord>, 'id' | 'examDate'> & {
   id?: number | null;

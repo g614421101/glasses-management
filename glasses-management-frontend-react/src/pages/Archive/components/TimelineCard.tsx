@@ -3,7 +3,7 @@ import { Button } from 'antd';
 import { EditOutlined, DeleteOutlined, UserOutlined, EyeOutlined } from '@ant-design/icons';
 import dayjs from 'dayjs';
 import type { TimelineItem } from '@/api/archive';
-import { fmt } from './formatters';
+import { fmt } from '../utils/formatters';
 
 interface Props {
   item: TimelineItem;

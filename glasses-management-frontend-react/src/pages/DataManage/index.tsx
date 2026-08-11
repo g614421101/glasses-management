@@ -1,7 +1,7 @@
 import React, { useState, useRef } from 'react';
 import { Modal, message, Input } from 'antd';
 import { dataAPI, ImportDetail } from '@/api/data';
-import DataCards from './DataCards';
+import DataCards from './components/DataCards';
 import './index.css';
 
 const DataManage: React.FC = () => {
