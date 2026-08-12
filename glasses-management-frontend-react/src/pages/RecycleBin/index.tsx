@@ -88,7 +88,7 @@ const RecycleBin: React.FC = () => {
       align: 'center' as const,
       render: (_: any, row: any) => (
         <div className="table-actions" style={{ justifyContent: 'center' }}>
-          <Button size="small" onClick={() => restore('customer', row.id)}>恢复</Button>
+          <Button size="small" type="primary" onClick={() => restore('customer', row.id)}>恢复</Button>
           <Button size="small" type="primary" danger onClick={() => purge('customer', row.id)}>彻底删除</Button>
         </div>
       ),
@@ -106,7 +106,7 @@ const RecycleBin: React.FC = () => {
       align: 'center' as const,
       render: (_: any, row: any) => (
         <div className="table-actions" style={{ justifyContent: 'center' }}>
-          <Button size="small" onClick={() => restore('optometry', row.id)}>恢复</Button>
+          <Button size="small" type="primary" onClick={() => restore('optometry', row.id)}>恢复</Button>
           <Button size="small" type="primary" danger onClick={() => purge('optometry', row.id)}>彻底删除</Button>
         </div>
       ),
@@ -124,7 +124,7 @@ const RecycleBin: React.FC = () => {
       align: 'center' as const,
       render: (_: any, row: any) => (
         <div className="table-actions" style={{ justifyContent: 'center' }}>
-          <Button size="small" onClick={() => restore('sales', row.id)}>恢复</Button>
+          <Button size="small" type="primary" onClick={() => restore('sales', row.id)}>恢复</Button>
           <Button size="small" type="primary" danger onClick={() => purge('sales', row.id)}>彻底删除</Button>
         </div>
       ),
@@ -153,7 +153,7 @@ const RecycleBin: React.FC = () => {
               { value: 'sales', label: '配镜记录' },
             ]}
           />
-          <Button onClick={() => loadData()}>刷新</Button>
+          <Button type="primary" onClick={() => loadData()}>刷新</Button>
           <Button type="primary" danger onClick={purgeExpired}>清理超过 30 天</Button>
           <Button danger type="primary" onClick={emptyBin}>一键清空</Button>
         </Space>

@@ -150,7 +150,7 @@ const OperationLogPage: React.FC = () => {
             />
             <RangePicker value={dateRange as any} onChange={(v) => setDateRange(v as any)} />
             <Button type="primary" className="search-submit" icon={<SearchOutlined />} onClick={handleSearch}>查询</Button>
-            <Button className="search-submit" onClick={resetFilters}>重置</Button>
+            <Button type="primary" className="search-submit" onClick={resetFilters}>重置</Button>
           </div>
         </div>
 

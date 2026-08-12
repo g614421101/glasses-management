@@ -98,7 +98,7 @@ const Profile: React.FC = () => {
           <p className="page-title-en">ACCOUNT PROFILE</p>
         </div>
         <div style={{ display: 'flex', gap: 12, alignItems: 'center' }}>
-          <Button onClick={startEdit}>{editing ? '继续编辑' : '编辑资料'}</Button>
+          <Button type="primary" onClick={startEdit}>{editing ? '继续编辑' : '编辑资料'}</Button>
         </div>
       </section>
 

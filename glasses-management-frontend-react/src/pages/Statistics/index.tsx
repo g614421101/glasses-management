@@ -103,7 +103,7 @@ const Statistics: React.FC = () => {
       title: '操作',
       width: 120,
       render: (_: any, row: any) => (
-        <Button size="small" onClick={() => navigate(`/archive/${row.customerId}`)}>查看详情</Button>
+        <Button size="small" type="primary" onClick={() => navigate(`/archive/${row.customerId}`)}>查看详情</Button>
       ),
     },
   ];

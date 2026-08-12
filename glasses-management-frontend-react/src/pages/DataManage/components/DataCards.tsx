@@ -81,6 +81,7 @@ const DataCards: React.FC<Props> = (p) => {
           <div className="import-actions">
             <input ref={p.fileInputRef} type="file" accept=".json" hidden onChange={p.onFileChange} />
             <Button
+              type="primary"
               className="action-btn action-btn--file"
               onClick={() => p.fileInputRef.current?.click()}
               icon={<FolderOpenOutlined />}

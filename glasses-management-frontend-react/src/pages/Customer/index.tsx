@@ -122,7 +122,7 @@ const CustomerPage: React.FC = () => {
       render: (_: any, record: Customer) => (
         <div className="table-actions">
           <Button className="action-pill" icon={<EyeOutlined />} onClick={() => navigate('/archive/' + record.id)}>档案</Button>
-          <Button className="action-pill" icon={<EditOutlined />} onClick={() => handleEdit(record)}>编辑</Button>
+          <Button className="action-pill action-pill--edit" icon={<EditOutlined />} onClick={() => handleEdit(record)}>编辑</Button>
           <Popconfirm title="确定删除该顾客？将会级联清除其记录!" onConfirm={() => handleDelete(record.id)}>
             <Button className="action-pill action-pill--danger" icon={<DeleteOutlined />}>删除</Button>
           </Popconfirm>
@@ -196,8 +196,8 @@ const CustomerPage: React.FC = () => {
                   📱 {row.phone}{row.birthday ? ` · 🎂 ${row.birthday}` : ''}
                 </p>
                 <div style={{ display: 'flex', gap: 8, marginTop: 12, flexWrap: 'wrap' }}>
-                  <Button size="small" icon={<EyeOutlined />} onClick={() => navigate('/archive/' + row.id)}>档案</Button>
-                  <Button size="small" icon={<EditOutlined />} onClick={() => handleEdit(row)}>编辑</Button>
+                  <Button size="small" type="primary" icon={<EyeOutlined />} onClick={() => navigate('/archive/' + row.id)}>档案</Button>
+                  <Button size="small" type="primary" className="btn-edit" icon={<EditOutlined />} onClick={() => handleEdit(row)}>编辑</Button>
                   <Popconfirm title="确定删除该顾客？" onConfirm={() => handleDelete(row.id)}>
                     <Button size="small" type="primary" danger icon={<DeleteOutlined />}>删除</Button>
                   </Popconfirm>

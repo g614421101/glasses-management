@@ -105,13 +105,13 @@ const SysUserPage: React.FC = () => {
       render: (_: any, row: SysUser) =>
         row.deleted ? (
           <div className="table-actions" style={{ justifyContent: 'center' }}>
-            <Button size="small" onClick={() => restoreUser(row)}>恢复</Button>
+            <Button size="small" type="primary" onClick={() => restoreUser(row)}>恢复</Button>
             <Button size="small" type="primary" danger onClick={() => purgeUser(row)}>彻底删除</Button>
           </div>
         ) : (
           <div className="table-actions" style={{ justifyContent: 'center' }}>
-            <Button size="small" onClick={() => resetPwd(row)}>重置密码</Button>
-            <Button size="small" onClick={() => toggleDisabled(row)}>{row.disabled ? '解除封禁' : '封禁'}</Button>
+            <Button size="small" type="primary" onClick={() => resetPwd(row)}>重置密码</Button>
+            <Button size="small" type="primary" onClick={() => toggleDisabled(row)}>{row.disabled ? '解除封禁' : '封禁'}</Button>
             <Button size="small" type="primary" danger onClick={() => deleteUser(row)}>删除</Button>
           </div>
         ),

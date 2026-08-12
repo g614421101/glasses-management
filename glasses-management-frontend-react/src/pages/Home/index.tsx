@@ -142,7 +142,7 @@ const Home: React.FC = () => {
           <canvas ref={qrCanvasRef} className="lan-qr" />
           <div className="lan-url-row">
             <code className="lan-url">{lanUrl}</code>
-            <Button size="small" className="lan-copy-btn" onClick={copyLanUrl}>
+            <Button size="small" type="primary" className="lan-copy-btn" onClick={copyLanUrl}>
               复制链接
             </Button>
           </div>
