@@ -12,9 +12,14 @@ app:
 glasses:
   admin:
     username: ${GLASSES_ADMIN_USERNAME:admin}
-    password: ${GLASSES_ADMIN_PASSWORD}
+    # 初始密码：仅首次创建管理员时生效；password 与 password-hash 二选一，
+    # 都为空则不自动创建，登录页会引导完成初始化
+    password: ${GLASSES_ADMIN_PASSWORD:}
+    password-hash: ${GLASSES_ADMIN_PASSWORD_HASH:}
     real-name: ${GLASSES_ADMIN_REAL_NAME:系统管理员}
     enabled: ${GLASSES_ADMIN_ENABLED:true}
+    # 一次性开关：置 true 启动后管理员密码被重置为随机强密码（仅打印一次到日志）
+    force-reset-password: ${GLASSES_ADMIN_FORCE_RESET:false}
   mdns:
     enabled: true
     service-name: GlassesManagement

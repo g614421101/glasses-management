@@ -52,6 +52,7 @@ pnpm-debug.log*
 **/dist-ssr/
 **/runtime/
 **/.vite/
+glasses-management-electron/packaging-config/
 *.tsbuildinfo
 *.local
 glasses-management-electron/package-lock.json

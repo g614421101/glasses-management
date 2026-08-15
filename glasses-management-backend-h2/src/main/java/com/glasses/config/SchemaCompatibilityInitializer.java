@@ -24,6 +24,7 @@ public class SchemaCompatibilityInitializer implements ApplicationRunner {
         addColumnIfMissing("SYS_USER", "DISABLED_TIME", "datetime DEFAULT NULL");
         addColumnIfMissing("SYS_USER", "DELETED", "boolean NOT NULL DEFAULT false");
         addColumnIfMissing("SYS_USER", "DELETED_TIME", "datetime DEFAULT NULL");
+        addColumnIfMissing("SYS_USER", "FORCE_RESET_TIME", "datetime DEFAULT NULL");
 
         addRecycleColumns("CUSTOMER");
         addRecycleColumns("OPTOMETRY_RECORD");

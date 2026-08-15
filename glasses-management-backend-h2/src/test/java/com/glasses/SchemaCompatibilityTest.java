@@ -30,6 +30,7 @@ public class SchemaCompatibilityTest {
         assertColumn(jdbc, "sys_user", "must_change_password");
         assertColumn(jdbc, "sys_user", "disabled");
         assertColumn(jdbc, "sys_user", "deleted");
+        assertColumn(jdbc, "sys_user", "force_reset_time");
         assertColumn(jdbc, "customer", "deleted");
         assertColumn(jdbc, "customer", "deleted_by");
         assertColumn(jdbc, "optometry_record", "remark");

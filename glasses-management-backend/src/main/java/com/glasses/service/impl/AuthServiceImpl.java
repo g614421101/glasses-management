@@ -10,6 +10,7 @@ import com.glasses.dto.ChangePasswordDTO;
 import com.glasses.dto.LoginDTO;
 import com.glasses.dto.ProfileUpdateDTO;
 import com.glasses.dto.RegisterDTO;
+import com.glasses.dto.SetupDTO;
 import com.glasses.entity.SysUser;
 import com.glasses.mapper.SysUserMapper;
 import com.glasses.service.AuthService;
@@ -21,10 +22,21 @@ import org.springframework.stereotype.Service;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 @Slf4j
 @Service
 public class AuthServiceImpl implements AuthService {
+
+    /** 登录防爆破：同一账号连续失败 N 次后临时锁定（内存计数，重启失效） */
+    private static final int LOGIN_MAX_FAILURES = 5;
+    private static final long LOGIN_LOCK_MILLIS = 15 * 60 * 1000L;
+    private static final Map<String, LoginFailState> LOGIN_FAILURES = new ConcurrentHashMap<>();
+
+    private static final class LoginFailState {
+        volatile int count;
+        volatile long lockedUntil;
+    }
 
     @Value("${app.invite-code}")
     private String inviteCode;
@@ -39,6 +51,15 @@ public class AuthServiceImpl implements AuthService {
         }
 
         String account = loginDTO.getUsername().trim();
+        LoginFailState failState = LOGIN_FAILURES.get(account);
+        if (failState != null && failState.lockedUntil > System.currentTimeMillis()) {
+            log.warn("账号 {} 处于临时锁定中，拒绝登录", account);
+            throw new BizException("失败次数过多，请15分钟后再试");
+        }
+        if (!isInitialized()) {
+            throw new BizException("系统尚未初始化，请先完成管理员初始化");
+        }
+
         SysUser user = sysUserMapper.selectOneByQuery(
                 QueryWrapper.create()
                         .from(SysUser.class)
@@ -46,6 +67,7 @@ public class AuthServiceImpl implements AuthService {
                         .or(SysUser::getPhone).eq(account));
 
         if (user == null || !BCrypt.checkpw(loginDTO.getPassword(), user.getPassword())) {
+            recordLoginFailure(account);
             log.info("用户登录失败: {} (用户名或密码错误)", account);
             throw new BizException("用户名或密码错误");
         }
@@ -60,6 +82,7 @@ public class AuthServiceImpl implements AuthService {
 
         StpUtil.login(user.getId());
         refreshSession(user);
+        LOGIN_FAILURES.remove(account);
         log.info("用户登录成功: {} (id={})", account, user.getId());
 
         Map<String, Object> data = buildUserInfo(user);
@@ -67,8 +90,23 @@ public class AuthServiceImpl implements AuthService {
         return data;
     }
 
+    private void recordLoginFailure(String account) {
+        LoginFailState state = LOGIN_FAILURES.computeIfAbsent(account, k -> new LoginFailState());
+        synchronized (state) {
+            state.count++;
+            if (state.count >= LOGIN_MAX_FAILURES) {
+                state.lockedUntil = System.currentTimeMillis() + LOGIN_LOCK_MILLIS;
+                state.count = 0;
+                log.warn("账号 {} 连续登录失败，临时锁定 {} 分钟", account, LOGIN_LOCK_MILLIS / 60000);
+            }
+        }
+    }
+
     @Override
     public void register(RegisterDTO dto) {
+        if (!isInitialized()) {
+            throw new BizException("系统尚未初始化，请先完成管理员初始化");
+        }
         if (!inviteCode.equals(dto.getInviteCode())) {
             throw new BizException("邀请码不正确");
         }
@@ -107,6 +145,48 @@ public class AuthServiceImpl implements AuthService {
         newUser.setDeleted(false);
         sysUserMapper.insert(newUser);
         log.info("新用户注册: {} (phone={})", username, phone);
+    }
+
+    @Override
+    public boolean isInitialized() {
+        return sysUserMapper.selectAnyByRole(RoleConstants.ADMIN) != null;
+    }
+
+    @Override
+    public void setupAdmin(SetupDTO dto) {
+        if (isInitialized()) {
+            throw new BizException("系统已初始化，无需重复操作");
+        }
+        if (dto == null || StrUtil.isBlank(dto.getInviteCode())
+                || !inviteCode.equals(dto.getInviteCode().trim())) {
+            throw new BizException("邀请码不正确");
+        }
+        String username = dto.getUsername() == null ? "" : dto.getUsername().trim();
+        if (username.length() < 3 || username.length() > 30) {
+            throw new BizException("用户名长度需为 3-30 位");
+        }
+        if (StrUtil.isBlank(dto.getPassword()) || dto.getPassword().length() < 6) {
+            throw new BizException("密码至少 6 位");
+        }
+        if (!dto.getPassword().equals(dto.getConfirmPassword())) {
+            throw new BizException("两次输入的密码不一致");
+        }
+
+        Long duplicateCount = sysUserMapper.countByUsernameOrPhoneIncludingDeleted(username, username);
+        if (duplicateCount != null && duplicateCount > 0) {
+            throw new BizException("用户名已被使用");
+        }
+
+        SysUser admin = new SysUser();
+        admin.setUsername(username);
+        admin.setPassword(BCrypt.hashpw(dto.getPassword()));
+        admin.setRealName("管理员[" + username + "]");
+        admin.setRole(RoleConstants.ADMIN);
+        admin.setMustChangePassword(true);
+        admin.setDisabled(false);
+        admin.setDeleted(false);
+        sysUserMapper.insert(admin);
+        log.warn("系统初始化完成: 管理员账号 {} 已创建", username);
     }
 
     @Override

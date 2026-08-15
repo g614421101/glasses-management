@@ -19,10 +19,22 @@ Write-Host "[1/4] Building and syncing $Frontend Frontend..." -ForegroundColor C
 & "$PSScriptRoot\sync-frontend.ps1" -Backend H2 -Frontend $Frontend
 if ($LASTEXITCODE -ne 0) { Write-Host "Error: Frontend sync failed." -ForegroundColor Red; exit }
 
+# Step 1.5: Prepare packaged config (统一管理员策略：不再强制预置 application-local.yml)
+# 本地存在 application-local.yml 时原样带入安装包（私有分发场景）；
+# 不存在时生成仅含注释的占位文件 —— 首次启动在登录页引导完成管理员初始化。
 $h2LocalConfig = Join-Path $PSScriptRoot 'glasses-management-backend-h2\application-local.yml'
-if (-not (Test-Path $h2LocalConfig)) {
-    Write-Host "Error: H2 application-local.yml not found. Copy glasses-management-backend-h2\application-local.example.yml first." -ForegroundColor Red
-    exit 1
+$packagingConfigDir = Join-Path $PSScriptRoot 'glasses-management-electron\packaging-config'
+$packagedConfig = Join-Path $packagingConfigDir 'application-local.yml'
+New-Item -ItemType Directory -Force -Path $packagingConfigDir | Out-Null
+if (Test-Path $h2LocalConfig) {
+    Copy-Item -LiteralPath $h2LocalConfig -Destination $packagedConfig -Force
+    Write-Host "[config] 已携带本地 glasses-management-backend-h2\application-local.yml 进入安装包（含其中预置的邀请码/管理员密码，请确认仅用于私有分发）。" -ForegroundColor Yellow
+} else {
+    @(
+        '# 本安装包未预置本地配置：',
+        '# 首次启动时登录页会引导完成管理员初始化（需邀请码），管理员密码在初始化时现场设置。'
+    ) | Set-Content -Path $packagedConfig -Encoding UTF8
+    Write-Host "[config] 未找到 application-local.yml，安装包将采用首次启动引导初始化。" -ForegroundColor Green
 }
 
 # Step 2: Build Spring Boot JAR

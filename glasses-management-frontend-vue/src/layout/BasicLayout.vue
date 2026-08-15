@@ -91,7 +91,7 @@
             <el-icon><TrendCharts /></el-icon>
             <span>营收统计</span>
           </el-menu-item>
-          <el-menu-item index="/data-manage" v-if="FEATURES.DATA_MANAGE">
+          <el-menu-item index="/data-manage" v-if="FEATURES.DATA_MANAGE && authStore.role === 'admin'">
             <el-icon><FolderOpened /></el-icon>
             <span>数据管理</span>
           </el-menu-item>
@@ -152,7 +152,7 @@
             <el-icon><TrendCharts /></el-icon>
             <span>营收统计</span>
           </el-menu-item>
-          <el-menu-item index="/data-manage" v-if="FEATURES.DATA_MANAGE">
+          <el-menu-item index="/data-manage" v-if="FEATURES.DATA_MANAGE && authStore.role === 'admin'">
             <el-icon><FolderOpened /></el-icon>
             <span>数据管理</span>
           </el-menu-item>

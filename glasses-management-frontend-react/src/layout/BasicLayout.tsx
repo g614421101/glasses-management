@@ -65,7 +65,7 @@ const BasicLayout: React.FC = () => {
     { key: '/', icon: <HomeOutlined />, label: '工作平台' },
     FEATURES.CUSTOMER && { key: '/customer', icon: <TeamOutlined />, label: '顾客管理' },
     FEATURES.STATISTICS && { key: '/stats', icon: <BarChartOutlined />, label: '营收统计' },
-    FEATURES.DATA_MANAGE && { key: '/data-manage', icon: <FolderOutlined />, label: '数据管理' },
+    FEATURES.DATA_MANAGE && isAdmin && { key: '/data-manage', icon: <FolderOutlined />, label: '数据管理' },
     FEATURES.PROFILE && { key: '/profile', icon: <UserOutlined />, label: '个人主页' },
     FEATURES.OPERATION_LOG && { key: '/operation-log', icon: <FileTextOutlined />, label: '操作日志' },
     FEATURES.RECYCLE_BIN && isAdmin && { key: '/recycle-bin', icon: <DeleteOutlined />, label: '回收站' },
@@ -269,7 +269,9 @@ const BasicLayout: React.FC = () => {
                 {FEATURES.CUSTOMER && <Route path="customer" element={<Customer />} />}
                 <Route path="archive/:id" element={<Archive />} />
                 {FEATURES.STATISTICS && <Route path="stats" element={<Statistics />} />}
-                {FEATURES.DATA_MANAGE && <Route path="data-manage" element={<DataManage />} />}
+                {FEATURES.DATA_MANAGE && (
+                  <Route path="data-manage" element={<PrivateRoute adminOnly><DataManage /></PrivateRoute>} />
+                )}
                 {FEATURES.PROFILE && <Route path="profile" element={<Profile />} />}
                 {FEATURES.OPERATION_LOG && <Route path="operation-log" element={<OperationLog />} />}
                 {FEATURES.RECYCLE_BIN && (

@@ -25,6 +25,8 @@ public class WebConfig implements WebMvcConfigurer {
                     .notMatch("/api/auth/login")
                     .notMatch("/api/auth/register")
                     .notMatch("/api/system/lan-info")
+                    .notMatch("/api/system/setup-status")
+                    .notMatch("/api/system/setup")
                     .check(r -> StpUtil.checkLogin());
         })).addPathPatterns("/**");
     }

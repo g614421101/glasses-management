@@ -24,5 +24,7 @@ public class SysUser {
     @Column(isLogicDelete = true)
     private Boolean deleted = false;
     private Date deletedTime;
+    /** 强制重置密码执行时间；非空表示 force-reset 开关已被消费，防止重复执行 */
+    private Date forceResetTime;
     private Date createTime;
 }

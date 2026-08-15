@@ -64,7 +64,7 @@ if (Test-Path $localConfigPath) {
     Copy-Item -LiteralPath $localConfigPath -Destination $tempDir -Force
     Write-Host 'Included local application-local.yml for this private installer.' -ForegroundColor Yellow
 } else {
-    Write-Host 'Warning: application-local.yml not found. Packaged app will require environment variables or an external config file.' -ForegroundColor Yellow
+    Write-Host 'Info: application-local.yml not found. The packaged app will boot without a preset admin account; first launch guides initialization on the login page.' -ForegroundColor Green
 }
 
 Write-Host "[4/4] Building H2 native installer..." -ForegroundColor Cyan

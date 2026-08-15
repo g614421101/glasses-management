@@ -229,6 +229,7 @@ glasses-management-backend-h2\dist-install
 ### 需要注意
 
 - H2 版生产环境数据库路径在 `application-prod.yml` 中，默认落到用户目录下的 `.glasses_management\data`
+- **管理员初始化（统一策略）**：`application-local.yml` 中配置了 `glasses.admin.password`（或 `password-hash`）则首次启动自动创建管理员；两者都留空时，首次打开页面会在登录页引导完成初始化（需邀请码）；忘记密码可临时置 `force-reset-password: true` 重启，密码被重置为随机强密码（仅打印一次到日志）
 - 当前 `jpackage` 参数保存在 `glasses-management-backend-h2/jpackage.cfg`，如果你改版本号，优先同步这里
 
 ## 手动打 MySQL 原生 EXE
@@ -275,7 +276,8 @@ glasses-management-backend\dist-install
 ### 需要注意
 
 - MySQL 版不会把数据库一起打进去，它依赖外部 MySQL 服务
-- 打包前请确认 `glasses-management-backend/src/main/resources/application.yml` 中的数据库地址、账号、密码已经是你要交付的配置
+- 打包前请确认 `application-local.yml` 中的数据库地址、账号、密码已经是你要交付的配置
+- **管理员初始化（统一策略）**：`application-local.yml` 中配置了 `glasses.admin.password`（或 `password-hash`）则首次启动自动创建管理员；两者都留空时，首次打开页面会在登录页引导完成初始化（需邀请码）；忘记密码可临时置 `force-reset-password: true` 重启，密码被重置为随机强密码（仅打印一次到日志）
 - 当前 `jpackage` 参数保存在 `glasses-management-backend/jpackage.cfg`，如果你改版本号，优先同步这里
 
 ## 常见问题

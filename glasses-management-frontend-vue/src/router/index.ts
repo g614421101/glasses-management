@@ -57,7 +57,7 @@ router.beforeEach(async (to, _from, next) => {
       if (!authStore.verified) {
         try {
           await authStore.verifyToken();
-          if ((to.name === 'SysUser' || to.name === 'RecycleBin') && authStore.role !== 'admin') {
+          if ((to.name === 'SysUser' || to.name === 'RecycleBin' || to.name === 'DataManage') && authStore.role !== 'admin') {
             next({ name: 'Home' });
             return;
           }
@@ -66,7 +66,7 @@ router.beforeEach(async (to, _from, next) => {
           next({ name: 'Login' });
         }
       } else {
-        if ((to.name === 'SysUser' || to.name === 'RecycleBin') && authStore.role !== 'admin') {
+        if ((to.name === 'SysUser' || to.name === 'RecycleBin' || to.name === 'DataManage') && authStore.role !== 'admin') {
           next({ name: 'Home' });
           return;
         }

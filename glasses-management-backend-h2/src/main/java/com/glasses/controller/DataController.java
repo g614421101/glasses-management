@@ -1,8 +1,10 @@
 package com.glasses.controller;
 
+import cn.dev33.satoken.annotation.SaCheckRole;
 import cn.dev33.satoken.stp.StpUtil;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import com.glasses.constant.RoleConstants;
 import com.glasses.dto.DataExportDTO;
 import com.glasses.dto.ImportResultDTO;
 import com.glasses.service.DataService;
@@ -24,6 +26,7 @@ import java.nio.charset.StandardCharsets;
 @Slf4j
 @RestController
 @RequestMapping("/api/data")
+@SaCheckRole(RoleConstants.ADMIN)
 public class DataController {
 
     @Autowired

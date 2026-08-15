@@ -10,6 +10,7 @@ CREATE TABLE IF NOT EXISTS `sys_user` (
   `disabled_time` datetime DEFAULT NULL,
   `deleted` boolean NOT NULL DEFAULT false,
   `deleted_time` datetime DEFAULT NULL,
+  `force_reset_time` datetime DEFAULT NULL,
   `create_time` datetime DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
   UNIQUE KEY `uk_sys_user_username` (`username`),

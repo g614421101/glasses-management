@@ -4,8 +4,13 @@ app:
 glasses:
   admin:
     username: admin
-    password: replace-with-a-strong-initial-admin-password
-    real-name: System Administrator
+    # ── 管理员初始密码（统一预设策略）──────────────────────────────
+    # password 与 password-hash 二选一，两者都留空时不做自动创建，
+    # 首次打开页面会在登录页引导完成初始化（需邀请码）。
+    # password: replace-with-a-strong-initial-admin-password
+    # password-hash: $2a$10$...（BCrypt 哈希，避免明文落盘）
+    # force-reset-password: true   # 忘记密码时临时置 true，启动后重置为随机强密码（日志打印一次）
+    real-name: 系统管理员
     enabled: true
 
 spring:

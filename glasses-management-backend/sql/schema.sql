@@ -17,6 +17,7 @@ CREATE TABLE `sys_user` (
   `disabled_time` datetime DEFAULT NULL,
   `deleted` tinyint(1) NOT NULL DEFAULT '0',
   `deleted_time` datetime DEFAULT NULL,
+  `force_reset_time` datetime DEFAULT NULL,
   `create_time` datetime DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
   UNIQUE KEY `uk_username` (`username`),

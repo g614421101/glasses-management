@@ -43,14 +43,22 @@ cd glasses-management-backend && .\build-package.ps1                 # 同上，
 
 ## 本地配置（首次运行前必须）
 
-两个后端启动前必须提供邀请码和管理员密码，否则启动失败：
+两个后端启动前必须提供邀请码（MySQL 版还必须配置数据源），否则启动失败：
 
 ```powershell
 Copy-Item glasses-management-backend\application-local.example.yml glasses-management-backend\application-local.yml
 Copy-Item glasses-management-backend-h2\application-local.example.yml glasses-management-backend-h2\application-local.yml
 ```
 
-也可使用环境变量：`APP_INVITE_CODE`、`GLASSES_ADMIN_USERNAME`、`GLASSES_ADMIN_PASSWORD`、`GLASSES_ADMIN_REAL_NAME`、`SPRING_DATASOURCE_URL`、`SPRING_DATASOURCE_USERNAME`、`SPRING_DATASOURCE_PASSWORD`、`SPRING_PROFILES_ACTIVE`、`SERVER_PORT`。
+**管理员统一预设策略**（两个后端一致，`DataInitializer` 实现，有集成测试覆盖）：
+
+- 配置 `glasses.admin.password`（明文）或 `glasses.admin.password-hash`（BCrypt 哈希）**二选一**，两者同时设置启动失败；首次启动时自动创建 admin，此后任何启动都不覆盖密码。
+- 两者都留空时不自动创建：登录页自动切换为"系统初始化"表单（`/api/system/setup-status` + `/api/system/setup`，需邀请码），现场创建管理员。
+- 每次启动幂等自愈 admin 的 `role`/`real_name`/`deleted`/`disabled`。
+- 忘记密码：`application-local.yml` 临时置 `force-reset-password: true` 重启，admin 密码被重置为随机强密码（仅打印一次到日志，`force_reset_time` 记录防重复执行）。
+- 登录防爆破：同一账号连续失败 5 次锁定 15 分钟（内存计数，重启失效）。
+
+也可使用环境变量：`APP_INVITE_CODE`、`GLASSES_ADMIN_USERNAME`、`GLASSES_ADMIN_PASSWORD`、`GLASSES_ADMIN_PASSWORD_HASH`、`GLASSES_ADMIN_FORCE_RESET`、`GLASSES_ADMIN_REAL_NAME`、`SPRING_DATASOURCE_URL`、`SPRING_DATASOURCE_USERNAME`、`SPRING_DATASOURCE_PASSWORD`、`SPRING_PROFILES_ACTIVE`、`SERVER_PORT`。
 
 - MySQL 后端数据源**没有默认值**，必须配置。
 - H2 后端默认 `./data/glasses_management`（用户 `sa`，空密码）。
@@ -70,8 +78,8 @@ Copy-Item glasses-management-backend-h2\application-local.example.yml glasses-ma
 
 - 统一响应 `Result<T>`，成功 `code = 200`；前端 `request.ts` 直接返回 `res.data`。
 - 认证：Sa-Token，token 存 `localStorage.token`，请求头 `Authorization`（**无 Bearer 前缀**）。
-- 免认证接口：`/api/auth/login`、`/api/auth/register`、`/api/system/lan-info`。
-- 角色：`admin`、`merchant`；`SysUser`、`RecycleBin` 仅 admin 可访问。
+- 免认证接口：`/api/auth/login`、`/api/auth/register`、`/api/system/lan-info`、`/api/system/setup-status`、`/api/system/setup`。
+- 角色：`admin`、`merchant`；`SysUser`、`RecycleBin`、`Data`（数据导入/导出/重置）仅 admin 可访问。
 - 后端控制器统一在 `/api` 前缀下：`/api/auth`、`/api/customer`、`/api/optometry`、`/api/sales`、`/api/archive`、`/api/print`、`/api/recycle-bin`、`/api/data`、`/api/sys-user`、`/api/operation-log`、`/api/system/lan-info`。
 - Jackson 时区配置为 `Asia/Shanghai`。
 
@@ -117,7 +125,27 @@ Copy-Item glasses-management-backend-h2\application-local.example.yml glasses-ma
 ## Changelog
 
 - 记录文件放在 `changelog/` 目录下，以日期命名 `YYYY-MM-DD.md`（已被 `.gitignore` 排除，本地用）。
-- 每次合并功能分支或重要改动后新增一个日期文件，一两句话描述改动内容和背景。
+- 每次合并功能分支或重要改动后新增一个日期文件。
+- **格式规范**（统一照此书写，参照往期文件）：
+
+```markdown
+# YYYY-MM-DD — <一句话标题，概括本次改动核心>
+
+**背景**：<为什么做这次改动，一两句话>
+
+**改动**：
+
+- <要点分组，以 **粗体小标题** 开头，子条目缩进两格列出具体改动>
+- ...
+
+**测试**：
+
+- <验证方式与结果（mvn test / npm run build 及用例数）>
+
+**涉及模块**：`module-a`、`module-b`。
+```
+
+- 四个小节（背景/改动/测试/涉及模块）均为必填；无测试的纯文案改动在"测试"下写人工验证方式。
 
 ## 禁止提交
 
