@@ -12,7 +12,7 @@ $backendDir = $PSScriptRoot
 $rootDir = Split-Path -Parent $backendDir
 $tempDir = Join-Path $backendDir 'jpackage-temp'
 $distDir = Join-Path $backendDir 'dist-install'
-$jarName = 'glasses-management-backend-h2-3.2.0.jar'
+$jarName = 'glasses-management-backend-h2-3.3.0.jar'
 $jarPath = Join-Path $backendDir "target\$jarName"
 $localConfigPath = Join-Path $backendDir 'application-local.yml'
 

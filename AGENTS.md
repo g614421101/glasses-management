@@ -1,6 +1,6 @@
 # AGENTS.md
 
-眼镜店视光档案管理系统。前后端分离 + Electron 桌面版 + 两套 Android 客户端。目标平台 Windows，UI/文档/commit 使用中文。全项目统一版本 **3.2.0**（Android `versionName`/`versionCode` 独立维护）。
+眼镜店视光档案管理系统。前后端分离 + Electron 桌面版 + 两套 Android 客户端。目标平台 Windows，UI/文档/commit 使用中文。全项目统一版本 **3.3.0**（Android `versionName`/`versionCode` 独立维护）。
 
 打包流程见 `PACKAGING_TUTORIAL.md`。
 
@@ -36,7 +36,7 @@ cd glasses-management-backend-h2 && mvn test -Dtest=SchemaCompatibilityTest   # 
 .\sync-frontend.ps1 -Backend H2 -Frontend React -SkipBuild           # 跳过构建，直接复制已有 dist
 
 # 打包
-.\build-desktop.ps1                                                   # H2 + Electron 一键桌面版，产物 glasses-management-electron\dist\视光管理系统_3.2.0.exe
+.\build-desktop.ps1                                                   # H2 + Electron 一键桌面版，产物 glasses-management-electron\dist\视光管理系统_3.3.0.exe
 cd glasses-management-backend-h2 && .\build-package.ps1              # jpackage 原生安装包（需 JDK 21 + WiX）
 cd glasses-management-backend && .\build-package.ps1                 # 同上，MySQL 版
 ```

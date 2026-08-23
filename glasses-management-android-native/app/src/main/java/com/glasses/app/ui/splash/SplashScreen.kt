@@ -114,7 +114,7 @@ fun SplashScreen(
 
             // Footer Version
             Text(
-                text = "v3.2.0 (Compose Native)",
+                text = "v3.3.0 (Compose Native)",
                 fontSize = 12.sp,
                 color = TextSecondary.copy(alpha = 0.4f),
                 fontWeight = FontWeight.Medium,

@@ -58,6 +58,8 @@ const DetailModal: React.FC<Props> = ({ open, detail, onClose }) => {
             <div className="extra-grid">
               <div className="info-tag"><span>右眼瞳距</span><strong>{d.odPd || '-'}</strong></div>
               <div className="info-tag"><span>左眼瞳距</span><strong>{d.osPd || '-'}</strong></div>
+              <div className="info-tag"><span>右眼瞳高</span><strong>{d.odPh || '-'}</strong></div>
+              <div className="info-tag"><span>左眼瞳高</span><strong>{d.osPh || '-'}</strong></div>
               <div className="info-tag"><span>远用瞳距</span><strong>{d.pdFar || '-'}</strong></div>
               <div className="info-tag"><span>近用瞳距</span><strong>{d.pdNear || '-'}</strong></div>
               <div className="info-tag"><span>下加光</span><strong>{fmt(d.addPower)}</strong></div>

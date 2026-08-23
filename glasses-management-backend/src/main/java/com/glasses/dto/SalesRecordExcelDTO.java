@@ -79,6 +79,10 @@ public class SalesRecordExcelDTO {
     @ColumnWidth(10)
     private String odPd;
 
+    @ExcelProperty("右眼PH")
+    @ColumnWidth(10)
+    private String odPh;
+
     @ExcelProperty("左眼SPH")
     @ColumnWidth(10)
     private String osSph;
@@ -94,6 +98,10 @@ public class SalesRecordExcelDTO {
     @ExcelProperty("左眼PD")
     @ColumnWidth(10)
     private String osPd;
+
+    @ExcelProperty("左眼PH")
+    @ColumnWidth(10)
+    private String osPh;
 
     @ExcelProperty("总瞳距")
     @ColumnWidth(10)

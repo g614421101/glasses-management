@@ -130,6 +130,8 @@ public class SystemIntegrationTest {
         optometry.setOsAxis(175);
         optometry.setOdPd(new BigDecimal("32.0"));
         optometry.setOsPd(new BigDecimal("33.0"));
+        optometry.setOdPh(new BigDecimal("19.0"));
+        optometry.setOsPh(new BigDecimal("19.5"));
         optometry.setPdFar(new BigDecimal("65.0"));
         
         mockMvc.perform(MockMvcRequestBuilders.post("/api/optometry/add")

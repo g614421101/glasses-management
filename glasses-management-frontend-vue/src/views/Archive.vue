@@ -302,6 +302,8 @@
         <div class="extra-grid">
           <div class="info-tag"><span>右眼瞳距</span><strong>{{ currentDetail.data.odPd || '-' }}</strong></div>
           <div class="info-tag"><span>左眼瞳距</span><strong>{{ currentDetail.data.osPd || '-' }}</strong></div>
+          <div class="info-tag"><span>右眼瞳高</span><strong>{{ currentDetail.data.odPh || '-' }}</strong></div>
+          <div class="info-tag"><span>左眼瞳高</span><strong>{{ currentDetail.data.osPh || '-' }}</strong></div>
           <div class="info-tag"><span>远用瞳距</span><strong>{{ currentDetail.data.pdFar || '-' }}</strong></div>
           <div class="info-tag"><span>近用瞳距</span><strong>{{ currentDetail.data.pdNear || '-' }}</strong></div>
           <div class="info-tag"><span>下加光</span><strong>{{ fmt(currentDetail.data.addPower) }}</strong></div>
@@ -389,15 +391,20 @@
         <el-divider />
 
         <el-row :gutter="12">
-          <el-col :xs="24" :sm="12" :md="8"><el-form-item label="右眼瞳距" label-width="84px"><el-input v-model="optoForm.odPd" @input="calcPdTotal" /></el-form-item></el-col>
-          <el-col :xs="24" :sm="12" :md="8"><el-form-item label="左眼瞳距" label-width="84px"><el-input v-model="optoForm.osPd" @input="calcPdTotal" /></el-form-item></el-col>
-          <el-col :xs="24" :sm="12" :md="8"><el-form-item label="远用瞳距" label-width="84px"><el-input v-model="optoForm.pdFar" /></el-form-item></el-col>
+          <el-col :xs="24" :sm="12" :md="8"><el-form-item label="右眼瞳距" label-width="84px"><el-input v-model="optoForm.odPd" placeholder="单位 mm" @input="calcPdTotal" /></el-form-item></el-col>
+          <el-col :xs="24" :sm="12" :md="8"><el-form-item label="左眼瞳距" label-width="84px"><el-input v-model="optoForm.osPd" placeholder="单位 mm" @input="calcPdTotal" /></el-form-item></el-col>
+          <el-col :xs="24" :sm="12" :md="8"><el-form-item label="远用瞳距" label-width="84px"><el-input v-model="optoForm.pdFar" placeholder="单位 mm" /></el-form-item></el-col>
         </el-row>
 
         <el-row :gutter="12">
-          <el-col :xs="24" :sm="12" :md="8"><el-form-item label="近用瞳距" label-width="84px"><el-input v-model="optoForm.pdNear" /></el-form-item></el-col>
-          <el-col :xs="24" :sm="12" :md="8"><el-form-item label="下加光" label-width="70px"><el-input v-model="optoForm.addPower" /></el-form-item></el-col>
-          <el-col :xs="24" :sm="12" :md="8"><el-form-item label="验光师" label-width="68px"><el-input v-model="optoForm.optometristName" placeholder="默认操作人" /></el-form-item></el-col>
+          <el-col :xs="24" :sm="12" :md="8"><el-form-item label="右眼瞳高" label-width="84px"><el-input v-model="optoForm.odPh" placeholder="单位 mm" /></el-form-item></el-col>
+          <el-col :xs="24" :sm="12" :md="8"><el-form-item label="左眼瞳高" label-width="84px"><el-input v-model="optoForm.osPh" placeholder="单位 mm" /></el-form-item></el-col>
+          <el-col :xs="24" :sm="12" :md="8"><el-form-item label="近用瞳距" label-width="84px"><el-input v-model="optoForm.pdNear" placeholder="单位 mm" /></el-form-item></el-col>
+        </el-row>
+
+        <el-row :gutter="12">
+          <el-col :xs="24" :sm="12" :md="12"><el-form-item label="下加光" label-width="70px"><el-input v-model="optoForm.addPower" /></el-form-item></el-col>
+          <el-col :xs="24" :sm="12" :md="12"><el-form-item label="验光师" label-width="68px"><el-input v-model="optoForm.optometristName" placeholder="默认操作人" /></el-form-item></el-col>
         </el-row>
 
         <el-row :gutter="12">
@@ -618,7 +625,7 @@ const optoForm = reactive<any>({
   customerId,
   odSph: '', odCyl: '', odAxis: '', odVa: '',
   osSph: '', osCyl: '', osAxis: '', osVa: '',
-  odPd: '', osPd: '', pdFar: '', pdNear: '', addPower: '',
+  odPd: '', osPd: '', odPh: '', osPh: '', pdFar: '', pdNear: '', addPower: '',
   optometristName: '',
   examDate: todayStr(),
   remark: ''
@@ -712,7 +719,7 @@ const resetOpto = () => {
     customerId,
     odSph: '', odCyl: '', odAxis: '', odVa: '',
     osSph: '', osCyl: '', osAxis: '', osVa: '',
-    odPd: '', osPd: '', pdFar: '', pdNear: '', addPower: '',
+    odPd: '', osPd: '', odPh: '', osPh: '', pdFar: '', pdNear: '', addPower: '',
     optometristName: '', examDate: todayStr(), remark: ''
   });
 };
@@ -825,6 +832,8 @@ const openEdit = (item) => {
       osVa: d.osVa,
       odPd: d.odPd,
       osPd: d.osPd,
+      odPh: d.odPh,
+      osPh: d.osPh,
       pdFar: d.pdFar,
       pdNear: d.pdNear,
       addPower: fmtInput(d.addPower),

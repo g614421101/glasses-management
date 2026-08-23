@@ -13,6 +13,8 @@ export interface OptometryRecord {
   osVa: string;
   odPd: string;
   osPd: string;
+  odPh?: string;
+  osPh?: string;
   pdFar: string;
   pdNear: string;
   addPower: string | number;

@@ -32,9 +32,11 @@ public class OptometryRecord {
     private Integer osAxis;
     private String osVa;
 
-    // Pupillary distance values
+    // Pupillary distance & height values
     private BigDecimal odPd;      // Right eye PD
     private BigDecimal osPd;      // Left eye PD
+    private BigDecimal odPh;      // Right eye Pupil Height
+    private BigDecimal osPh;      // Left eye Pupil Height
     private BigDecimal pdFar;     // Far PD
     private BigDecimal pdNear;    // Near PD
     private BigDecimal addPower;  // Addition power

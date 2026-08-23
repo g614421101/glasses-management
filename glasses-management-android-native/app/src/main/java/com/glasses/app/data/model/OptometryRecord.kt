@@ -16,6 +16,8 @@ data class OptometryRecord(
     val osVa: String? = null,
     val odPd: BigDecimal? = null,
     val osPd: BigDecimal? = null,
+    val odPh: BigDecimal? = null,
+    val osPh: BigDecimal? = null,
     val pdFar: BigDecimal? = null,
     val pdNear: BigDecimal? = null,
     val addPower: BigDecimal? = null,

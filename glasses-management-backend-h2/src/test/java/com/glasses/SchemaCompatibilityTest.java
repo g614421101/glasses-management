@@ -33,6 +33,8 @@ public class SchemaCompatibilityTest {
         assertColumn(jdbc, "sys_user", "force_reset_time");
         assertColumn(jdbc, "customer", "deleted");
         assertColumn(jdbc, "customer", "deleted_by");
+        assertColumn(jdbc, "optometry_record", "od_ph");
+        assertColumn(jdbc, "optometry_record", "os_ph");
         assertColumn(jdbc, "optometry_record", "remark");
         assertColumn(jdbc, "sales_record", "frame_quantity");
         assertColumn(jdbc, "sales_record", "lens_quantity");

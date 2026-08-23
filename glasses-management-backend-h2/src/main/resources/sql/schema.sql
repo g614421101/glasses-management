@@ -46,6 +46,8 @@ CREATE TABLE IF NOT EXISTS `optometry_record` (
   `os_va` varchar(20) DEFAULT NULL,
   `od_pd` decimal(5,1) DEFAULT NULL,
   `os_pd` decimal(5,1) DEFAULT NULL,
+  `od_ph` decimal(5,1) DEFAULT NULL,
+  `os_ph` decimal(5,1) DEFAULT NULL,
   `pd_far` decimal(5,1) DEFAULT NULL,
   `pd_near` decimal(5,1) DEFAULT NULL,
   `add_power` decimal(5,2) DEFAULT NULL,

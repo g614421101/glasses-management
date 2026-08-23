@@ -15,7 +15,7 @@ export const buildEmptyOpto = (customerId: number): OptoForm => ({
   customerId,
   odSph: '', odCyl: '', odAxis: '', odVa: '',
   osSph: '', osCyl: '', osAxis: '', osVa: '',
-  odPd: '', osPd: '', pdFar: '', pdNear: '', addPower: '',
+  odPd: '', osPd: '', odPh: '', osPh: '', pdFar: '', pdNear: '', addPower: '',
   optometristName: '',
   examDate: dayjs(),
   remark: '',
@@ -34,6 +34,8 @@ export const prepareOptoForEdit = (raw: any): OptoForm => ({
   osVa: raw.osVa,
   odPd: raw.odPd,
   osPd: raw.osPd,
+  odPh: raw.odPh,
+  osPh: raw.osPh,
   pdFar: raw.pdFar,
   pdNear: raw.pdNear,
   addPower: fmtInput(raw.addPower),
@@ -128,15 +130,20 @@ const OptometryFormModal: React.FC<Props> = ({ open, initial, onClose, onSaved }
         <Divider />
 
         <Row gutter={12}>
-          <Col xs={24} sm={12} md={8}><Form.Item label="右眼瞳距" name="odPd"><Input onBlur={calcPdTotal} /></Form.Item></Col>
-          <Col xs={24} sm={12} md={8}><Form.Item label="左眼瞳距" name="osPd"><Input onBlur={calcPdTotal} /></Form.Item></Col>
-          <Col xs={24} sm={12} md={8}><Form.Item label="远用瞳距" name="pdFar"><Input /></Form.Item></Col>
+          <Col xs={24} sm={12} md={8}><Form.Item label="右眼瞳距" name="odPd"><Input placeholder="单位 mm" onBlur={calcPdTotal} /></Form.Item></Col>
+          <Col xs={24} sm={12} md={8}><Form.Item label="左眼瞳距" name="osPd"><Input placeholder="单位 mm" onBlur={calcPdTotal} /></Form.Item></Col>
+          <Col xs={24} sm={12} md={8}><Form.Item label="远用瞳距" name="pdFar"><Input placeholder="单位 mm" /></Form.Item></Col>
         </Row>
 
         <Row gutter={12}>
-          <Col xs={24} sm={12} md={8}><Form.Item label="近用瞳距" name="pdNear"><Input /></Form.Item></Col>
-          <Col xs={24} sm={12} md={8}><Form.Item label="下加光" name="addPower"><Input /></Form.Item></Col>
-          <Col xs={24} sm={12} md={8}><Form.Item label="验光师" name="optometristName"><Input placeholder="默认操作人" /></Form.Item></Col>
+          <Col xs={24} sm={12} md={8}><Form.Item label="右眼瞳高" name="odPh"><Input placeholder="单位 mm" /></Form.Item></Col>
+          <Col xs={24} sm={12} md={8}><Form.Item label="左眼瞳高" name="osPh"><Input placeholder="单位 mm" /></Form.Item></Col>
+          <Col xs={24} sm={12} md={8}><Form.Item label="近用瞳距" name="pdNear"><Input placeholder="单位 mm" /></Form.Item></Col>
+        </Row>
+
+        <Row gutter={12}>
+          <Col xs={24} sm={12} md={12}><Form.Item label="下加光" name="addPower"><Input /></Form.Item></Col>
+          <Col xs={24} sm={12} md={12}><Form.Item label="验光师" name="optometristName"><Input placeholder="默认操作人" /></Form.Item></Col>
         </Row>
 
         <Form.Item label="检查日期" name="examDate">

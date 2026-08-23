@@ -114,11 +114,11 @@ public class PrintServiceImpl implements PrintService {
         if (opto != null) {
             doc.add(bold(new Paragraph("【验光数据】").setFont(chineseFont).setFontSize(12)).setMarginBottom(5));
 
-            Table optoTable = new Table(UnitValue.createPercentArray(new float[] { 15, 17, 17, 17, 17, 17 }))
+            Table optoTable = new Table(UnitValue.createPercentArray(new float[] { 14, 15, 15, 14, 14, 14, 14 }))
                     .useAllAvailableWidth().setMarginBottom(10);
 
             // 表头
-            String[] headers = { "眼别", "球镜 SPH", "柱镜 CYL", "轴位 AXIS", "矫正视力 VA", "瞳距 PD" };
+            String[] headers = { "眼别", "球镜 SPH", "柱镜 CYL", "轴位 AXIS", "矫正视力 VA", "瞳距 PD", "瞳高 PH" };
             for (String h : headers) {
                 optoTable.addHeaderCell(new Cell().add(bold(new Paragraph(h).setFont(chineseFont).setFontSize(9)))
                         .setTextAlignment(TextAlignment.CENTER));
@@ -131,6 +131,7 @@ public class PrintServiceImpl implements PrintService {
             optoTable.addCell(cell(opto.getOdAxis() != null ? opto.getOdAxis().toString() : "-", chineseFont));
             optoTable.addCell(cell(opto.getOdVa() != null ? opto.getOdVa() : "-", chineseFont));
             optoTable.addCell(cell(opto.getOdPd() != null ? opto.getOdPd().toString() : "-", chineseFont));
+            optoTable.addCell(cell(opto.getOdPh() != null ? opto.getOdPh().toString() : "-", chineseFont));
 
             // 左眼
             optoTable.addCell(cell("左眼(OS)", chineseFont));
@@ -139,6 +140,7 @@ public class PrintServiceImpl implements PrintService {
             optoTable.addCell(cell(opto.getOsAxis() != null ? opto.getOsAxis().toString() : "-", chineseFont));
             optoTable.addCell(cell(opto.getOsVa() != null ? opto.getOsVa() : "-", chineseFont));
             optoTable.addCell(cell(opto.getOsPd() != null ? opto.getOsPd().toString() : "-", chineseFont));
+            optoTable.addCell(cell(opto.getOsPh() != null ? opto.getOsPh().toString() : "-", chineseFont));
 
             doc.add(optoTable);
 
@@ -345,10 +347,12 @@ public class PrintServiceImpl implements PrintService {
         dto.setOdCyl(fmtDiopter(opto.getOdCyl()));
         dto.setOdAxis(opto.getOdAxis() != null ? opto.getOdAxis().toString() : "");
         dto.setOdPd(opto.getOdPd() != null ? opto.getOdPd().toString() : "");
+        dto.setOdPh(opto.getOdPh() != null ? opto.getOdPh().toString() : "");
         dto.setOsSph(fmtDiopter(opto.getOsSph()));
         dto.setOsCyl(fmtDiopter(opto.getOsCyl()));
         dto.setOsAxis(opto.getOsAxis() != null ? opto.getOsAxis().toString() : "");
         dto.setOsPd(opto.getOsPd() != null ? opto.getOsPd().toString() : "");
+        dto.setOsPh(opto.getOsPh() != null ? opto.getOsPh().toString() : "");
         dto.setPdFar(opto.getPdFar() != null ? opto.getPdFar().toString() : "");
         dto.setPdNear(opto.getPdNear() != null ? opto.getPdNear().toString() : "");
         dto.setAddPower(opto.getAddPower() != null ? fmtDiopter(opto.getAddPower()) : "");

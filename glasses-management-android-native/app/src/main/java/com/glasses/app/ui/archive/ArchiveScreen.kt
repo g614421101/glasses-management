@@ -552,7 +552,7 @@ private fun TimelineCard(
                     }
 
                     // 附加信息
-                    if (opt.odPd != null || opt.osPd != null || opt.pdFar != null || opt.pdNear != null || opt.addPower != null || !opt.optometristName.isNullOrBlank() || !opt.remark.isNullOrBlank()) {
+                    if (opt.odPd != null || opt.osPd != null || opt.odPh != null || opt.osPh != null || opt.pdFar != null || opt.pdNear != null || opt.addPower != null || !opt.optometristName.isNullOrBlank() || !opt.remark.isNullOrBlank()) {
                         Spacer(modifier = Modifier.height(10.dp))
                         Surface(shape = RoundedCornerShape(14.dp), color = Background, modifier = Modifier.fillMaxWidth()) {
                             Column(modifier = Modifier.padding(14.dp)) {
@@ -561,6 +561,11 @@ private fun TimelineCard(
                                 Row(modifier = Modifier.fillMaxWidth()) {
                                     DetailField("右眼瞳距", opt.odPd?.let { "${fmtPlain(it)} mm" }, Modifier.weight(1f))
                                     DetailField("左眼瞳距", opt.osPd?.let { "${fmtPlain(it)} mm" }, Modifier.weight(1f))
+                                }
+                                Spacer(modifier = Modifier.height(6.dp))
+                                Row(modifier = Modifier.fillMaxWidth()) {
+                                    DetailField("右眼瞳高", opt.odPh?.let { "${fmtPlain(it)} mm" }, Modifier.weight(1f))
+                                    DetailField("左眼瞳高", opt.osPh?.let { "${fmtPlain(it)} mm" }, Modifier.weight(1f))
                                 }
                                 Spacer(modifier = Modifier.height(6.dp))
                                 Row(modifier = Modifier.fillMaxWidth()) {
@@ -780,6 +785,8 @@ private fun parseOptometry(map: Map<*, *>): OptometryRecord {
         osVa = map["osVa"] as? String,
         odPd = (map["odPd"] as? Number)?.let { BigDecimal.valueOf(it.toDouble()) },
         osPd = (map["osPd"] as? Number)?.let { BigDecimal.valueOf(it.toDouble()) },
+        odPh = (map["odPh"] as? Number)?.let { BigDecimal.valueOf(it.toDouble()) },
+        osPh = (map["osPh"] as? Number)?.let { BigDecimal.valueOf(it.toDouble()) },
         pdFar = (map["pdFar"] as? Number)?.let { BigDecimal.valueOf(it.toDouble()) },
         pdNear = (map["pdNear"] as? Number)?.let { BigDecimal.valueOf(it.toDouble()) },
         addPower = (map["addPower"] as? Number)?.let { BigDecimal.valueOf(it.toDouble()) },
@@ -878,7 +885,7 @@ private fun OptometryDialog(
 
             Spacer(modifier = Modifier.height(20.dp))
 
-            // ── 右眼 ──
+            // ── 右眼 (OD) ──
             Surface(shape = sectionShape, color = Background, modifier = Modifier.fillMaxWidth()) {
                 Column(modifier = Modifier.padding(14.dp)) {
                     SectionHeader(icon = Icons.Default.Visibility, label = "右眼 (OD)", tint = Primary)
@@ -899,7 +906,7 @@ private fun OptometryDialog(
 
             Spacer(modifier = Modifier.height(12.dp))
 
-            // ── 左眼 ──
+            // ── 左眼 (OS) ──
             Surface(shape = sectionShape, color = Background, modifier = Modifier.fillMaxWidth()) {
                 Column(modifier = Modifier.padding(14.dp)) {
                     SectionHeader(icon = Icons.Default.Visibility, label = "左眼 (OS)", tint = Purple)
@@ -920,10 +927,10 @@ private fun OptometryDialog(
 
             Spacer(modifier = Modifier.height(12.dp))
 
-            // ── 瞳距 ──
+            // ── 瞳距与瞳高 ──
             Surface(shape = sectionShape, color = Background, modifier = Modifier.fillMaxWidth()) {
                 Column(modifier = Modifier.padding(14.dp)) {
-                    SectionHeader(icon = Icons.Default.Tune, label = "瞳距", tint = TextSecondary)
+                    SectionHeader(icon = Icons.Default.Tune, label = "瞳距与瞳高", tint = TextSecondary)
                     Spacer(modifier = Modifier.height(10.dp))
                     Row {
                         SmallField(odPd, {
@@ -931,20 +938,44 @@ private fun OptometryDialog(
                             val l = it.toBigDecimalOrNull()
                             val r = osPd.toBigDecimalOrNull()
                             if (l != null && r != null) pdFar = l.add(r).toPlainString()
-                        }, "右眼瞳距", fieldColors, Modifier.weight(1f))
+                        }, "右眼瞳距", fieldColors, Modifier.weight(1f), placeholder = "单位 mm")
                         Spacer(modifier = Modifier.width(6.dp))
                         SmallField(osPd, {
                             osPd = it
                             val l = odPd.toBigDecimalOrNull()
                             val r = it.toBigDecimalOrNull()
                             if (l != null && r != null) pdFar = l.add(r).toPlainString()
-                        }, "左眼瞳距", fieldColors, Modifier.weight(1f))
+                        }, "左眼瞳距", fieldColors, Modifier.weight(1f), placeholder = "单位 mm")
                     }
                     Spacer(modifier = Modifier.height(6.dp))
                     Row {
-                        OutlinedTextField(value = pdFar, onValueChange = { pdFar = it }, label = { Text("远用瞳距") }, singleLine = true, colors = fieldColors, shape = RoundedCornerShape(12.dp), modifier = Modifier.weight(1f))
+                        SmallField(odPh, { odPh = it }, "右眼瞳高", fieldColors, Modifier.weight(1f), placeholder = "单位 mm")
                         Spacer(modifier = Modifier.width(6.dp))
-                        OutlinedTextField(value = pdNear, onValueChange = { pdNear = it }, label = { Text("近用瞳距") }, singleLine = true, colors = fieldColors, shape = RoundedCornerShape(12.dp), modifier = Modifier.weight(1f))
+                        SmallField(osPh, { osPh = it }, "左眼瞳高", fieldColors, Modifier.weight(1f), placeholder = "单位 mm")
+                    }
+                    Spacer(modifier = Modifier.height(6.dp))
+                    Row {
+                        OutlinedTextField(
+                            value = pdFar,
+                            onValueChange = { pdFar = it },
+                            label = { Text("远用瞳距") },
+                            placeholder = { Text("单位 mm", fontSize = 12.sp, color = TextSecondary.copy(alpha = 0.6f)) },
+                            singleLine = true,
+                            colors = fieldColors,
+                            shape = RoundedCornerShape(12.dp),
+                            modifier = Modifier.weight(1f)
+                        )
+                        Spacer(modifier = Modifier.width(6.dp))
+                        OutlinedTextField(
+                            value = pdNear,
+                            onValueChange = { pdNear = it },
+                            label = { Text("近用瞳距") },
+                            placeholder = { Text("单位 mm", fontSize = 12.sp, color = TextSecondary.copy(alpha = 0.6f)) },
+                            singleLine = true,
+                            colors = fieldColors,
+                            shape = RoundedCornerShape(12.dp),
+                            modifier = Modifier.weight(1f)
+                        )
                     }
                 }
             }
@@ -1002,6 +1033,8 @@ private fun OptometryDialog(
                                 osVa = osVa.ifBlank { null },
                                 odPd = odPd.toBigDecimalOrNull(),
                                 osPd = osPd.toBigDecimalOrNull(),
+                                odPh = odPh.toBigDecimalOrNull(),
+                                osPh = osPh.toBigDecimalOrNull(),
                                 pdFar = pdFar.toBigDecimalOrNull(),
                                 pdNear = pdNear.toBigDecimalOrNull(),
                                 addPower = addPower.toBigDecimalOrNull(),
@@ -1272,12 +1305,14 @@ private fun SmallField(
     onValueChange: (String) -> Unit,
     label: String,
     colors: TextFieldColors,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    placeholder: String? = null
 ) {
     OutlinedTextField(
         value = value,
         onValueChange = onValueChange,
         label = { Text(label, fontSize = 12.sp) },
+        placeholder = placeholder?.let { { Text(it, fontSize = 12.sp, color = TextSecondary.copy(alpha = 0.6f)) } },
         singleLine = true,
         colors = colors,
         shape = RoundedCornerShape(12.dp),
