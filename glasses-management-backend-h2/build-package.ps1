@@ -1,4 +1,4 @@
-# glasses-management-backend-h2/build-package.ps1
+﻿# glasses-management-backend-h2/build-package.ps1
 # Build the H2 Spring Boot native Windows installer.
 
 param(

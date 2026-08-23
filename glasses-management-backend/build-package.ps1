@@ -1,4 +1,4 @@
-# glasses-management-backend/build-package.ps1
+﻿# glasses-management-backend/build-package.ps1
 # Build the MySQL Spring Boot native Windows installer.
 
 param(

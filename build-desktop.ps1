@@ -1,4 +1,4 @@
-# build-desktop.ps1
+﻿# build-desktop.ps1
 # Glasses Management System - Desktop Packaging Script (H2)
 
 $ErrorActionPreference = 'Stop'

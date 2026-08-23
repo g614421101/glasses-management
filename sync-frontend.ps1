@@ -1,4 +1,4 @@
-# sync-frontend.ps1
+﻿# sync-frontend.ps1
 # Build the Vue frontend and copy the generated assets into backend static dirs.
 
 param(
