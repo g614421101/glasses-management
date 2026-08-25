@@ -1,5 +1,6 @@
 package com.glasses.service.impl;
 
+import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.glasses.constant.RoleConstants;
@@ -21,19 +22,22 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.Date;
 import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 @Slf4j
 @Service
 public class DataServiceImpl implements DataService {
 
     private static final ObjectMapper objectMapper = new ObjectMapper()
-            .registerModule(new JavaTimeModule());
+            .registerModule(new JavaTimeModule())
+            .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
 
     @Autowired
     private SysUserMapper sysUserMapper;
@@ -265,20 +269,22 @@ public class DataServiceImpl implements DataService {
                 }
 
                 boolean found = false;
-                Date examDateStart = record.getExamDate();
-                Date examDateEnd = examDateStart != null
-                        ? new Date(examDateStart.getTime() + 1000)
+                Date examDateStart = record.getExamDate() != null
+                        ? new Date(record.getExamDate().getTime() - 2000)
+                        : null;
+                Date examDateEnd = record.getExamDate() != null
+                        ? new Date(record.getExamDate().getTime() + 2000)
                         : null;
                 List<OptometryRecord> candidates = optometryRecordMapper.findByCustomerAndExamDate(
                         record.getCustomerId(), examDateStart, examDateEnd);
                 for (OptometryRecord existing : candidates) {
-                    if (java.util.Objects.equals(existing.getOdSph(), record.getOdSph())
-                            && java.util.Objects.equals(existing.getOdCyl(), record.getOdCyl())
-                            && java.util.Objects.equals(existing.getOdAxis(), record.getOdAxis())
-                            && java.util.Objects.equals(existing.getOsSph(), record.getOsSph())
-                            && java.util.Objects.equals(existing.getOsCyl(), record.getOsCyl())
-                            && java.util.Objects.equals(existing.getOsAxis(), record.getOsAxis())
-                            && java.util.Objects.equals(existing.getOptometristName(), record.getOptometristName())) {
+                    if (isBigDecimalEqual(existing.getOdSph(), record.getOdSph())
+                            && isBigDecimalEqual(existing.getOdCyl(), record.getOdCyl())
+                            && Objects.equals(existing.getOdAxis(), record.getOdAxis())
+                            && isBigDecimalEqual(existing.getOsSph(), record.getOsSph())
+                            && isBigDecimalEqual(existing.getOsCyl(), record.getOsCyl())
+                            && Objects.equals(existing.getOsAxis(), record.getOsAxis())
+                            && isStringEqual(existing.getOptometristName(), record.getOptometristName())) {
                         optometryIdMap.put(record.getId(), existing.getId());
                         found = true;
                         break;
@@ -341,6 +347,22 @@ public class DataServiceImpl implements DataService {
 
         log.info("Merge import completed.");
         return result;
+    }
+
+    private boolean isBigDecimalEqual(BigDecimal a, BigDecimal b) {
+        if (a == null && b == null) {
+            return true;
+        }
+        if (a == null || b == null) {
+            return false;
+        }
+        return a.compareTo(b) == 0;
+    }
+
+    private boolean isStringEqual(String a, String b) {
+        String s1 = (a == null || a.trim().isEmpty()) ? null : a.trim();
+        String s2 = (b == null || b.trim().isEmpty()) ? null : b.trim();
+        return Objects.equals(s1, s2);
     }
 
     private Customer findCustomerByPhone(String phone) {
