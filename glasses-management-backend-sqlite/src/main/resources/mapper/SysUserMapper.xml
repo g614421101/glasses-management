@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.glasses.mapper.SysUserMapper">
+
+    <select id="selectAnyById" resultType="com.glasses.entity.SysUser">
+        SELECT * FROM sys_user WHERE id = #{id}
+    </select>
+
+    <select id="selectAnyByUsername" resultType="com.glasses.entity.SysUser">
+        SELECT * FROM sys_user WHERE username = #{username} LIMIT 1
+    </select>
+
+    <select id="selectAnyByRole" resultType="com.glasses.entity.SysUser">
+        SELECT * FROM sys_user WHERE role = #{role} ORDER BY id LIMIT 1
+    </select>
+
+    <select id="selectMerchants" resultType="com.glasses.entity.SysUser">
+        SELECT * FROM sys_user
+        WHERE role &lt;&gt; #{adminRole}
+        <if test="includeDeleted == false">
+            AND deleted = false
+        </if>
+        ORDER BY deleted DESC, create_time DESC
+    </select>
+
+    <select id="countByUsernameOrPhoneIncludingDeleted" resultType="java.lang.Long">
+        SELECT COUNT(*) FROM sys_user WHERE username = #{username} OR phone = #{phone}
+    </select>
+
+    <select id="countByUsernameOrPhoneExcludingIdIncludingDeleted" resultType="java.lang.Long">
+        SELECT COUNT(*) FROM sys_user WHERE id &lt;&gt; #{id} AND (username = #{username} OR phone = #{phone})
+    </select>
+
+    <update id="syncAdminAccount">
+        UPDATE sys_user
+        SET role = #{role},
+            real_name = #{realName},
+            deleted = false,
+            deleted_time = NULL,
+            disabled = false,
+            disabled_time = NULL
+        WHERE id = #{id}
+    </update>
+
+    <update id="softDeleteMerchantById">
+        UPDATE sys_user
+        SET deleted = true,
+            deleted_time = #{deletedTime},
+            disabled = true,
+            disabled_time = #{deletedTime}
+        WHERE id = #{id}
+          AND role &lt;&gt; #{adminRole}
+          AND deleted = false
+    </update>
+
+    <update id="restoreMerchantById">
+        UPDATE sys_user SET deleted = false, deleted_time = NULL, disabled = false, disabled_time = NULL WHERE id = #{id} AND role &lt;&gt; #{adminRole}
+    </update>
+
+    <delete id="physicalDeleteMerchantById">
+        DELETE FROM sys_user WHERE id = #{id} AND role &lt;&gt; #{adminRole} AND deleted = true
+    </delete>
+
+    <delete id="physicalDeleteExpired">
+        DELETE FROM sys_user WHERE deleted = true AND role &lt;&gt; #{adminRole} AND deleted_time &lt; #{expireBefore}
+    </delete>
+
+    <select id="selectAllIncludingDeleted" resultType="com.glasses.entity.SysUser">
+        SELECT * FROM sys_user
+    </select>
+
+    <delete id="deleteAllNonAdmin">
+        DELETE FROM sys_user WHERE role &lt;&gt; #{adminRole}
+    </delete>
+
+</mapper>

@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.glasses.mapper.SalesRecordMapper">
+
+    <select id="selectAnyById" resultType="com.glasses.entity.SalesRecord">
+        SELECT * FROM sales_record WHERE id = #{id}
+    </select>
+
+    <select id="selectDeletedList" resultType="com.glasses.entity.SalesRecord">
+        SELECT * FROM sales_record WHERE deleted = true ORDER BY deleted_time DESC, id DESC
+    </select>
+
+    <select id="selectDeletedByCustomerId" resultType="com.glasses.entity.SalesRecord">
+        SELECT * FROM sales_record WHERE customer_id = #{customerId} AND deleted = true
+    </select>
+
+    <update id="softDeleteById">
+        UPDATE sales_record SET deleted = true, deleted_time = #{deletedTime}, deleted_by = #{deletedBy} WHERE id = #{id} AND deleted = false
+    </update>
+
+    <update id="softDeleteByCustomerId">
+        UPDATE sales_record SET deleted = true, deleted_time = #{deletedTime}, deleted_by = #{deletedBy} WHERE customer_id = #{customerId} AND deleted = false
+    </update>
+
+    <update id="restoreByIdIgnoringLogic">
+        UPDATE sales_record SET deleted = false, deleted_time = NULL, deleted_by = NULL WHERE id = #{id}
+    </update>
+
+    <update id="restoreByCustomerIdIgnoringLogic">
+        UPDATE sales_record SET deleted = false, deleted_time = NULL, deleted_by = NULL WHERE customer_id = #{customerId} AND deleted = true
+    </update>
+
+    <delete id="physicalDeleteById">
+        DELETE FROM sales_record WHERE id = #{id} AND deleted = true
+    </delete>
+
+    <delete id="physicalDeleteByCustomerId">
+        DELETE FROM sales_record WHERE customer_id = #{customerId} AND deleted = true
+    </delete>
+
+    <delete id="physicalDeleteExpired">
+        DELETE FROM sales_record WHERE deleted = true AND deleted_time &lt; #{expireBefore}
+    </delete>
+
+    <select id="selectAllIncludingDeleted" resultType="com.glasses.entity.SalesRecord">
+        SELECT * FROM sales_record
+    </select>
+
+    <select id="selectByRecordNoIncludingDeleted" resultType="com.glasses.entity.SalesRecord">
+        SELECT * FROM sales_record WHERE record_no = #{recordNo} LIMIT 1
+    </select>
+
+    <select id="selectRevenueSummary" resultType="java.util.HashMap">
+        SELECT IFNULL(SUM(total_amount), 0) as totalRevenue, COUNT(*) as orderCount
+        FROM sales_record
+        WHERE deleted = false
+        <if test="startDate != null and endDate != null">
+            AND sales_date &gt;= #{startDate}
+            AND sales_date &lt;= #{endDate}
+        </if>
+    </select>
+
+    <delete id="deleteAll">
+        DELETE FROM sales_record
+    </delete>
+
+</mapper>

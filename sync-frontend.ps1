@@ -1,8 +1,8 @@
-﻿# sync-frontend.ps1
+# sync-frontend.ps1
 # Build the Vue frontend and copy the generated assets into backend static dirs.
 
 param(
-    [ValidateSet('All', 'MySQL', 'H2')]
+    [ValidateSet('All', 'MySQL', 'H2', 'SQLite')]
     [string]$Backend = 'All',
 
     [ValidateSet('Vue', 'React')]
@@ -90,6 +90,10 @@ if ($Backend -eq 'All' -or $Backend -eq 'MySQL') {
 
 if ($Backend -eq 'All' -or $Backend -eq 'H2') {
     Copy-Frontend -Name 'H2' -BackendDir (Join-Path $rootDir 'glasses-management-backend-h2')
+}
+
+if ($Backend -eq 'All' -or $Backend -eq 'SQLite') {
+    Copy-Frontend -Name 'SQLite' -BackendDir (Join-Path $rootDir 'glasses-management-backend-sqlite')
 }
 
 Write-Host ''

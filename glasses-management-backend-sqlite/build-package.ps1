@@ -1,0 +1,91 @@
+# glasses-management-backend-sqlite/build-package.ps1
+# Build the SQLite Spring Boot native Windows installer.
+
+param(
+    [ValidateSet('Vue', 'React')]
+    [string]$Frontend = 'Vue'
+)
+
+$ErrorActionPreference = 'Stop'
+
+$backendDir = $PSScriptRoot
+$rootDir = Split-Path -Parent $backendDir
+$tempDir = Join-Path $backendDir 'jpackage-temp'
+$distDir = Join-Path $backendDir 'dist-install'
+$jarName = 'glasses-management-backend-sqlite-3.3.1.jar'
+$jarPath = Join-Path $backendDir "target\$jarName"
+$localConfigPath = Join-Path $backendDir 'application-local.yml'
+
+function Assert-Success {
+    param([string]$Message)
+    if ($LASTEXITCODE -ne 0) {
+        Write-Host "Error: $Message" -ForegroundColor Red
+        exit $LASTEXITCODE
+    }
+}
+
+function Resolve-Jpackage {
+    $candidates = @()
+    if ($env:JAVA_HOME) {
+        $candidates += (Join-Path $env:JAVA_HOME 'bin\jpackage.exe')
+    }
+
+    $command = Get-Command jpackage.exe -ErrorAction SilentlyContinue
+    if ($command) {
+        $candidates += $command.Source
+    }
+
+    $candidates += 'C:\Software\Java\jdk-21\bin\jpackage.exe'
+
+    return $candidates | Where-Object { $_ -and (Test-Path $_) } | Select-Object -First 1
+}
+
+Write-Host "[1/4] Building and syncing $Frontend Frontend..." -ForegroundColor Cyan
+& (Join-Path $rootDir 'sync-frontend.ps1') -Backend SQLite -Frontend $Frontend
+Assert-Success 'Frontend sync failed.'
+
+Write-Host "[2/4] Building SQLite Spring Boot Backend (Maven)..." -ForegroundColor Cyan
+Push-Location $backendDir
+mvn clean package -DskipTests
+Assert-Success 'Backend build failed.'
+Pop-Location
+
+if (-not (Test-Path $jarPath)) {
+    Write-Host "Error: Built jar not found: $jarPath" -ForegroundColor Red
+    exit 1
+}
+
+Write-Host "[3/4] Preparing jpackage input..." -ForegroundColor Cyan
+Remove-Item $tempDir -Recurse -Force -ErrorAction SilentlyContinue
+Remove-Item $distDir -Recurse -Force -ErrorAction SilentlyContinue
+New-Item -ItemType Directory -Force -Path $tempDir | Out-Null
+Copy-Item -LiteralPath $jarPath -Destination $tempDir -Force
+if (Test-Path $localConfigPath) {
+    Copy-Item -LiteralPath $localConfigPath -Destination $tempDir -Force
+    Write-Host 'Included local application-local.yml for this private installer.' -ForegroundColor Yellow
+} else {
+    Write-Host 'Info: application-local.yml not found. The packaged app will boot without a preset admin account; first launch guides initialization on the login page.' -ForegroundColor Green
+}
+
+Write-Host "[4/4] Building SQLite native installer..." -ForegroundColor Cyan
+$jpackage = Resolve-Jpackage
+if (-not $jpackage) {
+    Write-Host 'Error: jpackage.exe not found. Install JDK 21 or set JAVA_HOME.' -ForegroundColor Red
+    exit 1
+}
+
+$wixPath = 'C:\Program Files (x86)\WiX Toolset v3.14\bin'
+if (Test-Path $wixPath) {
+    $env:Path = "$wixPath;$env:Path"
+}
+
+Push-Location $backendDir
+& $jpackage '@jpackage.cfg'
+Assert-Success 'jpackage build failed.'
+Pop-Location
+
+Remove-Item $tempDir -Recurse -Force -ErrorAction SilentlyContinue
+
+Write-Host ''
+Write-Host 'Success! SQLite native installer build complete.' -ForegroundColor Green
+Write-Host 'The installer (.exe) is located in: glasses-management-backend-sqlite\dist-install\' -ForegroundColor Green

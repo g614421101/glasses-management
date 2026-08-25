@@ -67,17 +67,22 @@ login-*.png
 # Generated frontend assets copied into Spring Boot static directories
 /glasses-management-backend/src/main/resources/static/
 /glasses-management-backend-h2/src/main/resources/static/
+/glasses-management-backend-sqlite/src/main/resources/static/
 
 # jpackage output
 **/jpackage-temp/
 **/dist-install/
 
-# Local H2 data and exported runtime data
+# Local database files and exported runtime data
 /data/
 **/data/
 !glasses-management-android-native/app/src/main/**/data/
 *.mv.db
 *.trace.db
+*.db
+*.db-wal
+*.db-shm
+*.db-journal
 
 # Android local properties
 **/local.properties

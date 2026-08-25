@@ -1,0 +1,17 @@
+# 生产环境配置 (打包成 EXE 时自动激活)
+# 数据库路径使用安装目录的 data 子目录（通过 JVM 参数 app.home 传入）
+# 若 app.home 未设置则回退到用户主目录
+spring:
+  datasource:
+    url: jdbc:sqlite:${app.home:${user.home}/.glasses_management}/data/glasses_management.db?date_class=text&date_string_format=yyyy-MM-dd HH:mm:ss.SSS&journal_mode=WAL&synchronous=NORMAL&busy_timeout=5000
+
+# 关闭 MyBatis SQL 日志输出，避免日志过于冗长
+mybatis-flex:
+  configuration:
+    log-impl: org.apache.ibatis.logging.nologging.NoLoggingImpl
+
+logging:
+  file:
+    path: ${app.home:${user.home}/.glasses_management}/logs
+  level:
+    root: INFO

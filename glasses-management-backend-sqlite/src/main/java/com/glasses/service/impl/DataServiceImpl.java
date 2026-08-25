@@ -1,0 +1,387 @@
+package com.glasses.service.impl;
+
+import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import com.glasses.constant.RoleConstants;
+import com.glasses.dto.DataExportDTO;
+import com.glasses.dto.ImportResultDTO;
+import com.glasses.entity.Customer;
+import com.glasses.entity.OptometryRecord;
+import com.glasses.entity.SalesRecord;
+import com.glasses.entity.SysUser;
+import com.glasses.mapper.CustomerMapper;
+import com.glasses.mapper.OptometryRecordMapper;
+import com.glasses.mapper.SalesRecordMapper;
+import com.glasses.mapper.SysUserMapper;
+import com.glasses.service.DataService;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.io.IOException;
+import java.math.BigDecimal;
+import java.time.LocalDateTime;
+import java.util.Date;
+import java.time.format.DateTimeFormatter;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+
+@Slf4j
+@Service
+public class DataServiceImpl implements DataService {
+
+    private static final ObjectMapper objectMapper = new ObjectMapper()
+            .registerModule(new JavaTimeModule())
+            .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+
+    @Autowired
+    private SysUserMapper sysUserMapper;
+    @Autowired
+    private CustomerMapper customerMapper;
+    @Autowired
+    private OptometryRecordMapper optometryRecordMapper;
+    @Autowired
+    private SalesRecordMapper salesRecordMapper;
+
+    @Override
+    public DataExportDTO exportAllData() {
+        DataExportDTO dto = new DataExportDTO();
+        dto.setExportTime(LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")));
+        dto.setVersion("1.0");
+        dto.setSysUsers(sysUserMapper.selectAllIncludingDeleted());
+        dto.setCustomers(customerMapper.selectAllIncludingDeleted());
+        dto.setOptometryRecords(optometryRecordMapper.selectAllIncludingDeleted());
+        dto.setSalesRecords(salesRecordMapper.selectAllIncludingDeleted());
+        return dto;
+    }
+
+    @Override
+    @Transactional
+    public ImportResultDTO importData(MultipartFile file, String mode) throws IOException {
+        DataExportDTO dto = objectMapper.readValue(file.getInputStream(), DataExportDTO.class);
+
+        if ("replace".equals(mode)) {
+            return importReplace(dto);
+        }
+        return importMerge(dto);
+    }
+
+    /**
+     * Full replace: clear all tables (except admin) then insert everything fresh.
+     */
+    private ImportResultDTO importReplace(DataExportDTO dto) {
+        // Clear in reverse dependency order
+        salesRecordMapper.deleteAll();
+        optometryRecordMapper.deleteAll();
+        customerMapper.deleteAll();
+        sysUserMapper.deleteAllNonAdmin(RoleConstants.ADMIN);
+        log.info("All data cleared (admin preserved). Starting import...");
+
+        ImportResultDTO result = new ImportResultDTO();
+        result.setMode("replace");
+
+        // 1. sys_user: skip admin if already exists (preserved by deleteAllNonAdmin)
+        Map<Long, Long> userIdMap = new HashMap<>();
+        if (dto.getSysUsers() != null) {
+            for (SysUser user : dto.getSysUsers()) {
+                if (RoleConstants.ADMIN.equals(user.getRole())) {
+                    SysUser existingAdmin = sysUserMapper.selectAnyByRole(RoleConstants.ADMIN);
+                    if (existingAdmin != null) {
+                        userIdMap.put(user.getId(), existingAdmin.getId());
+                        result.setSysUserSkipped(result.getSysUserSkipped() + 1);
+                        continue;
+                    }
+                }
+                boolean wasDeleted = Boolean.TRUE.equals(user.getDeleted());
+                Long oldId = user.getId();
+                user.setId(null);
+                user.setDeleted(false);
+                user.setDeletedTime(null);
+                sysUserMapper.insert(user);
+                if (wasDeleted) {
+                    user.setDeleted(true);
+                    sysUserMapper.update(user, true);
+                }
+                userIdMap.put(oldId, user.getId());
+                result.setSysUserInserted(result.getSysUserInserted() + 1);
+            }
+        }
+
+        // 2. customer: no dedup needed (table is empty)
+        Map<Long, Long> customerIdMap = new HashMap<>();
+        if (dto.getCustomers() != null) {
+            for (Customer customer : dto.getCustomers()) {
+                boolean wasDeleted = Boolean.TRUE.equals(customer.getDeleted());
+                if (customer.getDeletedBy() != null) {
+                    customer.setDeletedBy(userIdMap.get(customer.getDeletedBy()));
+                }
+                Long oldId = customer.getId();
+                customer.setId(null);
+                customer.setDeleted(false);
+                customer.setDeletedTime(null);
+                customer.setDeletedBy(null);
+                customerMapper.insert(customer);
+                if (wasDeleted) {
+                    customer.setDeleted(true);
+                    customerMapper.update(customer, true);
+                }
+                customerIdMap.put(oldId, customer.getId());
+                result.setCustomerInserted(result.getCustomerInserted() + 1);
+            }
+        }
+
+        // 3. optometry_record: no dedup needed
+        Map<Long, Long> optometryIdMap = new HashMap<>();
+        if (dto.getOptometryRecords() != null) {
+            for (OptometryRecord record : dto.getOptometryRecords()) {
+                boolean wasDeleted = Boolean.TRUE.equals(record.getDeleted());
+                if (record.getCustomerId() != null) {
+                    record.setCustomerId(customerIdMap.get(record.getCustomerId()));
+                }
+                if (record.getDeletedBy() != null) {
+                    record.setDeletedBy(userIdMap.get(record.getDeletedBy()));
+                }
+                Long oldId = record.getId();
+                record.setId(null);
+                record.setDeleted(false);
+                record.setDeletedTime(null);
+                record.setDeletedBy(null);
+                optometryRecordMapper.insert(record);
+                if (wasDeleted) {
+                    record.setDeleted(true);
+                    optometryRecordMapper.update(record, true);
+                }
+                optometryIdMap.put(oldId, record.getId());
+                result.setOptometryInserted(result.getOptometryInserted() + 1);
+            }
+        }
+
+        // 4. sales_record: no dedup needed
+        if (dto.getSalesRecords() != null) {
+            for (SalesRecord record : dto.getSalesRecords()) {
+                boolean wasDeleted = Boolean.TRUE.equals(record.getDeleted());
+                if (record.getCustomerId() != null) {
+                    record.setCustomerId(customerIdMap.get(record.getCustomerId()));
+                }
+                if (record.getOptometryId() != null) {
+                    record.setOptometryId(optometryIdMap.get(record.getOptometryId()));
+                }
+                if (record.getOperatorId() != null) {
+                    record.setOperatorId(userIdMap.get(record.getOperatorId()));
+                }
+                if (record.getDeletedBy() != null) {
+                    record.setDeletedBy(userIdMap.get(record.getDeletedBy()));
+                }
+                record.setId(null);
+                record.setDeleted(false);
+                record.setDeletedTime(null);
+                record.setDeletedBy(null);
+                salesRecordMapper.insert(record);
+                if (wasDeleted) {
+                    record.setDeleted(true);
+                    salesRecordMapper.update(record, true);
+                }
+                result.setSalesInserted(result.getSalesInserted() + 1);
+            }
+        }
+
+        log.info("Replace import completed.");
+        return result;
+    }
+
+    /**
+     * Merge append: dedup by business keys, skip existing records.
+     */
+    private ImportResultDTO importMerge(DataExportDTO dto) {
+        ImportResultDTO result = new ImportResultDTO();
+        result.setMode("merge");
+
+        // 1. sys_user: dedup by username
+        Map<Long, Long> userIdMap = new HashMap<>();
+        if (dto.getSysUsers() != null) {
+            for (SysUser user : dto.getSysUsers()) {
+                SysUser existing = sysUserMapper.selectAnyByUsername(user.getUsername());
+                if (existing != null) {
+                    userIdMap.put(user.getId(), existing.getId());
+                    result.setSysUserSkipped(result.getSysUserSkipped() + 1);
+                } else {
+                    boolean wasDeleted = Boolean.TRUE.equals(user.getDeleted());
+                    Long oldId = user.getId();
+                    user.setId(null);
+                    user.setDisabled(false);
+                    user.setDisabledTime(null);
+                    user.setDeleted(false);
+                    user.setDeletedTime(null);
+                    sysUserMapper.insert(user);
+                    if (wasDeleted) {
+                        user.setDeleted(true);
+                        sysUserMapper.update(user, true);
+                    }
+                    userIdMap.put(oldId, user.getId());
+                    result.setSysUserInserted(result.getSysUserInserted() + 1);
+                }
+            }
+        }
+
+        // 2. customer: dedup by phone
+        Map<Long, Long> customerIdMap = new HashMap<>();
+        if (dto.getCustomers() != null) {
+            for (Customer customer : dto.getCustomers()) {
+                Customer existing = findCustomerByPhone(customer.getPhone());
+                if (existing != null) {
+                    customerIdMap.put(customer.getId(), existing.getId());
+                    result.setCustomerSkipped(result.getCustomerSkipped() + 1);
+                } else {
+                    boolean wasDeleted = Boolean.TRUE.equals(customer.getDeleted());
+                    if (customer.getDeletedBy() != null) {
+                        customer.setDeletedBy(userIdMap.get(customer.getDeletedBy()));
+                    }
+                    Long oldId = customer.getId();
+                    customer.setId(null);
+                    customer.setDeleted(false);
+                    customer.setDeletedTime(null);
+                    customer.setDeletedBy(null);
+                    customerMapper.insert(customer);
+                    if (wasDeleted) {
+                        customer.setDeleted(true);
+                        customerMapper.update(customer, true);
+                    }
+                    customerIdMap.put(oldId, customer.getId());
+                    result.setCustomerInserted(result.getCustomerInserted() + 1);
+                }
+            }
+        }
+
+        // 3. optometry_record: dedup by customer + exam_date + measurements
+        Map<Long, Long> optometryIdMap = new HashMap<>();
+        if (dto.getOptometryRecords() != null) {
+            for (OptometryRecord record : dto.getOptometryRecords()) {
+                if (record.getCustomerId() != null) {
+                    record.setCustomerId(customerIdMap.get(record.getCustomerId()));
+                }
+                if (record.getDeletedBy() != null) {
+                    record.setDeletedBy(userIdMap.get(record.getDeletedBy()));
+                }
+
+                boolean found = false;
+                Date examDateStart = record.getExamDate() != null
+                        ? new Date(record.getExamDate().getTime() - 2000)
+                        : null;
+                Date examDateEnd = record.getExamDate() != null
+                        ? new Date(record.getExamDate().getTime() + 2000)
+                        : null;
+                List<OptometryRecord> candidates = optometryRecordMapper.findByCustomerAndExamDate(
+                        record.getCustomerId(), examDateStart, examDateEnd);
+                for (OptometryRecord existing : candidates) {
+                    if (isBigDecimalEqual(existing.getOdSph(), record.getOdSph())
+                            && isBigDecimalEqual(existing.getOdCyl(), record.getOdCyl())
+                            && Objects.equals(existing.getOdAxis(), record.getOdAxis())
+                            && isBigDecimalEqual(existing.getOsSph(), record.getOsSph())
+                            && isBigDecimalEqual(existing.getOsCyl(), record.getOsCyl())
+                            && Objects.equals(existing.getOsAxis(), record.getOsAxis())
+                            && isStringEqual(existing.getOptometristName(), record.getOptometristName())) {
+                        optometryIdMap.put(record.getId(), existing.getId());
+                        found = true;
+                        break;
+                    }
+                }
+                if (found) {
+                    result.setOptometrySkipped(result.getOptometrySkipped() + 1);
+                    continue;
+                }
+
+                boolean wasDeleted = Boolean.TRUE.equals(record.getDeleted());
+                Long oldId = record.getId();
+                record.setId(null);
+                record.setDeleted(false);
+                record.setDeletedTime(null);
+                record.setDeletedBy(null);
+                optometryRecordMapper.insert(record);
+                if (wasDeleted) {
+                    record.setDeleted(true);
+                    optometryRecordMapper.update(record, true);
+                }
+                optometryIdMap.put(oldId, record.getId());
+                result.setOptometryInserted(result.getOptometryInserted() + 1);
+            }
+        }
+
+        // 4. sales_record: dedup by record_no, remap FK
+        if (dto.getSalesRecords() != null) {
+            for (SalesRecord record : dto.getSalesRecords()) {
+                SalesRecord existing = findSalesRecordByNo(record.getRecordNo());
+                if (existing != null) {
+                    result.setSalesSkipped(result.getSalesSkipped() + 1);
+                    continue;
+                }
+                boolean wasDeleted = Boolean.TRUE.equals(record.getDeleted());
+                if (record.getCustomerId() != null) {
+                    record.setCustomerId(customerIdMap.get(record.getCustomerId()));
+                }
+                if (record.getOptometryId() != null) {
+                    record.setOptometryId(optometryIdMap.get(record.getOptometryId()));
+                }
+                if (record.getOperatorId() != null) {
+                    record.setOperatorId(userIdMap.get(record.getOperatorId()));
+                }
+                if (record.getDeletedBy() != null) {
+                    record.setDeletedBy(userIdMap.get(record.getDeletedBy()));
+                }
+                record.setId(null);
+                record.setDeleted(false);
+                record.setDeletedTime(null);
+                record.setDeletedBy(null);
+                salesRecordMapper.insert(record);
+                if (wasDeleted) {
+                    record.setDeleted(true);
+                    salesRecordMapper.update(record, true);
+                }
+                result.setSalesInserted(result.getSalesInserted() + 1);
+            }
+        }
+
+        log.info("Merge import completed.");
+        return result;
+    }
+
+    private boolean isBigDecimalEqual(BigDecimal a, BigDecimal b) {
+        if (a == null && b == null) {
+            return true;
+        }
+        if (a == null || b == null) {
+            return false;
+        }
+        return a.compareTo(b) == 0;
+    }
+
+    private boolean isStringEqual(String a, String b) {
+        String s1 = (a == null || a.trim().isEmpty()) ? null : a.trim();
+        String s2 = (b == null || b.trim().isEmpty()) ? null : b.trim();
+        return Objects.equals(s1, s2);
+    }
+
+    private Customer findCustomerByPhone(String phone) {
+        return customerMapper.selectByPhoneIncludingDeleted(phone);
+    }
+
+    private SalesRecord findSalesRecordByNo(String recordNo) {
+        return salesRecordMapper.selectByRecordNoIncludingDeleted(recordNo);
+    }
+
+    @Override
+    @Transactional
+    public int resetAllData() {
+        int deleted = 0;
+        deleted += salesRecordMapper.deleteAll();
+        deleted += optometryRecordMapper.deleteAll();
+        deleted += customerMapper.deleteAll();
+        deleted += sysUserMapper.deleteAllNonAdmin(RoleConstants.ADMIN);
+        log.info("Data reset completed. {} records deleted (admin preserved).", deleted);
+        return deleted;
+    }
+}

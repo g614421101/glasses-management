@@ -7,14 +7,15 @@
 ## 模块边界与同步规则
 
 - `glasses-management-backend`：Spring Boot + MySQL，服务端部署形态。
-- `glasses-management-backend-h2`：Spring Boot + H2 文件库，**桌面版 / 原生安装包 / 单机场景只依赖它**。
+- `glasses-management-backend-h2`：Spring Boot + H2 文件库，桌面版 / 原生安装包 / 单机场景。
+- `glasses-management-backend-sqlite`：Spring Boot + SQLite 文件库，轻量单机后端形态。
 - `glasses-management-frontend-vue`：Vue 3 + Element Plus + Pinia。
 - `glasses-management-frontend-react`：React 18 + Ant Design 5 + Redux Toolkit，与 Vue 端共享同一套后端 API。
 - `glasses-management-electron`：Electron 30 壳，启动内置 H2 后端 JAR + 本地 Web 静态资源。
 - `glasses-management-android`：Android WebView 客户端（mDNS 自动发现后端）。
 - `glasses-management-android-native`：Android 原生 Compose 客户端，包名 `com.glasses.app`（`native` 是 Java 关键字，不能作为包名）。
 
-**关键**：两个后端模块共享包名 `com.glasses`，代码结构高度一致，**改后端业务时通常需要同步修改两个模块**。真实差异只有 `MybatisPlusConfig.java` 中的 `DbType`（MYSQL vs H2）和 `SchemaCompatibilityInitializer.java` 中的 SQL 方言适配。无父 POM，两个后端各自独立继承 `spring-boot-starter-parent` 3.5.14。
+**关键**：后端模块共享包名 `com.glasses`，代码结构高度一致，**改后端业务时通常需要同步修改对应模块**。真实差异在于 SQL 方言适配（`SchemaCompatibilityInitializer.java`）与数据源配置。无父 POM，后端各自独立继承 `spring-boot-starter-parent` 3.5.14。
 
 ## 开发 / 验证 / 打包命令
 

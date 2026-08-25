@@ -1,0 +1,63 @@
+server:
+  port: ${SERVER_PORT:8080}
+
+app:
+  invite-code: ${APP_INVITE_CODE}
+  operation-log:
+    # 操作日志定时保留天数：超过该天数的日志会被定时任务自动清理（0 表示不自动清理）
+    retention-days: ${APP_OPERATION_LOG_RETENTION_DAYS:90}
+    # 手动清理天数：管理页"清理过期日志"按钮删除最近该天数内的日志（更早的历史记录保留，0 表示禁用手动清理）
+    manual-cleanup-days: ${APP_OPERATION_LOG_MANUAL_CLEANUP_DAYS:30}
+
+glasses:
+  admin:
+    username: ${GLASSES_ADMIN_USERNAME:admin}
+    # 初始密码：仅首次创建管理员时生效；password 与 password-hash 二选一，
+    # 都为空则不自动创建，登录页会引导完成初始化
+    password: ${GLASSES_ADMIN_PASSWORD:}
+    password-hash: ${GLASSES_ADMIN_PASSWORD_HASH:}
+    real-name: ${GLASSES_ADMIN_REAL_NAME:系统管理员}
+    enabled: ${GLASSES_ADMIN_ENABLED:true}
+    # 一次性开关：置 true 启动后管理员密码被重置为随机强密码（仅打印一次到日志）
+    force-reset-password: ${GLASSES_ADMIN_FORCE_RESET:false}
+  mdns:
+    enabled: true
+    service-name: GlassesManagement
+
+spring:
+  config:
+    import:
+      - optional:file:./application-local.yml
+      - optional:file:./app/application-local.yml
+  profiles:
+    active: ${SPRING_PROFILES_ACTIVE:dev}
+  datasource:
+    driver-class-name: org.sqlite.JDBC
+    url: ${SPRING_DATASOURCE_URL:jdbc:sqlite:${app.home:${user.home}/.glasses_management}/data/glasses_management.db?date_class=text&date_string_format=yyyy-MM-dd HH:mm:ss.SSS&journal_mode=WAL&synchronous=NORMAL&busy_timeout=5000}
+    username: ${SPRING_DATASOURCE_USERNAME:}
+    password: ${SPRING_DATASOURCE_PASSWORD:}
+    hikari:
+      maximum-pool-size: 10
+      connection-timeout: 30000
+  sql:
+    init:
+      mode: always
+      schema-locations: classpath:sql/schema.sql
+  jackson:
+    date-format: yyyy-MM-dd HH:mm:ss
+    time-zone: Asia/Shanghai
+
+mybatis-flex:
+  mapper-locations: classpath:/mapper/**/*.xml
+  configuration:
+    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+    map-underscore-to-camel-case: true
+
+sa-token:
+  token-name: Authorization
+  timeout: 86400
+  active-timeout: -1
+  is-concurrent: true
+  is-share: true
+  token-style: uuid
+  is-log: true
