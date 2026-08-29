@@ -11,7 +11,7 @@
 - `glasses-management-backend-sqlite`：Spring Boot + SQLite 文件库，轻量单机后端形态。
 - `glasses-management-frontend-vue`：Vue 3 + Element Plus + Pinia。
 - `glasses-management-frontend-react`：React 18 + Ant Design 5 + Redux Toolkit，与 Vue 端共享同一套后端 API。
-- `glasses-management-electron`：Electron 30 壳，启动内置 H2 后端 JAR + 本地 Web 静态资源。
+- `glasses-management-electron`：Electron 30 壳，启动内置后端 JAR（H2 / SQLite / MySQL，由 `build-desktop.ps1` 打包时选择）+ 本地 Web 静态资源。
 - `glasses-management-android`：Android WebView 客户端（mDNS 自动发现后端）。
 - `glasses-management-android-native`：Android 原生 Compose 客户端，包名 `com.glasses.app`（`native` 是 Java 关键字，不能作为包名）。
 
@@ -37,7 +37,8 @@ cd glasses-management-backend-h2 && mvn test -Dtest=SchemaCompatibilityTest   # 
 .\sync-frontend.ps1 -Backend H2 -Frontend React -SkipBuild           # 跳过构建，直接复制已有 dist
 
 # 打包
-.\build-desktop.ps1                                                   # H2 + Electron 一键桌面版，产物 glasses-management-electron\dist\视光管理系统_3.3.1.exe
+.\build-desktop.ps1                                                   # Electron 一键桌面版，交互选择后端（H2/SQLite/MySQL），产物 glasses-management-electron\dist\视光管理系统_<后端>_3.3.1.exe
+.\build-desktop.ps1 -Backend SQLite -Frontend Vue                     # 非交互指定后端与前端（MySQL 版首启前需配置数据源）
 cd glasses-management-backend-h2 && .\build-package.ps1              # jpackage 原生安装包（需 JDK 21 + WiX）
 cd glasses-management-backend && .\build-package.ps1                 # 同上，MySQL 版
 ```
@@ -104,7 +105,7 @@ Copy-Item glasses-management-backend-h2\application-local.example.yml glasses-ma
 |------|------|
 | H2 开发数据库 | `./data/glasses_management.mv.db`（相对工作目录） |
 | H2 原生安装包（prod） | `${user.home}/.glasses_management/data/glasses_management.mv.db` |
-| Electron 桌面版数据库 | `%APPDATA%\<应用名>\data\glasses_management.mv.db`（Electron 把 CWD 设为 `userData`） |
+| Electron 桌面版数据库 | `%APPDATA%\<应用名>\data\`（Electron 传 `-Dapp.home=userData`）：H2 版 `glasses_management.mv.db`；SQLite 版 `glasses_management.db`（伴随 `-wal`/`-shm`）；MySQL 版本地无业务数据 |
 | MySQL/H2 原生后端日志（prod） | `${user.home}/.glasses_management[_mysql]/logs/app.log` |
 | Electron 后端日志 | `%APPDATA%\<应用名>\logs/app.log` |
 | Electron 主进程日志 | `%APPDATA%\<应用名>\logs/backend-{YYYYMMDD-HHmmss}.log`（保留最近 30 个） |

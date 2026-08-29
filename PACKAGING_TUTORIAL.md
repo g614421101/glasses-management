@@ -1,9 +1,10 @@
 # 视光管理系统打包教程
 
-本文档基于当前工作区里真实存在的四个模块编写：
+本文档基于当前工作区里真实存在的模块编写：
 
 - `glasses-management-backend`
 - `glasses-management-backend-h2`
+- `glasses-management-backend-sqlite`
 - `glasses-management-frontend-vue`
 - `glasses-management-electron`
 
@@ -13,19 +14,19 @@
 
 如果你只是想把当前系统打成一个可以发给别人安装的 Windows 安装包，优先使用下面这条：
 
-- 推荐路线：`build-desktop.ps1` 一键打包 H2 桌面版
+- 推荐路线：`build-desktop.ps1` 一键打包 Electron 桌面版（可选 H2 / SQLite / MySQL 后端）
 
 如果你需要直接生成 Spring Boot 原生安装包，而不是 Electron 桌面壳，则使用下面这条：
 
 - 备选路线：运行对应后端目录下的 `build-package.ps1`
 
-## 路线一：一键打包 H2 桌面版
+## 路线一：一键打包 Electron 桌面版（H2 / SQLite / MySQL）
 
 这是当前项目里最完整、最贴近交付场景的打包方式。它会：
 
 1. 构建前端
-2. 把前端 `dist` 拷贝进 `glasses-management-backend-h2`
-3. 打包 H2 后端 JAR
+2. 把前端 `dist` 拷贝进所选后端模块
+3. 打包所选后端的 JAR 并暂存到 `glasses-management-electron\backend-jar`
 4. 交给 Electron 生成 Windows 安装包
 
 ### 环境要求
@@ -37,10 +38,16 @@
 
 ### 执行命令
 
-在项目根目录运行：
+在项目根目录运行（交互选择后端与前端，回车默认 H2 / Vue）：
 
 ```powershell
 .\build-desktop.ps1
+```
+
+也可以非交互指定：
+
+```powershell
+.\build-desktop.ps1 -Backend SQLite -Frontend Vue
 ```
 
 ### 产物位置
@@ -51,16 +58,19 @@
 glasses-management-electron\dist
 ```
 
-当前 Electron 安装包文件名格式来自 `glasses-management-electron/package.json`：
+安装包文件名带后端标识，避免三种后端同名混淆：
 
 ```text
-视光管理系统_版本号.exe
+视光管理系统_H2_版本号.exe
+视光管理系统_SQLite_版本号.exe
+视光管理系统_MySQL_版本号.exe
 ```
 
 ### 什么时候用这条路线
 
 - 想交付一个开箱即用的桌面版
-- 希望默认使用 H2 单机数据库
+- H2 / SQLite：单机数据库，零配置即可运行
+- MySQL：工作站连中央数据库场景，需在首次启动前配置数据源（打包时自动携带所选后端的 `application-local.yml`，或安装后在 `%APPDATA%\视光管理系统\application-local.yml` 配置）
 - 希望用户直接安装运行，不自己配浏览器访问
 
 ### 版本号在哪里改
@@ -292,13 +302,14 @@ glasses-management-backend\dist-install
 
 之后才会进入安装包。
 
-### 2. 为什么脚本只打 H2，不打 MySQL
+### 2. build-desktop.ps1 可以打哪些后端
 
-当前根目录的 `build-desktop.ps1` 是给单机桌面版准备的，目标就是：
+根目录的 `build-desktop.ps1` 支持 H2 / SQLite / MySQL 三种后端，打包时交互选择或用 `-Backend` 参数指定：
 
-- `frontend + backend-h2 + electron`
+- H2（默认）/ SQLite：单机文件数据库，开箱即用
+- MySQL：需连接外部 MySQL 服务，首次启动前必须配置数据源，适合工作站连中央数据库场景
 
-如果你要打 MySQL 交付包，请走 `glasses-management-backend\build-package.ps1`。
+如果你要打不依赖 Electron 的原生安装包，请走各后端目录下的 `build-package.ps1`（H2 / SQLite / MySQL 均有）。
 
 ### 3. 版本号改哪里
 

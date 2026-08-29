@@ -202,16 +202,35 @@ async function ensureJavaEnvironment() {
 
 // ── Backend Launch ──────────────────────────────────────────────────────────
 function startBackend(javaCommand) {
-    let jarPath = path.join(__dirname, '..', 'glasses-management-backend-h2', 'target');
     let finalJar = null;
     let backendDir = null;
 
     if (!app.isPackaged) {
-        // Dev mode
-        if (fs.existsSync(jarPath)) {
-            const files = fs.readdirSync(jarPath).filter(f => f.endsWith('.jar') && !f.endsWith('.original'));
-            if (files.length > 0) finalJar = path.join(jarPath, files[0]);
-            backendDir = path.join(__dirname, '..', 'glasses-management-backend-h2');
+        // Dev mode: 优先使用 build-desktop.ps1 暂存的后端 JAR，其次扫描各后端模块 target，取最新的
+        const devCandidates = [
+            // 打包脚本暂存目录（配置取 packaging-config，与打包态行为一致）
+            { jarDir: path.join(__dirname, 'backend-jar'), configDir: path.join(__dirname, 'packaging-config') },
+            { jarDir: path.join(__dirname, '..', 'glasses-management-backend-h2', 'target'), configDir: path.join(__dirname, '..', 'glasses-management-backend-h2') },
+            { jarDir: path.join(__dirname, '..', 'glasses-management-backend-sqlite', 'target'), configDir: path.join(__dirname, '..', 'glasses-management-backend-sqlite') },
+            { jarDir: path.join(__dirname, '..', 'glasses-management-backend', 'target'), configDir: path.join(__dirname, '..', 'glasses-management-backend') },
+        ];
+        let best = null;
+        for (const candidate of devCandidates) {
+            if (!fs.existsSync(candidate.jarDir)) continue;
+            const jars = fs.readdirSync(candidate.jarDir)
+                .filter(f => f.endsWith('.jar') && !f.endsWith('.original'))
+                .map(f => {
+                    const full = path.join(candidate.jarDir, f);
+                    return { jar: full, mtime: fs.statSync(full).mtimeMs, configDir: candidate.configDir };
+                });
+            for (const j of jars) {
+                if (!best || j.mtime > best.mtime) best = j;
+            }
+        }
+        if (best) {
+            finalJar = best.jar;
+            backendDir = best.configDir;
+            logInfo(`Dev 模式后端 JAR: ${finalJar}`);
         }
     } else {
         // Prod mode

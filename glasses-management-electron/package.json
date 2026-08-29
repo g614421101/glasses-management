@@ -19,10 +19,10 @@
     },
     "extraResources": [
       {
-        "from": "../glasses-management-backend-h2/target",
+        "from": "backend-jar",
         "to": "backend",
         "filter": [
-          "glasses-management-backend-h2-*.jar"
+          "*.jar"
         ]
       },
       {

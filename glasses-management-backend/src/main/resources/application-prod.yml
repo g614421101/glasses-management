@@ -6,6 +6,7 @@ mybatis-flex:
 
 logging:
   file:
-    path: ${user.home}/.glasses_management_mysql/logs
+    # app.home 由 Electron 桌面版传入（指向 userData）；jpackage 原生包未设置时回退用户主目录
+    path: ${app.home:${user.home}/.glasses_management_mysql}/logs
   level:
     root: INFO

@@ -1,10 +1,10 @@
 # 视光档案管理系统 Electron 桌面端
 
-`glasses-management-electron` 是 H2 单机版的桌面壳项目，用 Electron 启动内置后端并加载本地页面。
+`glasses-management-electron` 是桌面壳项目，用 Electron 启动内置后端并加载本地页面。内置后端在打包时由 `build-desktop.ps1` 选择（H2 / SQLite / MySQL）。
 
 ## 作用
 
-- 启动 H2 后端 JAR
+- 启动内置后端 JAR（H2 / SQLite / MySQL，由打包时决定）
 - 等待本地 `8080` 服务就绪
 - 加载桌面窗口
 - 关闭应用时清理 Java 后端进程
@@ -15,18 +15,19 @@
 
 打包产物里会包含：
 
-- `resources/backend`：H2 后端 JAR
+- `resources/backend`：所选后端的 JAR 与 `application-local.yml`
 - `resources/runtime/jre`：Electron 使用的内置 Java 运行时
 
 因此交付给客户时，目标机器不需要额外安装 Java。
 
 ## 安装后数据位置
 
-Electron 版会把 H2 后端的工作目录设置到 Electron 的用户数据目录，因此安装后数据默认写在当前 Windows 用户的 `AppData\Roaming` 下。
+Electron 版会把后端的工作目录设置到 Electron 的用户数据目录（`-Dapp.home`），因此安装后数据默认写在当前 Windows 用户的 `AppData\Roaming` 下：
 
 - 数据库目录：`C:\Users\<用户名>\AppData\Roaming\视光管理系统\data`
-- 常见数据文件：`glasses_management.mv.db`
-- 可能生成的跟踪文件：`glasses_management.trace.db`
+- H2 后端：`glasses_management.mv.db`（可能伴随 `glasses_management.trace.db`）
+- SQLite 后端：`glasses_management.db`（伴随 WAL 文件 `glasses_management.db-wal` / `glasses_management.db-shm`，备份时需一并带上）
+- MySQL 后端：本地无业务数据（依赖外部 MySQL），仅日志写入用户数据目录
 
 如果需要备份或迁移 Electron 单机版数据，直接备份上述 `data` 目录即可，不需要备份安装目录里的程序文件。
 
@@ -35,6 +36,8 @@ Electron 版会把 H2 后端的工作目录设置到 Electron 的用户数据目
 - `main.js`：Electron 主进程入口
 - `preload.js`：预加载脚本
 - `loading.html`：启动加载页
+- `backend-jar`：打包脚本暂存的后端 JAR（打包前由 `build-desktop.ps1` 生成）
+- `packaging-config`：打包时携带的 `application-local.yml`
 - `runtime/jre`：打包前生成的内置 Java 运行时
 - `dist`：Electron 安装包输出目录
 
@@ -45,23 +48,28 @@ Electron 版会把 H2 后端的工作目录设置到 Electron 的用户数据目
 - Node.js 18+
 - npm 9+
 - JDK 21（用于 `jlink`）
-- H2 后端已能正常构建
+- 所选后端已能正常构建
 
 ## 推荐打包方式
 
-回到根目录执行：
+回到根目录执行（交互选择后端与前端，回车默认 H2 / Vue）：
 
 ```powershell
 .\build-desktop.ps1
 ```
 
+也可以非交互指定：
+
+```powershell
+.\build-desktop.ps1 -Backend SQLite -Frontend Vue
+```
+
 该脚本会自动完成：
 
-1. 构建前端
-2. 同步前端到 H2 后端静态目录
-3. 构建 H2 后端 JAR
-4. 用 `jlink` 生成 `runtime/jre`
-5. 用 `electron-builder` 输出安装包
+1. 构建前端并同步到所选后端静态目录
+2. 构建所选后端的 JAR 并暂存到 `backend-jar`
+3. 用 `jlink` 生成 `runtime/jre`
+4. 用 `electron-builder` 输出安装包（文件名带后端标识：`视光管理系统_H2/SQLite/MySQL_版本号.exe`）
 
 安装包输出目录：
 
@@ -75,6 +83,8 @@ Electron 版会把 H2 后端的工作目录设置到 Electron 的用户数据目
 npm install
 npm run build
 ```
+
+注意：`npm run build` 从 `backend-jar` 目录读取后端 JAR，请先执行 `build-desktop.ps1`（或手动把所选后端的 JAR 复制进 `backend-jar`，目录内有且仅有一个 JAR）。
 
 ## 说明
 
