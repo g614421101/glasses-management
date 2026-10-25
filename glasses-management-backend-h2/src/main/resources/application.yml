@@ -31,6 +31,10 @@ spring:
       - optional:file:./app/application-local.yml
   profiles:
     active: ${SPRING_PROFILES_ACTIVE:dev}
+  servlet:
+    multipart:
+      max-file-size: 100MB
+      max-request-size: 100MB
   datasource:
     driver-class-name: org.h2.Driver
     url: ${SPRING_DATASOURCE_URL:jdbc:h2:file:./data/glasses_management;MODE=MySQL;DATABASE_TO_UPPER=FALSE;CASE_INSENSITIVE_IDENTIFIERS=TRUE;AUTO_SERVER=TRUE;AUTO_SERVER_HOST=127.0.0.1}

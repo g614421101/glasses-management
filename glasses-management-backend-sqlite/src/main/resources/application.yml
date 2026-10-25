@@ -31,6 +31,10 @@ spring:
       - optional:file:./app/application-local.yml
   profiles:
     active: ${SPRING_PROFILES_ACTIVE:dev}
+  servlet:
+    multipart:
+      max-file-size: 100MB
+      max-request-size: 100MB
   datasource:
     driver-class-name: org.sqlite.JDBC
     url: ${SPRING_DATASOURCE_URL:jdbc:sqlite:${app.home:${user.home}/.glasses_management}/data/glasses_management.db?date_class=text&date_string_format=yyyy-MM-dd HH:mm:ss.SSS&journal_mode=WAL&synchronous=NORMAL&busy_timeout=5000}
