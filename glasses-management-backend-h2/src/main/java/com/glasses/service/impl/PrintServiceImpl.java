@@ -30,9 +30,12 @@ import org.springframework.stereotype.Service;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -101,107 +104,114 @@ public class PrintServiceImpl implements PrintService {
                 .setFontSize(10).setTextAlignment(TextAlignment.CENTER)
                 .setMarginBottom(20));
 
-        // 基础信息行
-        String dateStr = salesRecord.getSalesDate() != null ? DateUtil.formatDateTime(salesRecord.getSalesDate()) : "-";
-        doc.add(new Paragraph("单号: " + salesRecord.getRecordNo() + "          日期: " + dateStr)
+        // 基础信息：不打印单号，日期取打印时刻
+        doc.add(new Paragraph("日期: " + DateUtil.formatDateTime(new Date()))
                 .setFont(chineseFont).setFontSize(10).setMarginBottom(5));
-        String genderStr = customer.getGender() != null ? (customer.getGender() == 1 ? "男" : "女") : "";
-        doc.add(new Paragraph("顾客姓名: " + customer.getName() + "    性别: " + genderStr
-                + "    联系电话: " + customer.getPhone())
+        String genderStr = customer.getGender() != null ? (customer.getGender() == 1 ? "男" : "女") : "-";
+        doc.add(new Paragraph("顾客姓名: " + nvl(customer.getName()) + "    性别: " + genderStr
+                + "    联系电话: " + nvl(customer.getPhone()))
                 .setFont(chineseFont).setFontSize(10).setMarginBottom(10));
 
-        // 验光数据表格
+        // 验光数据：表格只放球镜/柱镜/轴位/矫正视力，眼别留空，其余数据移到表格下方
         if (opto != null) {
-            doc.add(bold(new Paragraph("【验光数据】").setFont(chineseFont).setFontSize(12)).setMarginBottom(5));
+            doc.add(bold(new Paragraph("【验光数据】").setFont(chineseFont).setFontSize(12)).setMarginBottom(3));
+            doc.add(new Paragraph("验光日期: " + fmtDate(opto.getExamDate())
+                    + "          验光师: " + nvl(opto.getOptometristName()))
+                    .setFont(chineseFont).setFontSize(10).setMarginBottom(5));
 
-            Table optoTable = new Table(UnitValue.createPercentArray(new float[] { 14, 15, 15, 14, 14, 14, 14 }))
-                    .useAllAvailableWidth().setMarginBottom(10);
+            Table optoTable = new Table(UnitValue.createPercentArray(new float[] { 20, 20, 20, 20, 20 }))
+                    .useAllAvailableWidth().setMarginBottom(8);
 
-            // 表头
-            String[] headers = { "眼别", "球镜 SPH", "柱镜 CYL", "轴位 AXIS", "矫正视力 VA", "瞳距 PD", "瞳高 PH" };
+            String[] headers = { "", "球镜 SPH", "柱镜 CYL", "轴位 AXIS", "矫正视力 VA" };
             for (String h : headers) {
                 optoTable.addHeaderCell(new Cell().add(bold(new Paragraph(h).setFont(chineseFont).setFontSize(9)))
                         .setTextAlignment(TextAlignment.CENTER));
             }
 
-            // 右眼
+            // 眼别列头留空，行内标注右/左眼
             optoTable.addCell(cell("右眼(OD)", chineseFont));
             optoTable.addCell(cell(fmtDiopter(opto.getOdSph()), chineseFont));
             optoTable.addCell(cell(fmtDiopter(opto.getOdCyl()), chineseFont));
-            optoTable.addCell(cell(opto.getOdAxis() != null ? opto.getOdAxis().toString() : "-", chineseFont));
-            optoTable.addCell(cell(opto.getOdVa() != null ? opto.getOdVa() : "-", chineseFont));
-            optoTable.addCell(cell(opto.getOdPd() != null ? opto.getOdPd().toString() : "-", chineseFont));
-            optoTable.addCell(cell(opto.getOdPh() != null ? opto.getOdPh().toString() : "-", chineseFont));
+            optoTable.addCell(cell(intText(opto.getOdAxis()), chineseFont));
+            optoTable.addCell(cell(nvl(opto.getOdVa()), chineseFont));
 
-            // 左眼
             optoTable.addCell(cell("左眼(OS)", chineseFont));
             optoTable.addCell(cell(fmtDiopter(opto.getOsSph()), chineseFont));
             optoTable.addCell(cell(fmtDiopter(opto.getOsCyl()), chineseFont));
-            optoTable.addCell(cell(opto.getOsAxis() != null ? opto.getOsAxis().toString() : "-", chineseFont));
-            optoTable.addCell(cell(opto.getOsVa() != null ? opto.getOsVa() : "-", chineseFont));
-            optoTable.addCell(cell(opto.getOsPd() != null ? opto.getOsPd().toString() : "-", chineseFont));
-            optoTable.addCell(cell(opto.getOsPh() != null ? opto.getOsPh().toString() : "-", chineseFont));
+            optoTable.addCell(cell(intText(opto.getOsAxis()), chineseFont));
+            optoTable.addCell(cell(nvl(opto.getOsVa()), chineseFont));
 
             doc.add(optoTable);
 
-            // 瞳距与下加光汇总
-            StringBuilder pdInfo = new StringBuilder();
-            if (opto.getPdFar() != null)
-                pdInfo.append("瞳距: ").append(opto.getPdFar()).append("    ");
-            if (opto.getPdNear() != null)
-                pdInfo.append("近用瞳距: ").append(opto.getPdNear()).append("    ");
-            if (opto.getAddPower() != null)
-                pdInfo.append("下加光(ADD): ").append(fmtDiopter(opto.getAddPower()));
-            if (!pdInfo.isEmpty()) {
-                doc.add(new Paragraph(pdInfo.toString())
-                        .setFont(chineseFont).setFontSize(10).setMarginBottom(10));
+            // 瞳距 / 瞳高 写在表格下方
+            doc.add(new Paragraph("瞳距 PD: 右 " + num(opto.getOdPd()) + "    左 " + num(opto.getOsPd())
+                    + "        瞳高 PH: 右 " + num(opto.getOdPh()) + "    左 " + num(opto.getOsPh()))
+                    .setFont(chineseFont).setFontSize(10).setMarginBottom(3));
+            doc.add(new Paragraph("远用瞳距: " + num(opto.getPdFar())
+                    + "    近用瞳距: " + num(opto.getPdNear())
+                    + "    下加光(ADD): " + fmtDiopter(opto.getAddPower()))
+                    .setFont(chineseFont).setFontSize(10).setMarginBottom(3));
+            if (!isBlank(opto.getRemark())) {
+                doc.add(new Paragraph("验光备注: " + opto.getRemark())
+                        .setFont(chineseFont).setFontSize(10));
             }
         }
 
-        // 配镜信息表格
-        doc.add(bold(new Paragraph("【配镜明细】").setFont(chineseFont).setFontSize(12)).setMarginBottom(5));
+        // 配镜明细：全部字段列出
+        doc.add(bold(new Paragraph("【配镜明细】").setFont(chineseFont).setFontSize(12))
+                .setMarginTop(12).setMarginBottom(5));
 
-        Table salesTable = new Table(UnitValue.createPercentArray(new float[] { 15, 25, 22, 13, 25 }))
-                .useAllAvailableWidth().setMarginBottom(15);
+        Table salesTable = new Table(UnitValue.createPercentArray(new float[] { 10, 15, 21, 8, 15, 15, 16 }))
+                .useAllAvailableWidth().setMarginBottom(8);
 
-        String[] sHeaders = { "项目", "品牌/参数", "型号/规格", "数量", "小计(元)" };
+        String[] sHeaders = { "项目", "品牌", "型号/参数", "数量", "零售单价", "实际售价", "小计(元)" };
         for (String h : sHeaders) {
             salesTable.addHeaderCell(new Cell().add(bold(new Paragraph(h).setFont(chineseFont).setFontSize(9)))
                     .setTextAlignment(TextAlignment.CENTER));
         }
 
+        int fq = salesRecord.getFrameQuantity() != null ? salesRecord.getFrameQuantity() : 1;
+        BigDecimal frameRetail = salesRecord.getFrameRetailPrice() != null
+                ? salesRecord.getFrameRetailPrice() : BigDecimal.ZERO;
+        BigDecimal framePrice = salesRecord.getFramePrice() != null
+                ? salesRecord.getFramePrice() : BigDecimal.ZERO;
+
         salesTable.addCell(cell("镜架", chineseFont));
         salesTable.addCell(cell(nvl(salesRecord.getFrameBrand()), chineseFont));
         salesTable.addCell(cell(nvl(salesRecord.getFrameModel()), chineseFont));
-        int fq = salesRecord.getFrameQuantity() != null ? salesRecord.getFrameQuantity() : 1;
         salesTable.addCell(cell(String.valueOf(fq), chineseFont));
-        java.math.BigDecimal frameSubtotal = salesRecord.getFramePrice() != null
-                ? salesRecord.getFramePrice().multiply(java.math.BigDecimal.valueOf(fq)) : java.math.BigDecimal.ZERO;
-        salesTable.addCell(cell(frameSubtotal.toString(), chineseFont));
+        salesTable.addCell(cell(money(frameRetail), chineseFont));
+        salesTable.addCell(cell(money(framePrice), chineseFont));
+        salesTable.addCell(cell(money(framePrice.multiply(BigDecimal.valueOf(fq))), chineseFont));
+
+        int lq = salesRecord.getLensQuantity() != null ? salesRecord.getLensQuantity() : 1;
+        BigDecimal lensRetail = salesRecord.getLensRetailPrice() != null
+                ? salesRecord.getLensRetailPrice() : BigDecimal.ZERO;
+        BigDecimal lensPrice = salesRecord.getLensPrice() != null
+                ? salesRecord.getLensPrice() : BigDecimal.ZERO;
 
         salesTable.addCell(cell("镜片", chineseFont));
         salesTable.addCell(cell(nvl(salesRecord.getLensBrand()), chineseFont));
         salesTable.addCell(cell(nvl(salesRecord.getLensParams()), chineseFont));
-        int lq = salesRecord.getLensQuantity() != null ? salesRecord.getLensQuantity() : 1;
         salesTable.addCell(cell(String.valueOf(lq), chineseFont));
-        java.math.BigDecimal lensSubtotal = salesRecord.getLensPrice() != null
-                ? salesRecord.getLensPrice().multiply(java.math.BigDecimal.valueOf(lq)) : java.math.BigDecimal.ZERO;
-        salesTable.addCell(cell(lensSubtotal.toString(), chineseFont));
+        salesTable.addCell(cell(money(lensRetail), chineseFont));
+        salesTable.addCell(cell(money(lensPrice), chineseFont));
+        salesTable.addCell(cell(money(lensPrice.multiply(BigDecimal.valueOf(lq))), chineseFont));
 
         doc.add(salesTable);
 
-        // 合计金额
-        doc.add(bold(new Paragraph("实收合计:  ￥" + salesRecord.getTotalAmount())
-                .setFont(chineseFont).setFontSize(16))
-                .setTextAlignment(TextAlignment.RIGHT).setMarginBottom(30));
+        // 合计
+        doc.add(new Paragraph("零售总价: ￥" + money(salesRecord.getTotalRetailPrice()))
+                .setFont(chineseFont).setFontSize(10).setMarginBottom(3));
 
-        // 签名区域
-        Table signTable = new Table(UnitValue.createPercentArray(new float[] { 50, 50 })).useAllAvailableWidth();
-        signTable.addCell(new Cell().add(new Paragraph("验光师签字:_______________").setFont(chineseFont).setFontSize(10))
-                .setBorder(null));
-        signTable.addCell(new Cell().add(new Paragraph("顾客签字:_______________").setFont(chineseFont).setFontSize(10))
-                .setBorder(null));
-        doc.add(signTable);
+        if (!isBlank(salesRecord.getRemark())) {
+            doc.add(new Paragraph("备注: " + salesRecord.getRemark())
+                    .setFont(chineseFont).setFontSize(10).setMarginBottom(3));
+        }
+
+        doc.add(bold(new Paragraph("实收总价:  ￥" + money(salesRecord.getTotalAmount()))
+                .setFont(chineseFont).setFontSize(16))
+                .setTextAlignment(TextAlignment.RIGHT).setMarginTop(6).setMarginBottom(30));
 
         doc.close();
 
@@ -376,6 +386,29 @@ public class PrintServiceImpl implements PrintService {
     }
 
     private String nvl(String s) {
-        return s != null ? s : "-";
+        return s != null && !s.trim().isEmpty() ? s : "-";
+    }
+
+    private boolean isBlank(String s) {
+        return s == null || s.trim().isEmpty();
+    }
+
+    private String fmtDate(java.util.Date date) {
+        return date != null ? DateUtil.formatDate(date) : "-";
+    }
+
+    private String num(BigDecimal v) {
+        return v != null ? v.toPlainString() : "-";
+    }
+
+    private String intText(Integer v) {
+        return v != null ? v.toString() : "-";
+    }
+
+    private String money(BigDecimal v) {
+        if (v == null) {
+            return "0.00";
+        }
+        return v.setScale(2, RoundingMode.HALF_UP).toPlainString();
     }
 }
