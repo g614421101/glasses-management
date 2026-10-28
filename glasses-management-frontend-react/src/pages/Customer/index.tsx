@@ -12,6 +12,7 @@ const CustomerPage: React.FC = () => {
   const isMobile = useMobile();
   const [loading, setLoading] = useState(false);
   const [data, setData] = useState<Customer[]>([]);
+  const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([]);
   const [total, setTotal] = useState(0);
   const [keyword, setKeyword] = useState('');
   const [current, setCurrent] = useState(1);
@@ -96,6 +97,27 @@ const CustomerPage: React.FC = () => {
     }
   };
 
+  const handleBatchDelete = () => {
+    const ids = selectedRowKeys as number[];
+    if (!ids.length) return;
+    Modal.confirm({
+      title: '批量删除顾客',
+      content: `确定删除选中的 ${ids.length} 位顾客？将级联清除其验光与配镜记录，删除后可在回收站恢复。`,
+      okType: 'danger',
+      okText: '确定删除',
+      cancelText: '取消',
+      onOk: async () => {
+        const count = await customerAPI.batchDelete(ids);
+        message.success(`已删除 ${count} 位顾客`);
+        setSelectedRowKeys([]);
+        if (data.length === count && current > 1) {
+          setCurrent(current - 1);
+        }
+        loadData();
+      },
+    });
+  };
+
   const handleDelete = async (id: number) => {
     try {
       await customerAPI.delete(id);
@@ -160,19 +182,31 @@ const CustomerPage: React.FC = () => {
           </div>
         </div>
 
-        <div className="search-shell home-search-shell" style={{ marginBottom: 20 }}>
-          <div className="search-icon-badge">
-            <SearchOutlined style={{ fontSize: 20 }} />
+        <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 20, flexWrap: 'wrap' }}>
+          <div className="search-shell home-search-shell" style={{ flex: 1, minWidth: 260 }}>
+            <div className="search-icon-badge">
+              <SearchOutlined style={{ fontSize: 20 }} />
+            </div>
+            <Input
+              className="search-control"
+              placeholder="搜索姓名 / 手机号"
+              value={keyword}
+              onChange={(e) => setKeyword(e.target.value)}
+              onPressEnter={handleSearch}
+              allowClear
+            />
+            <Button type="primary" className="search-submit" onClick={handleSearch}>立即搜索</Button>
           </div>
-          <Input
-            className="search-control"
-            placeholder="搜索姓名 / 手机号"
-            value={keyword}
-            onChange={(e) => setKeyword(e.target.value)}
-            onPressEnter={handleSearch}
-            allowClear
-          />
-          <Button type="primary" className="search-submit" onClick={handleSearch}>立即搜索</Button>
+          {!isMobile && (
+            <Button
+              danger
+              icon={<DeleteOutlined />}
+              disabled={!selectedRowKeys.length}
+              onClick={handleBatchDelete}
+            >
+              批量删除{selectedRowKeys.length ? `（${selectedRowKeys.length}）` : ''}
+            </Button>
+          )}
         </div>
 
         {!isMobile ? (
@@ -183,6 +217,7 @@ const CustomerPage: React.FC = () => {
             loading={loading}
             pagination={false}
             className="main-table"
+            rowSelection={{ selectedRowKeys, onChange: setSelectedRowKeys }}
           />
         ) : (
           <div className="mobile-card-list">

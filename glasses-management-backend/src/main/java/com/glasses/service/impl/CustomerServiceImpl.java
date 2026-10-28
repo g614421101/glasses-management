@@ -17,6 +17,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Date;
+import java.util.List;
 
 @Slf4j
 @Service
@@ -57,5 +58,24 @@ public class CustomerServiceImpl extends ServiceImpl<CustomerMapper, Customer> i
         salesRecordMapper.softDeleteByCustomerId(id, now, loginId);
         log.info("软删除顾客: id={}, 操作人={}", id, loginId);
         return true;
+    }
+
+    @Override
+    @Transactional
+    public int batchSoftDeleteCustomers(List<Long> ids) {
+        if (ids == null || ids.isEmpty()) {
+            return 0;
+        }
+        int deleted = 0;
+        for (Long id : ids) {
+            if (id == null) {
+                continue;
+            }
+            if (softDeleteCustomer(id)) {
+                deleted++;
+            }
+        }
+        log.info("批量软删除顾客: 请求={}, 成功={}", ids.size(), deleted);
+        return deleted;
     }
 }

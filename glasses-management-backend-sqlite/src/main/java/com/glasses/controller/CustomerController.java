@@ -8,6 +8,8 @@ import com.glasses.util.Result;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("/api/customer")
 public class CustomerController {
@@ -62,6 +64,19 @@ public class CustomerController {
             return Result.error("顾客不存在");
         }
         return Result.success(true);
+    }
+
+    /**
+     * 批量删除顾客（软删除，级联清除其验光与配镜记录）
+     * @return 实际删除成功的条数
+     */
+    @PostMapping("/batch-delete")
+    public Result<Integer> batchDeleteCustomers(@RequestBody List<Long> ids) {
+        int deleted = customerService.batchSoftDeleteCustomers(ids);
+        if (deleted == 0) {
+            return Result.error("没有可删除的顾客");
+        }
+        return Result.success(deleted);
     }
 
     @GetMapping("/{id}")

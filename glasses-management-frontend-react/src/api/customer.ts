@@ -41,4 +41,8 @@ export const customerAPI = {
   delete: (id: number): Promise<void> => {
     return request.delete('/customer/' + id);
   },
+
+  batchDelete: (ids: number[]): Promise<number> => {
+    return request.post('/customer/batch-delete', ids);
+  },
 };

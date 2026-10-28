@@ -30,22 +30,43 @@
           <h3>顾客列表</h3>
         </div>
 
-        <div class="search-shell compact-search-shell query-input">
-          <div class="search-icon-badge compact-search-icon">
-            <el-icon :size="18"><Search /></el-icon>
+        <div class="customer-toolbar-actions" style="display: flex; align-items: center; gap: 12px; flex-wrap: wrap;">
+          <div class="search-shell compact-search-shell query-input">
+            <div class="search-icon-badge compact-search-icon">
+              <el-icon :size="18"><Search /></el-icon>
+            </div>
+            <el-input
+              v-model="keyword"
+              placeholder="搜索姓名 / 手机号"
+              clearable
+              class="search-control compact-search-control"
+              @keyup.enter="handleQuery"
+            />
+            <el-button class="search-submit compact-search-submit" type="primary" @click="handleQuery">立即搜索</el-button>
           </div>
-          <el-input
-            v-model="keyword"
-            placeholder="搜索姓名 / 手机号"
-            clearable
-            class="search-control compact-search-control"
-            @keyup.enter="handleQuery"
-          />
-          <el-button class="search-submit compact-search-submit" type="primary" @click="handleQuery">立即搜索</el-button>
+          <el-button
+            v-if="!isMobile"
+            class="batch-delete-btn"
+            type="danger"
+            plain
+            :disabled="!selectedIds.length"
+            @click="handleBatchDelete"
+          >
+            <el-icon><Delete /></el-icon>批量删除<template v-if="selectedIds.length">（{{ selectedIds.length }}）</template>
+          </el-button>
         </div>
       </div>
       
-      <el-table v-if="!isMobile" :data="tableData" v-loading="loading" row-key="id" class="main-table">
+      <el-table
+        v-if="!isMobile"
+        ref="customerTable"
+        :data="tableData"
+        v-loading="loading"
+        row-key="id"
+        class="main-table"
+        @selection-change="handleSelectionChange"
+      >
+        <el-table-column type="selection" width="48" />
         <el-table-column prop="name" label="姓名" min-width="140" />
         <el-table-column prop="phone" label="手机号" min-width="160" />
         <el-table-column label="性别" width="110">
@@ -168,6 +189,8 @@ import MobileCardList from '../components/MobileCardList.vue';
 
 const router = useRouter();
 const tableData = ref([]);
+const customerTable = ref();
+const selectedIds = ref<number[]>([]);
 const loading = ref(false);
 const total = ref(0);
 const keyword = ref('');
@@ -292,6 +315,36 @@ const submitForm = async () => {
       }
     }
   });
+};
+
+const handleSelectionChange = (rows: any[]) => {
+  selectedIds.value = rows.map((row) => row.id);
+};
+
+const handleBatchDelete = async () => {
+  if (!selectedIds.value.length) return;
+  const ids = [...selectedIds.value];
+  try {
+    await ElMessageBox.confirm(
+      `确定删除选中的 ${ids.length} 位顾客？将级联清除其验光与配镜记录，删除后可在回收站恢复。`,
+      '批量删除',
+      { type: 'warning', confirmButtonText: '确定删除', cancelButtonText: '取消' }
+    );
+  } catch {
+    return;
+  }
+  try {
+    const count: any = await request.post('/customer/batch-delete', ids);
+    ElMessage.success(`已删除 ${count} 位顾客`);
+    customerTable.value?.clearSelection();
+    selectedIds.value = [];
+    if (tableData.value.length === count && pageParams.current > 1) {
+      pageParams.current -= 1;
+    }
+    loadData();
+  } catch (e) {
+    console.error(e);
+  }
 };
 
 const handleDelete = async (id) => {
