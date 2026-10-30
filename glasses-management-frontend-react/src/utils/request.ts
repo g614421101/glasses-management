@@ -51,6 +51,18 @@ request.interceptors.response.use(
 
 export const openBlob = async (url: string) => {
   const token = getToken();
+  const electron = (window as any).electronAPI;
+  // 桌面端：Electron 内置打印没有预览，改成交给系统默认 PDF 阅读器打开
+  if (electron?.openPdfExternally) {
+    const response = await axios.get(url, {
+      baseURL: '/api',
+      responseType: 'blob',
+      headers: token ? { Authorization: token } : undefined,
+    });
+    const bytes = new Uint8Array(await response.data.arrayBuffer());
+    await electron.openPdfExternally(bytes, `prescription_${url.split('/').pop()}.pdf`);
+    return;
+  }
   const target = window.open('', '_blank');
   try {
     const response = await axios.get(url, {

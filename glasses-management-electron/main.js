@@ -94,6 +94,27 @@ function registerIpc() {
         }
         return false;
     });
+
+    // 把 PDF 落到临时目录后用系统默认阅读器打开（Electron 内置打印没有预览）
+    ipcMain.handle('open-pdf-externally', async (_event, bytes, fileName) => {
+        const dir = path.join(app.getPath('temp'), 'glasses-pdf');
+        fs.mkdirSync(dir, { recursive: true });
+        // 顺手清理一天前的临时文件，避免长期堆积
+        try {
+            const cutoff = Date.now() - 24 * 60 * 60 * 1000;
+            for (const f of fs.readdirSync(dir)) {
+                const fp = path.join(dir, f);
+                if (fs.statSync(fp).mtimeMs < cutoff) fs.unlinkSync(fp);
+            }
+        } catch (e) {
+            logError('清理 PDF 临时文件失败: ' + e.message);
+        }
+        const safeName = String(fileName || 'prescription.pdf').replace(/[\\/:*?"<>|]/g, '_');
+        const file = path.join(dir, safeName);
+        fs.writeFileSync(file, Buffer.from(bytes));
+        const error = await shell.openPath(file);
+        return { ok: !error, path: file, error: error || null };
+    });
 }
 
 // ── Create Window ───────────────────────────────────────────────────────────

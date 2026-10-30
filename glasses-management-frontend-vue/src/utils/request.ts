@@ -49,6 +49,14 @@ const requestBlob = async (url: string) => {
 };
 
 export const openBlob = async (url: string) => {
+  const electron = (window as any).electronAPI;
+  // 桌面端：Electron 内置打印没有预览，改成交给系统默认 PDF 阅读器打开
+  if (electron?.openPdfExternally) {
+    const response = await requestBlob(url);
+    const bytes = new Uint8Array(await response.data.arrayBuffer());
+    await electron.openPdfExternally(bytes, `prescription_${url.split('/').pop()}.pdf`);
+    return;
+  }
   const target = window.open('', '_blank');
   try {
     const response = await requestBlob(url);
