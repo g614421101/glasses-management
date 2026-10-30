@@ -437,11 +437,13 @@ public class PrintServiceImpl implements PrintService {
         return paragraph;
     }
 
+    /** 度数固定两位小数（-1 也要打成 -1.00），正数带 + 号 */
     private String fmtDiopter(java.math.BigDecimal val) {
-        if (val == null)
+        if (val == null) {
             return "-";
-        double d = val.doubleValue();
-        return d > 0 ? "+" + val.toPlainString() : val.toPlainString();
+        }
+        BigDecimal scaled = val.setScale(2, RoundingMode.HALF_UP);
+        return scaled.signum() > 0 ? "+" + scaled.toPlainString() : scaled.toPlainString();
     }
 
     private String nvl(String s) {
@@ -456,8 +458,9 @@ public class PrintServiceImpl implements PrintService {
         return date != null ? DateUtil.formatDate(date) : "-";
     }
 
+    /** 瞳距 / 瞳高固定一位小数（63 也要打成 63.0） */
     private String num(BigDecimal v) {
-        return v != null ? v.toPlainString() : "-";
+        return v != null ? v.setScale(1, RoundingMode.HALF_UP).toPlainString() : "-";
     }
 
     private String intText(Integer v) {
