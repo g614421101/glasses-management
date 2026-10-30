@@ -48,9 +48,9 @@ public class PrintServiceImpl implements PrintService {
     private static final String EXCEL_CONTENT_TYPE =
             "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
 
-    /** 纸张 13.8cm × 21.5cm，竖向打印：宽 138mm、高 215mm */
-    private static final float PAGE_WIDTH = 391.18f;
-    private static final float PAGE_HEIGHT = 609.45f;
+    /** 纸张 13.8cm × 21.5cm，横向打印：宽 215mm、高 138mm */
+    private static final float PAGE_WIDTH = 609.45f;
+    private static final float PAGE_HEIGHT = 391.18f;
     /** 四边留白（pt），约 9mm */
     private static final float PAGE_MARGIN = 16f;
 
@@ -98,25 +98,25 @@ public class PrintServiceImpl implements PrintService {
     private void renderPrescription(Document doc, PdfFont chineseFont, SalesRecord salesRecord,
                                     Customer customer, OptometryRecord opto) {
         // 标题
-        doc.add(bold(new Paragraph("配 镜 处 方 单").setFont(chineseFont).setFontSize(22))
+        doc.add(bold(new Paragraph("配 镜 处 方 单").setFont(chineseFont).setFontSize(16))
                 .setTextAlignment(TextAlignment.CENTER).setMarginBottom(2));
-        doc.add(new Paragraph("Glasses Prescription").setFontSize(9)
+        doc.add(new Paragraph("Glasses Prescription").setFontSize(7)
                 .setTextAlignment(TextAlignment.CENTER).setMarginBottom(8));
 
         // 基础信息：不打印单号，日期取打印时刻
         doc.add(new Paragraph("日期: " + DateUtil.formatDateTime(new Date()))
-                .setFont(chineseFont).setFontSize(11.5f).setMarginBottom(1));
+                .setFont(chineseFont).setFontSize(8.5f).setMarginBottom(1));
         String genderStr = customer.getGender() != null ? (customer.getGender() == 1 ? "男" : "女") : "-";
         doc.add(new Paragraph("顾客: " + nvl(customer.getName()) + "    性别: " + genderStr
                 + "    电话: " + nvl(customer.getPhone()))
-                .setFont(chineseFont).setFontSize(11.5f).setMarginBottom(6));
+                .setFont(chineseFont).setFontSize(8.5f).setMarginBottom(6));
 
         // 验光数据：表格只放球镜/柱镜/轴位/矫正视力，其余数据在表外
         if (opto != null) {
-            doc.add(bold(new Paragraph("【验光数据】").setFont(chineseFont).setFontSize(13)).setMarginBottom(3));
+            doc.add(bold(new Paragraph("【验光数据】").setFont(chineseFont).setFontSize(10)).setMarginBottom(3));
             doc.add(new Paragraph("验光日期: " + fmtDate(opto.getExamDate())
                     + "    验光师: " + nvl(opto.getOptometristName()))
-                    .setFont(chineseFont).setFontSize(11.5f).setMarginBottom(3));
+                    .setFont(chineseFont).setFontSize(8.5f).setMarginBottom(3));
 
             Table optoTable = new Table(UnitValue.createPercentArray(new float[] { 16, 21, 21, 21, 21 }))
                     .useAllAvailableWidth().setMarginBottom(4);
@@ -124,8 +124,8 @@ public class PrintServiceImpl implements PrintService {
             String[] headers = { "", "球镜 SPH", "柱镜 CYL", "轴位 AXIS", "矫正视力 VA" };
             for (String h : headers) {
                 optoTable.addHeaderCell(new Cell()
-                        .add(bold(new Paragraph(h).setFont(chineseFont).setFontSize(10.5f)))
-                        .setTextAlignment(TextAlignment.CENTER).setPadding(4));
+                        .add(bold(new Paragraph(h).setFont(chineseFont).setFontSize(8)))
+                        .setTextAlignment(TextAlignment.CENTER).setPadding(2));
             }
 
             // 眼别列头留空，先右眼后左眼各一行
@@ -144,28 +144,27 @@ public class PrintServiceImpl implements PrintService {
             doc.add(optoTable);
 
             // 瞳距 / 瞳高 / 瞳距汇总 / 下加光 / 备注：全部表格外展示
-                        doc.add(new Paragraph("瞳距 PD: 右 " + num(opto.getOdPd()) + "    左 " + num(opto.getOsPd())
-                    + "        瞳高 PH: 右 " + num(opto.getOdPh()) + "    左 " + num(opto.getOsPh()))
-                    .setFont(chineseFont).setFontSize(11.5f).setMarginBottom(4));
-            doc.add(new Paragraph("远用瞳距: " + num(opto.getPdFar())
-                    + "    近用瞳距: " + num(opto.getPdNear())
-                    + "    下加光: " + fmtDiopter(opto.getAddPower()))
-                    .setFont(chineseFont).setFontSize(11.5f).setMarginBottom(6));
+            doc.add(new Paragraph("瞳距: 右 " + num(opto.getOdPd()) + " / 左 " + num(opto.getOsPd())
+                    + "    瞳高: 右 " + num(opto.getOdPh()) + " / 左 " + num(opto.getOsPh())
+                    + "    远用: " + num(opto.getPdFar())
+                    + "    近用: " + num(opto.getPdNear())
+                    + "    ADD: " + fmtDiopter(opto.getAddPower()))
+                    .setFont(chineseFont).setFontSize(8.5f).setMarginBottom(3));
             if (!isBlank(opto.getRemark())) {
                 doc.add(new Paragraph("验光备注: " + opto.getRemark())
-                        .setFont(chineseFont).setFontSize(11.5f).setMarginBottom(2));
+                        .setFont(chineseFont).setFontSize(8.5f).setMarginBottom(2));
             }
         }
 
         // 配镜明细：紧接验光部分，不另起分节标题
-        Table salesTable = new Table(UnitValue.createPercentArray(new float[] { 9, 15, 24, 9, 15, 15, 13 }))
+        Table salesTable = new Table(UnitValue.createPercentArray(new float[] { 10, 18, 30, 8, 12, 11, 11 }))
                 .useAllAvailableWidth().setMarginTop(4).setMarginBottom(6);
 
         String[] sHeaders = { "项目", "品牌", "型号/参数", "数量", "零售单价", "实际售价", "小计" };
         for (String h : sHeaders) {
             salesTable.addHeaderCell(new Cell()
-                    .add(bold(new Paragraph(h).setFont(chineseFont).setFontSize(10.5f)))
-                    .setTextAlignment(TextAlignment.CENTER).setPadding(4));
+                    .add(bold(new Paragraph(h).setFont(chineseFont).setFontSize(8)))
+                    .setTextAlignment(TextAlignment.CENTER).setPadding(2));
         }
 
         int fq = salesRecord.getFrameQuantity() != null ? salesRecord.getFrameQuantity() : 1;
@@ -201,17 +200,17 @@ public class PrintServiceImpl implements PrintService {
         // 合计：零售总价与实收总价同一行，实收突出显示
         if (!isBlank(salesRecord.getRemark())) {
             doc.add(new Paragraph("备注: " + salesRecord.getRemark())
-                    .setFont(chineseFont).setFontSize(11.5f).setMarginBottom(2));
+                    .setFont(chineseFont).setFontSize(8.5f).setMarginBottom(2));
         }
 
-        Table totalRow = new Table(UnitValue.createPercentArray(new float[] { 40, 60 }))
-                .useAllAvailableWidth().setMarginTop(2).setBorder(Border.NO_BORDER).setKeepTogether(true);
+        Table totalRow = new Table(UnitValue.createPercentArray(new float[] { 45, 55 }))
+                .useAllAvailableWidth().setMarginTop(2).setBorder(Border.NO_BORDER);
         totalRow.addCell(new Cell().setBorder(Border.NO_BORDER).setPadding(0)
                 .add(new Paragraph("零售总价: ￥" + money(salesRecord.getTotalRetailPrice()))
-                        .setFont(chineseFont).setFontSize(11.5f)));
+                        .setFont(chineseFont).setFontSize(8.5f)));
         totalRow.addCell(new Cell().setBorder(Border.NO_BORDER).setPadding(0)
                 .add(bold(new Paragraph("实收总价: ￥" + money(salesRecord.getTotalAmount()))
-                        .setFont(chineseFont).setFontSize(18))
+                        .setFont(chineseFont).setFontSize(15))
                         .setTextAlignment(TextAlignment.RIGHT)));
         doc.add(totalRow);
     }
@@ -381,7 +380,7 @@ public class PrintServiceImpl implements PrintService {
     }
 
     private Cell cell(String text, PdfFont font) {
-        return new Cell().add(new Paragraph(text).setFont(font).setFontSize(11.5f))
+        return new Cell().add(new Paragraph(text).setFont(font).setFontSize(9))
                 .setTextAlignment(TextAlignment.CENTER).setPadding(3);
     }
 
