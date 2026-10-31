@@ -52,7 +52,7 @@ public class PrintServiceImpl implements PrintService {
     private static final float PAGE_WIDTH = 609.45f;
     private static final float PAGE_HEIGHT = 391.18f;
     /** 四边留白（pt），约 9mm */
-    private static final float PAGE_MARGIN = 16f;
+    private static final float PAGE_MARGIN = 24f;
 
     @Autowired
     private SalesRecordService salesRecordService;
@@ -101,25 +101,25 @@ public class PrintServiceImpl implements PrintService {
         doc.add(bold(new Paragraph("配 镜 处 方 单").setFont(chineseFont).setFontSize(16))
                 .setTextAlignment(TextAlignment.CENTER).setMarginBottom(2));
         doc.add(new Paragraph("Glasses Prescription").setFontSize(7)
-                .setTextAlignment(TextAlignment.CENTER).setMarginBottom(8));
+                .setTextAlignment(TextAlignment.CENTER).setMarginBottom(3));
 
-        // 基础信息：不打印单号，日期取打印时刻
-        doc.add(new Paragraph("日期: " + DateUtil.formatDateTime(new Date()))
-                .setFont(chineseFont).setFontSize(8.5f).setMarginBottom(1));
+        // 基础信息：不打印单号，日期取打印时刻；日期与顾客信息合并成一行
         String genderStr = customer.getGender() != null ? (customer.getGender() == 1 ? "男" : "女") : "-";
-        doc.add(new Paragraph("顾客: " + nvl(customer.getName()) + "    性别: " + genderStr
+        doc.add(new Paragraph("日期: " + DateUtil.formatDateTime(new Date())
+                + "        顾客: " + nvl(customer.getName())
+                + "    性别: " + genderStr
                 + "    电话: " + nvl(customer.getPhone()))
-                .setFont(chineseFont).setFontSize(8.5f).setMarginBottom(6));
+                .setFont(chineseFont).setFontSize(8.5f).setMarginBottom(8));
 
         // 验光数据：表格只放球镜/柱镜/轴位/矫正视力，其余数据在表外
         if (opto != null) {
-            doc.add(bold(new Paragraph("【验光数据】").setFont(chineseFont).setFontSize(10)).setMarginBottom(3));
+            doc.add(bold(new Paragraph("【验光数据】").setFont(chineseFont).setFontSize(10)).setMarginBottom(2));
             doc.add(new Paragraph("验光日期: " + fmtDate(opto.getExamDate())
                     + "    验光师: " + nvl(opto.getOptometristName()))
-                    .setFont(chineseFont).setFontSize(8.5f).setMarginBottom(3));
+                    .setFont(chineseFont).setFontSize(8.5f).setMarginBottom(2));
 
             Table optoTable = new Table(UnitValue.createPercentArray(new float[] { 16, 21, 21, 21, 21 }))
-                    .useAllAvailableWidth().setMarginBottom(4);
+                    .useAllAvailableWidth().setMarginBottom(3);
 
             String[] headers = { "", "球镜 SPH", "柱镜 CYL", "轴位 AXIS", "矫正视力 VA" };
             for (String h : headers) {
@@ -158,7 +158,7 @@ public class PrintServiceImpl implements PrintService {
 
         // 配镜明细：紧接验光部分，不另起分节标题
         Table salesTable = new Table(UnitValue.createPercentArray(new float[] { 10, 18, 30, 8, 12, 11, 11 }))
-                .useAllAvailableWidth().setMarginTop(4).setMarginBottom(6);
+                .useAllAvailableWidth().setMarginTop(3).setMarginBottom(5);
 
         String[] sHeaders = { "项目", "品牌", "型号/参数", "数量", "零售单价", "实际售价", "小计" };
         for (String h : sHeaders) {
@@ -381,7 +381,7 @@ public class PrintServiceImpl implements PrintService {
 
     private Cell cell(String text, PdfFont font) {
         return new Cell().add(new Paragraph(text).setFont(font).setFontSize(9))
-                .setTextAlignment(TextAlignment.CENTER).setPadding(3);
+                .setTextAlignment(TextAlignment.CENTER).setPadding(2);
     }
 
     private Paragraph bold(Paragraph paragraph) {
