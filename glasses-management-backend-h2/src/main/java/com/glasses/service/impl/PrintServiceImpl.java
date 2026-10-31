@@ -130,14 +130,14 @@ public class PrintServiceImpl implements PrintService {
 
             // 眼别列头留空，先右眼后左眼各一行
             optoTable.addCell(cell("右眼(OD)", chineseFont));
-            optoTable.addCell(cellBold(fmtDiopter(opto.getOdSph()), chineseFont));
-            optoTable.addCell(cellBold(fmtDiopter(opto.getOdCyl()), chineseFont));
+            optoTable.addCell(cell(fmtDiopter(opto.getOdSph()), chineseFont));
+            optoTable.addCell(cell(fmtDiopter(opto.getOdCyl()), chineseFont));
             optoTable.addCell(cell(intText(opto.getOdAxis()), chineseFont));
             optoTable.addCell(cell(nvl(opto.getOdVa()), chineseFont));
 
             optoTable.addCell(cell("左眼(OS)", chineseFont));
-            optoTable.addCell(cellBold(fmtDiopter(opto.getOsSph()), chineseFont));
-            optoTable.addCell(cellBold(fmtDiopter(opto.getOsCyl()), chineseFont));
+            optoTable.addCell(cell(fmtDiopter(opto.getOsSph()), chineseFont));
+            optoTable.addCell(cell(fmtDiopter(opto.getOsCyl()), chineseFont));
             optoTable.addCell(cell(intText(opto.getOsAxis()), chineseFont));
             optoTable.addCell(cell(nvl(opto.getOsVa()), chineseFont));
 
@@ -377,12 +377,6 @@ public class PrintServiceImpl implements PrintService {
                 }
             }
         }
-    }
-
-    /** 度数单元格：加粗 + 略放大，避免点阵打印机把细笔画的 + 打成 - */
-    private Cell cellBold(String text, PdfFont font) {
-        return new Cell().add(bold(new Paragraph(text).setFont(font).setFontSize(10)))
-                .setTextAlignment(TextAlignment.CENTER).setPadding(2);
     }
 
     private Cell cell(String text, PdfFont font) {
